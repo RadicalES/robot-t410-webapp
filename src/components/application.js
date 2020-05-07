@@ -1,3 +1,7 @@
+/* (C) 2020, Radical Electronic Systems CC - info@radicalsystems.co.za
+ * Written by Jan Zwiegers, jan@radicalsystems.co.za
+ * Robot-T410 UX
+ */
 import React, { useState, useEffect } from 'react';
 import Fetcher from '../utils/fetcher'
 import AppBrowser from './appbrowser'
@@ -35,7 +39,7 @@ const Application = () => {
 
     useEffect( () => {
         let inView = true;
-        Fetcher('/getapp.sh', 'GET', "", (data) => { if(inView) udapteAppSettings(data) } );
+        Fetcher('/cgi/getapp.sh', 'GET', "", (data) => { if(inView) udapteAppSettings(data) } );
         return () => { inView = false; }
     }, [])
 
@@ -121,11 +125,6 @@ const Application = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        let url = '/setapp.sh';
-
-        console.log("Browser: ", BrowserSettings);
-        console.log("Telemetry: ", TelemetrySettings);
-        console.log("SerialWS: ", SerialWSSettings);
 
         const aps = 'appurl=' + BrowserSettings.appurl +
                     '&layout=' + BrowserSettings.layout;
@@ -142,10 +141,7 @@ const Application = () => {
                     '&srlwsforeign=' + SerialWSSettings.allowforeign;
         const data = aps + '&' + sws + '&' + tels;
 
-        console.log("URL: " + url + ' data: ' + data);
-
-        Fetcher('/setapp.sh', 'POST', data, appSetResult );
-
+        Fetcher('/cgi/setapp.sh', 'POST', data, appSetResult );
         return true;
     }
 
@@ -153,11 +149,8 @@ const Application = () => {
         alert("Not implemented")
     }
 
-    return (
-
-   
+    return (   
             <div className="container content network-tabs">
-
                 <ul className="nav nav-tabs" id="applicationTab" role="tablist">
                     <li className="nav-item">
                         <a className="nav-link active" id="app-browser-tab" data-toggle="tab" href="#browser" role="tab" aria-controls="browser" aria-selected="true">Browser</a>

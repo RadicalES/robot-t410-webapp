@@ -1,3 +1,7 @@
+/* (C) 2020, Radical Electronic Systems CC - info@radicalsystems.co.za
+ * Written by Jan Zwiegers, jan@radicalsystems.co.za
+ * Robot-T410 UX
+ */
 import React, { useState, useEffect } from 'react';
 import Fetcher from '../utils/fetcher'
 import NetworkWired from './networkwired'
@@ -39,7 +43,7 @@ const Network = () => {
 
     useEffect( () => {
         let inView = true;
-        Fetcher('/getnwk.sh', 'GET', "", (data) => { if(inView) udapteNetSettings(data) } );
+        Fetcher('/cgi/getnwk.sh', 'GET', "", (data) => { if(inView) udapteNetSettings(data) } );
         return () => { inView = false; }
     }, [NetRefresh])
 
@@ -84,6 +88,8 @@ const Network = () => {
             }
         }
 
+        console.log("WIFI: ", ws);
+
         setWifiSettings(ws);
         return er;
     }
@@ -101,13 +107,13 @@ const Network = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();        
-  
-        const wificfg = 'wifi_ipaddr=' + WifiSettings.ipAddress + 
+          
+       const wificfg = 'wifi_ipaddr=' + WifiSettings.ipAddress + 
                         '&wifi_gateway=' + WifiSettings.gateway + 
                         '&wifi_netmask=' + WifiSettings.netmask +
                         '&wifi_dhcp=' + WifiSettings.dhcp + 
                         '&wifi_ssid=' + WifiSettings.SSID + 
-                        '&wifi_passkey=' + WifiSettings.passkey + 
+                        (('passkey' in WifiSettings) ? ('&wifi_passkey=' + WifiSettings.passkey) : "") +
                         '&wifi_enable=ENABLED';
 
         const wiredcfg = 'wired_ipaddr=' + WiredSettings.ipAddress + 
@@ -116,7 +122,10 @@ const Network = () => {
                         '&wired_dhcp=' + WiredSettings.dhcp;
 
         const data = wiredcfg + '&' + wificfg;
-        Fetcher('/setnwk.sh', 'POST', data, netSetResult );
+
+        console.log("NET: ", data);
+
+        Fetcher('/cgi/setnwk.sh', 'POST', data, netSetResult );
 
         return true;
     }
@@ -147,15 +156,15 @@ const Network = () => {
     }
 
     const handleNetReset = (e) => {
-        Fetcher('/resetnwk.sh', 'POST', {}, netResetResult );
+        Fetcher('/cgi/resetnwk.sh', 'POST', {}, netResetResult );
     }
 
     const handleNetRestart = (e) => {
-        Fetcher('/restartnwk.sh', 'POST', {}, netRestartResult );
+        Fetcher('/cgi/restartnwk.sh', 'POST', {}, netRestartResult );
     }
 
     const handleNetRestartWifi = (e) => {
-        Fetcher('/restartnwkwifi.sh', 'POST', {}, netRestartResult );
+        Fetcher('/cgi/restartnwkwifi.sh', 'POST', {}, netRestartResult );
     }
 
     return (

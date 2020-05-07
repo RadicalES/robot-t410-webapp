@@ -1,9 +1,8 @@
-
-
-
+/* (C) 2020, Radical Electronic Systems CC - info@radicalsystems.co.za
+ * Written by Jan Zwiegers, jan@radicalsystems.co.za
+ * Robot-T410 UX
+ */
 const Validation = {
-
-
     IPAddress : (obj, paramsObj) => {
         const params = paramsObj || {};
         const message = (params.failureMessage !== undefined) ? params.failureMessage : "Must be a valid IP Address/Subnet Mask!";
@@ -14,7 +13,7 @@ const Validation = {
             ip = (!ary[i].match(/^\d{1,3}$/) || (Number(ary[i]) > 255)) ? false : ip; 
         }
 
-        return (ary.length != 4) ? false : ip;
+        return (ary.length !== 4) ? false : ip;
     },
 
     MQTTTopic : (topic, params) => {
@@ -28,21 +27,21 @@ const Validation = {
 
     Numericality : (value, params) => {
         var suppliedValue = value;
-        var value = Number(value);
+        value = Number(value);
     	var paramsObj = params || {};
-        var minimum = ((paramsObj.minimum) || (paramsObj.minimum == 0)) ? paramsObj.minimum : null;;
-        var maximum = ((paramsObj.maximum) || (paramsObj.maximum == 0)) ? paramsObj.maximum : null;
-    	var is = ((paramsObj.is) || (paramsObj.is == 0)) ? paramsObj.is : null;
+        var minimum = ((paramsObj.minimum) || (paramsObj.minimum === 0)) ? paramsObj.minimum : null;;
+        var maximum = ((paramsObj.maximum) || (paramsObj.maximum === 0)) ? paramsObj.maximum : null;
+    	var is = ((paramsObj.is) || (paramsObj.is === 0)) ? paramsObj.is : null;
         var notANumberMessage = paramsObj.notANumberMessage || "Must be a number!";
         var notAnIntegerMessage = paramsObj.notAnIntegerMessage || "Must be an integer!";
     	var wrongNumberMessage = paramsObj.wrongNumberMessage || "Must be " + is + "!";
     	var tooLowMessage = paramsObj.tooLowMessage || "Must not be less than " + minimum + "!";
     	var tooHighMessage = paramsObj.tooHighMessage || "Must not be more than " + maximum + "!";
         if (!isFinite(value)) return false;
-        if (paramsObj.onlyInteger && (/\.0+$|\.$/.test(String(suppliedValue))  || value != parseInt(value)) ) return false;
+        if (paramsObj.onlyInteger && (/\.0+$|\.$/.test(String(suppliedValue))  || value !== parseInt(value)) ) return false;
     	switch(true){
     	  	case (is !== null):
-    	  		if( value != Number(is) ) return false;
+    	  		if( value !== Number(is) ) return false;
     			break;
     	  	case (minimum !== null && maximum !== null):
     	  		if(!Validation.Numericality(value, {tooLowMessage: tooLowMessage, minimum: minimum})) return false;

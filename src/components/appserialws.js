@@ -1,5 +1,8 @@
+/* (C) 2020, Radical Electronic Systems CC - info@radicalsystems.co.za
+ * Written by Jan Zwiegers, jan@radicalsystems.co.za
+ * Robot-T410 UX
+ */
 import React, { useState, useEffect, useRef } from 'react';
-
 
 const AppSerialWS= ({ config, handleChange }) => {
     const appSWSenable = useRef();

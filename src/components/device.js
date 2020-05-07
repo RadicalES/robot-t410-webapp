@@ -1,6 +1,9 @@
+/* (C) 2020, Radical Electronic Systems CC - info@radicalsystems.co.za
+ * Written by Jan Zwiegers, jan@radicalsystems.co.za
+ * Robot-T410 UX
+ */
 import React, { useState, useEffect } from 'react';
 import Fetcher from '../utils/fetcher'
-
 
 const DeviceInfo = () => {
 
@@ -12,7 +15,7 @@ const DeviceInfo = () => {
 
     useEffect( () => {
         let inView = true;
-        Fetcher('/getinfo.sh', 'GET', null, (data) => { if(inView) setRobotInfo(data) });
+        Fetcher('/cgi/getinfo.sh', 'GET', null, (data) => { if(inView) setRobotInfo(data) });
         return () => {inView = false;}
     }, [])
 

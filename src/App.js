@@ -1,14 +1,14 @@
+/* (C) 2020, Radical Electronic Systems CC - info@radicalsystems.co.za
+ * Written by Jan Zwiegers, jan@radicalsystems.co.za
+ * Robot-T410 UX
+ */
 import React from 'react';
-
 import RobotNavbar from './components/navbar'
-
 import { Route, BrowserRouter, Switch } from 'react-router-dom'
-
 import Application from './components/application'
 import Network from './components/network'
 import DeviceInfo from './components/device'
 import Admin from './components/admin'
-
 
 function App () {
   

@@ -1,3 +1,7 @@
+/* (C) 2020, Radical Electronic Systems CC - info@radicalsystems.co.za
+ * Written by Jan Zwiegers, jan@radicalsystems.co.za
+ * Robot-T410 UX
+ */
 import React, { useRef } from 'react';
 import Fetcher from '../utils/fetcher'
 
@@ -25,7 +29,7 @@ const Admin = () => {
             const cfg = 'password=' + curPass.current.value + 
                     '&newPassword=' + newPass.current.value;
 
-            Fetcher('/setpasswd.sh', 'POST', cfg, setResult );
+            Fetcher('/cgi/setpasswd.sh', 'POST', cfg, setResult );
         }
         else {
             alert("Passwords do not match!")

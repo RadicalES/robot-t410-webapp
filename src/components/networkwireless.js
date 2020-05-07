@@ -1,3 +1,7 @@
+/* (C) 2020, Radical Electronic Systems CC - info@radicalsystems.co.za
+ * Written by Jan Zwiegers, jan@radicalsystems.co.za
+ * Robot-T410 UX
+ */
 import React, { useState, useEffect, useRef } from 'react';
 import Fetcher from '../utils/fetcher'
 import useInterval from '../utils/interval'
@@ -32,7 +36,7 @@ const NetworkWireless = ( { config, handleChange } ) => {
     const [ NetWifiKeyStyle, setNetWifiKeyStyle] = useState({ borderColor: "" });
 
      useInterval( () => {
-        Fetcher('/getwifidata.sh', 'GET', "", (data) => { setWifiApData(data.data) });
+        Fetcher('/cgi/getwifidata.sh', 'GET', "", (data) => { setWifiApData(data.data) });
     }, Period)
 
     useEffect( () => {        
@@ -96,7 +100,7 @@ const NetworkWireless = ( { config, handleChange } ) => {
         else if(field === 'netmask') {
             setNetWifiNmStyle(s);
         }
-        else if(field == 'gateway') {
+        else if(field === 'gateway') {
             setNetWifiGwStyle(s);
         }       
         else if(field === 'passkey') {
@@ -163,7 +167,7 @@ const NetworkWireless = ( { config, handleChange } ) => {
 
             <div className="form-group app-group">
                 <label htmlFor="wifi-ssid" className="col-form-label col-form-label-sm applabel">AP SSID:</label>
-                <input type="text" className="form-control form-control-sm appipmac" id="wifi-ssid"
+                <input type="text" className="form-control form-control-sm appipmac" id="wifi-ssid" 
                     onChange={ (e) => {handleChange( "SSID", e.target.value)}}
                     ref={netWifiSsid} 
                 />                    
@@ -171,7 +175,7 @@ const NetworkWireless = ( { config, handleChange } ) => {
 
             <div className="form-group app-group">
                 <label htmlFor="wifi-passkey" className="col-form-label col-form-label-sm applabel">Passkey:</label>
-                <input type="text" className="form-control form-control-sm appipmac" id="wifi-passkey"
+                <input type="password" className="form-control form-control-sm appipmac" id="wifi-passkey" autoComplete="off"
                     onChange={ (e) => {const er = handleChange( "passkey", e.target.value); changeErrorStyle('passkey', er)}}
                     style={NetWifiKeyStyle}
                 />                    
