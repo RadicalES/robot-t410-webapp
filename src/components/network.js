@@ -11,6 +11,7 @@ import Validation from '../utils/validate'
 const Network = () => {
 
     const [ NetRefresh, setNetRefresh ] = useState(0);
+    const [ InView, setInView ] = useState(true);
 
     const [ WiredSettings, setWiredSettings ] = useState({
         name: "Wired",
@@ -41,11 +42,17 @@ const Network = () => {
         setWifiSettings(data.data.wifi);        
     }
 
-    useEffect( () => {
-        let inView = true;
-        Fetcher('/cgi/getnwk.sh', 'GET', "", (data) => { if(inView) udapteNetSettings(data) } );
-        return () => { inView = false; }
+    useEffect( () => {       
+        if(InView) {
+            Fetcher('/cgi/getnwk.sh', 'GET', "", (data) => { if(InView) udapteNetSettings(data) } );       
+        }
     }, [NetRefresh])
+
+    useEffect(() => {
+        return () => {
+            setInView(false);
+        }
+     }, [])
 
     const handleWiredChange = (field, value) => {
         const ws = WiredSettings;
@@ -88,8 +95,6 @@ const Network = () => {
             }
         }
 
-        console.log("WIFI: ", ws);
-
         setWifiSettings(ws);
         return er;
     }
@@ -122,8 +127,6 @@ const Network = () => {
                         '&wired_dhcp=' + WiredSettings.dhcp;
 
         const data = wiredcfg + '&' + wificfg;
-
-        console.log("NET: ", data);
 
         Fetcher('/cgi/setnwk.sh', 'POST', data, netSetResult );
 

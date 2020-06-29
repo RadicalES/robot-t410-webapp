@@ -26,6 +26,8 @@ TELEM_ENABLED=FALSE
 TELEM_PUBTOPIC="robot-t410/events"
 TELEM_PORT=1883
 TELEM_BROKER="192.168.100.1"
+TELEM_USER="robot"
+TELEM_PASSWD="t410"
 
 parse_params () {
   PARAM=$1
@@ -62,6 +64,12 @@ parse_params () {
       elif [ $1 == "telport" ]; then
         TELEM_PORT=$2
 
+      elif [ $1 == "teluser" ]; then
+        TELEM_USER=$2
+
+      elif [ $1 == "telpasswd" ]; then
+        TELEM_PASSWD=$2
+
       elif [ $1 == "telpubtopic" ]; then
         TELEM_PUBTOPIC=$2
 
@@ -90,8 +98,8 @@ parse_params () {
 
 configure_app () {
 
-  APP_CFG="# Window Manager Settings\nWB_LOAD_URL=$WB_LOAD_URL\nWB_LAYOUT=$WB_LAYOUT\n\n"
-  TELM_CFG="# Telemetry Settings\nTELEM_ENABLED=$TELEM_ENABLED\nTELEM_BROKER=$TELEM_BROKER\nTELEM_PORT=$TELEM_PORT\nTELEM_PUBTOPIC=$TELEM_PUBTOPIC\n\n"
+  APP_CFG="# Web Browser Settings\nWB_LOAD_URL=$WB_LOAD_URL\nWB_LAYOUT=$WB_LAYOUT\n\n"
+  TELM_CFG="# Telemetry Settings\nTELEM_ENABLED=$TELEM_ENABLED\nTELEM_BROKER=$TELEM_BROKER\nTELEM_PORT=$TELEM_PORT\nTELEM_USER=$TELEM_USER\nTELEM_PASSWD=$TELEM_PASSWD\nTELEM_PUBTOPIC=$TELEM_PUBTOPIC\n\n"
   SWS_CFG="# Serial Websocket Server Settings\nSERWS_SVR_ENABLED=$SERWS_SVR_ENABLED\nSERWS_SVR_SPORT=$SERWS_SVR_SPORT\nSERWS_SVR_WPORT=$SERWS_SVR_WPORT\nSERWS_SVR_FOREIGN=$SERWS_SVR_FOREIGN\nSERWS_SVR_BAUD=$SERWS_SVR_BAUD\n"
 
   echo -e $APP_DESC > /etc/formfactor/appconfig

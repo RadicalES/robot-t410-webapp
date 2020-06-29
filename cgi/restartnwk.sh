@@ -9,4 +9,4 @@
 echo -e "Content-Type: application/json\r\n\r\n"
 echo -e "{\"status\":\"OK\"}"
 
-/etc/init.d/networking restart
+/etc/init.d/networking restart >> /dev/null

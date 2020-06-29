@@ -3,7 +3,7 @@
  * Robot-T410 UX
  */
 import React from 'react';
-import { Link } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 
 const RobotNavbar = (props) => {
 
@@ -12,18 +12,18 @@ const RobotNavbar = (props) => {
             <nav className="navbar navbar-expand-sm navbar-light" fixed="top">                                            
                 <a className="navbar-brand robot-brand" href="#"><img src="robot.png" alt="Robot" height="40"className="d-inline-block"/> T410</a>                
                 <div className="navbar-nav">
-                    <Link to="/" className="nav-item nav-link">
+                    <NavLink to="/" exact className="nav-item nav-link" activeClassName="active" >
                         Device
-                    </Link>
-                    <Link to="/app" className="nav-item nav-link">
+                    </NavLink>
+                    <NavLink to="/app" className="nav-item nav-link" activeClassName="active">
                         Application
-                    </Link>
-                    <Link to="/network" className="nav-item nav-link">
+                    </NavLink>
+                    <NavLink to="/network" className="nav-item nav-link" activeClassName="active">
                         Network
-                    </Link>
-                    <Link to="/admin" className="nav-item nav-link">
+                    </NavLink>
+                    <NavLink to="/admin" className="nav-item nav-link" activeClassName="active">
                         Admin
-                    </Link>
+                    </NavLink>
                 </div>
             </nav>
         </div> 

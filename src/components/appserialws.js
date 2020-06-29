@@ -55,8 +55,9 @@ const AppSerialWS= ({ config, handleChange }) => {
                     ref={appSWSsport}
                     onChange={(e) => { handleChange('serialport', e.target.value)}}
                     >
-                    <option value="ttyS1">Port 1</option>
-                    <option value="ttyS2">Port 2</option>
+                    <option value="ttyS1">Serial Port 1</option>
+                    <option value="ttyS2">Serail Port 2</option>
+                    <option value="ttyACM0">USB Serial Port</option>
                 </select>
             </div>
 

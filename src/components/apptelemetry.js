@@ -9,6 +9,8 @@ const AppTelemetry = ({ config, handleChange }) => {
     const appTMbroker = useRef();
     const appTMtopic = useRef();
     const appTMport = useRef();
+    const appTMuser = useRef();
+    const appTMpasswd = useRef();
 
     const [ Updated, setUpdated] = useState(0);
     const [ BrokerStyle, setBrokerStyle] = useState({ borderColor: "" });
@@ -20,6 +22,8 @@ const AppTelemetry = ({ config, handleChange }) => {
             appTMbroker.current.value = config.broker;
             appTMtopic.current.value = config.pubtopic;
             appTMport.current.value = config.port;
+            appTMuser.current.value = config.username;
+            appTMpasswd.current.value = config.password;
             setUpdated(Updated + 1);
         }
     }, [config])
@@ -77,6 +81,22 @@ const AppTelemetry = ({ config, handleChange }) => {
                 <input type="text" className="form-control form-control-sm appurl" id="telemtopic" 
                     ref={appTMtopic}
                     onChange={( (e) => { handleChange('pubtopic', e.target.value) })}
+                    />
+                </div>
+
+                <div className="form-group app-group">
+                <label htmlFor="telemuser" className="col-form-label col-form-label-sm applabel">Username:</label>
+                <input type="text" className="form-control form-control-sm appurl" id="telempasswd" 
+                    ref={appTMuser}
+                    onChange={( (e) => { handleChange('username', e.target.value) })}
+                    />
+                </div>
+
+                <div className="form-group app-group">
+                <label htmlFor="telempasswd" className="col-form-label col-form-label-sm applabel">Password:</label>
+                <input type="text" className="form-control form-control-sm appurl" id="telempasswd" 
+                    ref={appTMpasswd}
+                    onChange={( (e) => { handleChange('password', e.target.value) })}
                     />
                 </div>
 

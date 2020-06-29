@@ -10,6 +10,19 @@ const Admin = () => {
     const newPass = useRef();
     const confirmPass = useRef();
 
+    const rebootResult = (result) => {        
+        const { status } = result.data;        
+
+        console.log("REBOOT : ", result);
+
+        if(status === 'OK') {
+            alert("Device will reboot!");
+        }
+        else {
+            alert("Failed to reboot");
+        }
+    }
+
     const setResult = (result) => {        
         const { status } = result.data;    
         if(status === 'OK') {
@@ -37,11 +50,16 @@ const Admin = () => {
         return true;
     }
 
+    const handleReboot = (e) => {
+        const d = 'restart=restart'
+        Fetcher('/cgi/restart.sh', 'POST', d, rebootResult );
+    }
+
     return (
 
         <div className="container content" onSubmit={handleSubmit} noValidate>
             <form>
-                <h4>Update Password</h4> 
+                <h4>Admistration Tasks</h4> 
                 <div className="form-group app-group">
                     <label htmlFor="currentPassword" className="col-form-label col-form-label-sm applabel">Current Password:</label>
                     <input type="password" className="form-control form-control-sm appipmac" id="currentPassword" ref={curPass}/>                    
@@ -54,7 +72,8 @@ const Admin = () => {
                     <label htmlFor="confirmPassword" className="col-form-label col-form-label-sm applabel">Confirm Password:</label>
                     <input type="password" className="form-control form-control-sm appipmac" id="confirmPassword" ref={confirmPass}/>                    
                 </div>
-                <button type="submit" className="btn btn-secondary btn-sm appbtn">Update Password</button>                
+                <button type="submit" className="btn btn-secondary btn-sm appbtn">Save Password</button>
+                <button type="button" className="btn btn-secondary btn-sm appbtn" onClick={handleReboot} >Reboot</button>         
             </form>
         </div>
         

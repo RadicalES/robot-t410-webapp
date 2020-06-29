@@ -22,6 +22,8 @@ TELEM_ENABLED=TRUE
 TELEM_PUBTOPIC="robot-t410/events"
 TELEM_PORT=1883
 TELEM_BROKER="192.168.100.1"
+TELEM_USER="robot"
+TELEM_PASSWD="t410"
 
 if [ -e $CFGFILE ]; then
   . $CFGFILE
@@ -29,7 +31,7 @@ fi
 
 SERWS_SVR_CFG="{\"enabled\":\"$SERWS_SVR_ENABLED\",\"serialport\":\"$SERWS_SVR_SPORT\",\"baudrate\":$SERWS_SVR_BAUD,\"socketport\":$SERWS_SVR_WPORT,\"allowforeign\":\"$SERWS_SVR_FOREIGN\"}"
 
-TELEM_CFG="{\"enabled\":\"$TELEM_ENABLED\",\"port\":$TELEM_PORT,\"pubtopic\":\"$TELEM_PUBTOPIC\",\"broker\":\"$TELEM_BROKER\"}"
+TELEM_CFG="{\"enabled\":\"$TELEM_ENABLED\",\"port\":$TELEM_PORT,\"pubtopic\":\"$TELEM_PUBTOPIC\",\"broker\":\"$TELEM_BROKER\",\"username\":\"$TELEM_USER\",\"password\":\"$TELEM_PASSWD\"}"
 
 BROWSER_CFG="{\"appurl\":\"$WB_LOAD_URL\",\"layout\":\"$WB_LAYOUT\"}"
 

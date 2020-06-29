@@ -3,7 +3,6 @@
  * Robot-T410 UX
  */
 import React, { useState, useEffect, useRef } from 'react';
-import Fetcher from '../utils/fetcher'
 import useInterval from '../utils/interval'
 
 const NetworkWireless = ( { config, handleChange } ) => {
@@ -19,15 +18,20 @@ const NetworkWireless = ( { config, handleChange } ) => {
     const netWifiFreq = useRef();
     const netWifiLink = useRef();
     const netWifiSignal = useRef();
+    const netWifiBitRate = useRef();
+    const DataWs = useRef(null);
 
     const [ Updated, setUpdated] = useState(0);
-    const [ Period, setPeriod] = useState(0);
+    const [ InView, setInView] = useState(false);
     const [ WifiApData, setWifiApData] = useState({
-        status: "OK",
-        APMAC: "Not set",
-        frequency: "",
-        linkqualtiy: "",
-        signallevel: ""
+        wifiConfig : {
+            accessPoint : "Not set",
+            frequency : ""
+        },
+        wifiLinkStatistics : {
+            quality : "",
+            signalLevel : ""
+        }
     });
 
     const [ NetWifiIpStyle, setNetWifiIpStyle] = useState({ borderColor: "" });
@@ -35,22 +39,45 @@ const NetworkWireless = ( { config, handleChange } ) => {
     const [ NetWifiGwStyle, setNetWifiGwStyle] = useState({ borderColor: "" });
     const [ NetWifiKeyStyle, setNetWifiKeyStyle] = useState({ borderColor: "" });
 
-     useInterval( () => {
-        Fetcher('/cgi/getwifidata.sh', 'GET', "", (data) => { setWifiApData(data.data) });
-    }, Period)
-
-    useEffect( () => {        
-        let inView = true;
-
-        if(inView) {
-            netWifiApMAC.current.innerHTML = WifiApData.APMAC;
-            //netWifiESSID.current.innerHTML = data.data.ESSID;
-            netWifiFreq.current.innerHTML = WifiApData.frequency;
-            netWifiLink.current.innerHTML = WifiApData.linkquality;
-            netWifiSignal.current.innerHTML = WifiApData.signallevel;
+    const connectWifiData = () => {
+        let { hostname } = window.location;   
+        
+        if (process.env.NODE_ENV === 'development' && process.env.REACT_APP_WSPROXYIP) {
+            hostname = process.env.REACT_APP_WSPROXYIP;
+            if (process.env.REACT_APP_WSPROXYPORT) {
+                hostname += `:${process.env.REACT_APP_WSPROXYPORT}`;
+            }
         }
 
-        return () => { inView = false;}
+        const url = 'ws://' + hostname + ':7000/';        
+        DataWs.current = new WebSocket(url);
+        
+        DataWs.current.onopen = () => {
+        }
+
+        DataWs.current.onclose = e => {
+        }
+
+        DataWs.current.onerror = err => {
+            DataWs.current.close();
+        }
+
+        DataWs.current.onmessage = evt => {
+            const d = JSON.parse(evt.data);            
+            if ( ('wifiConfig' in d) && ('wifiLinkStatistics' in d) ) {
+                setWifiApData(d);         
+            }
+        }
+    }
+
+    useEffect( () => {         
+        if(InView) {       
+            netWifiApMAC.current.innerHTML = WifiApData.wifiConfig.accessPoint;
+            netWifiFreq.current.innerHTML = WifiApData.wifiConfig.frequency;
+            netWifiLink.current.innerHTML = WifiApData.wifiLinkStatistics.quality;
+            netWifiSignal.current.innerHTML = WifiApData.wifiLinkStatistics.signalLevel;
+            netWifiBitRate.current.innerHTML = WifiApData.wifiConfig.bitRate;
+        }
     }, [WifiApData])
 
     useEffect( () => {     
@@ -82,10 +109,23 @@ const NetworkWireless = ( { config, handleChange } ) => {
 
             // wait until view has relevant data
             if(c === 2) {
-                setPeriod(1000);
+                setInView(true);                
+                connectWifiData();
+            }            
+        }
+
+        
+     }, [config])
+
+    useEffect(() => {
+        return () => {
+            setInView(false);
+            const ws = DataWs.current;                        
+            if(ws && ws.readyState != WebSocket.CLOSED ) {
+                ws.close();
             }
         }
-     }, [config])
+     }, [])
 
      const changeErrorStyle = (field, error) => {
         let s = {borderColor: ""};
@@ -184,6 +224,11 @@ const NetworkWireless = ( { config, handleChange } ) => {
             <div className="form-group app-group">
                 <label className="col-form-label col-form-label-sm applabel">AP MAC:</label>
                 <label className="form-control form-control-sm appipmac readonly-field" ref={netWifiApMAC}>Not set</label>
+            </div>
+
+            <div className="form-group app-group">
+                <label className="col-form-label col-form-label-sm applabel">Bit Rate:</label>
+                <label className="form-control form-control-sm appipmac readonly-field" ref={netWifiBitRate}>Not set</label>                    
             </div>
 
             <div className="form-group app-group">

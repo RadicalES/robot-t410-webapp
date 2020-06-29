@@ -4,14 +4,13 @@
  */
 import React from 'react';
 import RobotNavbar from './components/navbar'
-import { Route, BrowserRouter, Switch } from 'react-router-dom'
+import { Route, BrowserRouter, Switch, useLocation } from 'react-router-dom'
 import Application from './components/application'
 import Network from './components/network'
 import DeviceInfo from './components/device'
 import Admin from './components/admin'
 
 function App () {
-  
     return (
       <BrowserRouter>
         <div className="App">
@@ -27,7 +26,7 @@ function App () {
 		        &copy; 2020 Radical Electronic Systems&nbsp;|&nbsp;            
 		        <a href="http://www.radicalsystems.co.za">www.radicalsystems.co.za</a>&nbsp;|&nbsp;            
             <a href="mailto:info@radicalsystems.co.za">info@radicalsystems.co.za</a>&nbsp;|&nbsp;
-            <span>ver 1.0</span>
+            <span>ver 1.1</span>
 	        </div>
           </div>
         </div>

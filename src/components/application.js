@@ -20,7 +20,9 @@ const Application = () => {
         enabled: "FALSE",
         broker: "Waiting...",
         port: 1883,
-        pubtopic: ""
+        pubtopic: "",
+        username: "",
+        password: ""
     })
 
     const [ SerialWSSettings, setSerialWSSettings ] = useState({
@@ -84,6 +86,12 @@ const Application = () => {
         else if(field === 'pubtopic') {            
             ts[field] = value;
         }
+        else if(field === 'username') {            
+            ts[field] = value;
+        }
+        else if(field === 'password') {            
+            ts[field] = value;
+        }
         
         setTelemetrySettings(ts);
         return er;
@@ -132,6 +140,8 @@ const Application = () => {
         const tels = 'telen=' + TelemetrySettings.enabled + 
                     '&telbroker=' + TelemetrySettings.broker + 
                     '&telport=' + TelemetrySettings.port + 
+                    '&teluser=' + TelemetrySettings.username + 
+                    '&telpasswd=' + TelemetrySettings.password + 
                     '&telpubtopic=' + TelemetrySettings.pubtopic;
 
         const sws = 'srlwsen=' + SerialWSSettings.enabled + 
