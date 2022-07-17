@@ -1,6 +1,6 @@
-/* (C) 2020, Radical Electronic Systems CC - info@radicalsystems.co.za
+/* (C) 2020-2022, Radical Electronic Systems CC - info@radicalsystems.co.za
  * Written by Jan Zwiegers, jan@radicalsystems.co.za
- * Robot-T410 UX
+ * Robot-T420 UX
  */
 import React, { useState, useEffect } from 'react';
 import Fetcher from '../utils/fetcher'
@@ -19,17 +19,15 @@ const Network = () => {
         status: "ENABLED",
         dhcp: "FALSE",
         ipAddress: "192.168.1.20",
-        netmask: "255.255.255.0",
         gateway: "192.168.0.1"
     })
 
     const [ WifiSettings, setWifiSettings ] = useState({
-        name: "Wired",
+        name: "Wireless",
         macAddress: "Waiting...",
         status: "ENABLED",
         dhcp: "FALSE",
         ipAddress: "192.168.1.20",
-        netmask: "255.255.255.0",
         gateway: "192.168.0.1",
         SSID: "",
         passkey: ""
@@ -38,7 +36,12 @@ const Network = () => {
     const udapteNetSettings = (data) => {
         const wifi = data.data.wifi;
         setWiredSettings(data.data.wired);
-        wifi['SSID'] = data.data.wifiap.SSID;
+        if('SSID' in data.data.wifiap) {
+            wifi['SSID'] = data.data.wifiap.SSID;
+        }
+        else {
+            wifi['SSID'] = 'Not set'
+        }
         setWifiSettings(data.data.wifi);        
     }
 
@@ -115,7 +118,6 @@ const Network = () => {
           
        const wificfg = 'wifi_ipaddr=' + WifiSettings.ipAddress + 
                         '&wifi_gateway=' + WifiSettings.gateway + 
-                        '&wifi_netmask=' + WifiSettings.netmask +
                         '&wifi_dhcp=' + WifiSettings.dhcp + 
                         '&wifi_ssid=' + WifiSettings.SSID + 
                         (('passkey' in WifiSettings) ? ('&wifi_passkey=' + WifiSettings.passkey) : "") +
@@ -123,7 +125,6 @@ const Network = () => {
 
         const wiredcfg = 'wired_ipaddr=' + WiredSettings.ipAddress + 
                         '&wired_gateway=' + WiredSettings.gateway + 
-                        '&wired_netmask=' + WiredSettings.netmask +
                         '&wired_dhcp=' + WiredSettings.dhcp;
 
         const data = wiredcfg + '&' + wificfg;

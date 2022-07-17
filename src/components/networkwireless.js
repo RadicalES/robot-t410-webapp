@@ -88,13 +88,11 @@ const NetworkWireless = ( { config, handleChange } ) => {
                 netWifiDHCP.current.checked = config.dhcp === "TRUE";
                 netWifiMAC.current.innerHTML = config.macAddress;
                 netWifiIp.current.value = config.ipAddress;            
-                netWifiNm.current.value = config.netmask;
                 netWifiGw.current.value = config.gateway;
                 netWifiSsid.current.value = config.SSID;
 
                 if(config.dhcp === "TRUE") {
                     netWifiIp.current.readOnly = true;
-                    netWifiNm.current.readOnly = true;
                     netWifiGw.current.readOnly = true;
                 }
                 c = c + 1;
@@ -103,7 +101,6 @@ const NetworkWireless = ( { config, handleChange } ) => {
             else {
                 netWifiMAC.current.innerHTML = "Not installed"
                 netWifiIp.current.readOnly = true;
-                netWifiNm.current.readOnly = true;
                 netWifiGw.current.readOnly = true;
             }
 
@@ -136,9 +133,6 @@ const NetworkWireless = ( { config, handleChange } ) => {
 
         if(field === 'ipAddress') {
             setNetWifiIpStyle(s);
-        }
-        else if(field === 'netmask') {
-            setNetWifiNmStyle(s);
         }
         else if(field === 'gateway') {
             setNetWifiGwStyle(s);
@@ -186,14 +180,6 @@ const NetworkWireless = ( { config, handleChange } ) => {
                     onChange={ (e) => { const er = handleChange( "ipAddress", e.target.value); changeErrorStyle('ipAddress', er) }}
                     style={NetWifiIpStyle}
                     ref={netWifiIp}                
-                />                    
-            </div>
-            <div className="form-group app-group">
-                <label htmlFor="wireless_netmask" className="col-form-label col-form-label-sm applabel">Subnet Mask:</label>
-                <input type="text" className="form-control form-control-sm appipmac" id="wireless_netmask" 
-                    onChange={ (e) => {const er = handleChange( "netmask", e.target.value); changeErrorStyle('netmask', er)}}
-                    style={NetWifiNmStyle}
-                    ref={netWifiNm}
                 />                    
             </div>
             <div className="form-group app-group">

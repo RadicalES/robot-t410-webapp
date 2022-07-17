@@ -1,6 +1,6 @@
-/* (C) 2020, Radical Electronic Systems CC - info@radicalsystems.co.za
+/* (C) 2020-2022, Radical Electronic Systems CC - info@radicalsystems.co.za
  * Written by Jan Zwiegers, jan@radicalsystems.co.za
- * Robot-T410 UX
+ * Robot-T420 UX
  */
 import React, { useState, useEffect, useRef } from 'react';
 
@@ -55,9 +55,8 @@ const AppSerialWS= ({ config, handleChange }) => {
                     ref={appSWSsport}
                     onChange={(e) => { handleChange('serialport', e.target.value)}}
                     >
-                    <option value="ttyS1">Serial Port 1</option>
-                    <option value="ttyS2">Serial Port 2</option>
-                    <option value="ttyACM0">USB Serial Port</option>
+                    <option value="ttyUSB0">Serial Port 1</option>
+                    <option value="ttyUSB1">Serial Port 2</option>
                 </select>
             </div>
 

@@ -135,11 +135,11 @@ body {
 }
 
 .navbar {
-  background:#c88000;
+  background:#ffa200;
 }
 
 .robotNavBar {
-  background:#c88000;
+  background:#ffa200;
 }
 
 
@@ -188,7 +188,7 @@ h4 {
 }
 
 .navbar-light .navbar-brand {  
-  color: #c75629;
+  color: #f53302;
   font-weight: bold;
 }
 

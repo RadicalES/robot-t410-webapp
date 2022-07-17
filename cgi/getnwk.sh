@@ -3,7 +3,7 @@
 # getnwkcfg.sh
 # CGI Script to retrieve the current network setup and return as JSON result
 #
-# (C) 2016 - 2020, Radical Electronic Systems - www.radicalsystems.co.za
+# (C) 2016 - 2022, Radical Electronic Systems - www.radicalsystems.co.za
 # Written by Jan Zwiegers, jan@radicalsystems.co.za
 
 IFACECFGFILE=/etc/network/interfaces
@@ -12,31 +12,39 @@ DNSCFGFILE=/etc/resolve.conf
 GDNS=$(cat /etc/network/resolv.static.conf |grep -i '^nameserver'|head -n1|cut -d ' ' -f2)
 GNTP=$(cat /etc/ntp.conf |grep -i '^server'|head -n1|cut -d ' ' -f2)
 
-LANIFDEV=eth0
+# source LAN settings
+LANCFGFILE=/etc/systemd/network/eth0.network
 LANMAC=$(cat /sys/class/net/eth0/address)
-LANIFCFG=$(awk -f readInterfaces.awk $IFACECFGFILE device=$LANIFDEV)
-RES=$?
-if [ -z "$LANMAC" ]; then
+# LANIFCFG=$(awk -f readInterfaces.awk $IFACECFGFILE device=$LANIFDEV)
+# RES=$?
+if [ ! -f $LANCFGFILE ]; then
 	# network interface not available
 	LANIFCFG="{\"name\":\"$LANIFCFG\",\"status\":\"NOTAVAIL\",\"macAddress\":\"Not installed\"}"
 else
-	if [ $RES -eq 0 ]; then
-		# Static address
-		LANCFG="{\"macAddress\":\"$LANMAC\",\"status\":\"ENABLED\",$LANIFCFG}"
-	elif [ $RES -eq 1 ]; then
-		# DHCP address
-		IFDATA=$(ifconfig $LANIFDEV | grep 'inet addr')
-		if [ -z "$IFDATA" ]; then
-			LANCFG="{\"name\":\"$LANIFDEV\",status=\"ENABLED\",\"macAddress\":\"$LANMAC\",\"ipAddress\":\"0.0.0.0\",\"netmask\":\"0.0.0.0\",\"gateway\":\"0.0.0.0\",\"dhcp\":\"TRUE\"}"
+	. $LANCFGFILE
+	if [ -n "$Name"  ]; then
+
+		if [ -n "$DHCP" ] && [ $DHCP == "yes" ]; then
+
+			# DHCP address
+			IFDATA=$(ifconfig $LANIFDEV | grep 'inet addr')
+			if [ -z "$IFDATA" ]; then
+				LANCFG="{\"name\":\"$LANIFDEV\",status=\"ENABLED\",\"macAddress\":\"$LANMAC\",\"ipAddress\":\"0.0.0.0\",\"netmask\":\"0.0.0.0\",\"gateway\":\"0.0.0.0\",\"dhcp\":\"TRUE\"}"
+			else
+				IFIP=$(echo $IFDATA | awk '/inet addr/ {gsub("addr:", "", $2); print $2}')
+				IFMASK=$(echo $IFDATA | awk '/inet addr/ {gsub("Mask:", "", $4); print $4}')
+				IPGW=$(ip route | awk '/default/ { print $3 }')
+				LANCFG="{\"name\":\"$LANIFDEV\",\"status\":\"ENABLED\",\"macAddress\":\"$LANMAC\",\"ipAddress\":\"$IFIP\",\"netmask\":\"$IFMASK\",\"gateway\":\"$IPGW\",\"dhcp\":\"TRUE\"}"
+			fi
+		
 		else
-			IFIP=$(echo $IFDATA | awk '/inet addr/ {gsub("addr:", "", $2); print $2}')
-			IFMASK=$(echo $IFDATA | awk '/inet addr/ {gsub("Mask:", "", $4); print $4}')
-			IPGW=$(ip route | awk '/default/ { print $3 }')
-			LANCFG="{\"name\":\"$LANIFDEV\",\"status\":\"ENABLED\",\"macAddress\":\"$LANMAC\",\"ipAddress\":\"$IFIP\",\"netmask\":\"$IFMASK\",\"gateway\":\"$IPGW\",\"dhcp\":\"TRUE\"}"
+			# Static address
+			LANCFG="{\"macAddress\":\"$LANMAC\",\"status\":\"ENABLED\",\"name\":\"$Name\",\"ipAddress\":\"$Address\",\"gateway\":\"$Gateway\",\"dhcp\":\"FALSE\"}"
 		fi
+		
 	else
 		# not configured
-		LANCFG="{{\"name\":\"$LANIFCFG\",\"status\":\"DISABLED\",\"macAddress\":\"not configured\"}}"
+		LANCFG="{\"name\":\"$LANIFCFG\",\"status\":\"DISABLED\",\"macAddress\":\"$LANMAC\"}"
 	fi
 fi
 
@@ -62,7 +70,7 @@ else
 			WIFICFG="{\"name\":\"$WIFIIFDEV\",\"status\":\"ENABLED\",\"macAddress\":\"$WIFIMAC\",\"ipAddress\":\"$IFIP\",\"netmask\":\"$IFMASK\",\"gateway\":\"$IPGW\",\"dhcp\":\"TRUE\"}"
 		fi
 	else
-		WIFICFG="{\"name\":\"$WIFIIFDEV\",\"status\":\"DISABLED\",\"macAddress\":\"Not configured\"}"
+		WIFICFG="{\"name\":\"$WIFIIFDEV\",\"status\":\"DISABLED\",\"macAddress\":\"$WIFIMAC\"}"
 	fi	
 fi
 

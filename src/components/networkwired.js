@@ -17,17 +17,17 @@ const NetworkWired = ({ config, handleChange }) => {
     const [ NetWiredNmStyle, setNetWiredNmStyle] = useState({ borderColor: "" });
     const [ NetWiredGwStyle, setNetWiredGwStyle] = useState({ borderColor: "" });
 
+    console.log("NET CONFIG:", config)
+
     useEffect( () => {        
         if(Updated < 2) {
             netWiredDHCP.current.checked = config.dhcp === "TRUE";
             netWiredMAC.current.innerHTML = config.macAddress;
             netWiredIp.current.value = config.ipAddress;            
-            netWiredNm.current.value = config.netmask;
             netWiredGw.current.value = config.gateway;
 
             if(config.dhcp === "TRUE") {
                 netWiredIp.current.readOnly = true;
-                netWiredNm.current.readOnly = true;
                 netWiredGw.current.readOnly = true;
             }
 
@@ -56,12 +56,10 @@ const NetworkWired = ({ config, handleChange }) => {
     const handleDHCPChange = (state) => {
         if(state === true) {
             netWiredIp.current.readOnly = true;
-            netWiredNm.current.readOnly = true;
             netWiredGw.current.readOnly = true;
         }
         else {
             netWiredIp.current.readOnly = false;
-            netWiredNm.current.readOnly = false;
             netWiredGw.current.readOnly = false;
         }
 
@@ -95,14 +93,6 @@ const NetworkWired = ({ config, handleChange }) => {
                         style={NetWiredIpStyle}
                         ref={netWiredIp}
                 />
-            </div>
-            <div className="form-group app-group">
-                <label htmlFor="wired_netmask" className="col-form-label col-form-label-sm applabel">Subnet Mask:</label>
-                <input type="text" className="form-control form-control-sm appipmac" id="wired_netmask"                     
-                    onChange={ (e) => {const er = handleChange( "netmask", e.target.value); changeErrorStyle('netmask', er)}}
-                    style={NetWiredNmStyle}
-                    ref={netWiredNm}
-                />                    
             </div>
             <div className="form-group app-group">
                 <label htmlFor="wired_gateway" className="col-form-label col-form-label-sm applabel">Default Gateway:</label>

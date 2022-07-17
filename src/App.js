@@ -1,6 +1,6 @@
-/* (C) 2020, Radical Electronic Systems CC - info@radicalsystems.co.za
+/* (C) 2020-2022, Radical Electronic Systems CC - info@radicalsystems.co.za
  * Written by Jan Zwiegers, jan@radicalsystems.co.za
- * Robot-T410 UX
+ * Robot-T420 UX
  */
 import React from 'react';
 import RobotNavbar from './components/navbar'
@@ -23,10 +23,10 @@ function App () {
           </Switch>        
           <div className="container footer">
 	          <div className="smallText">
-		        &copy; 2020 Radical Electronic Systems&nbsp;|&nbsp;            
+		        &copy; 2022 Radical Electronic Systems&nbsp;|&nbsp;            
 		        <a href="http://www.radicalsystems.co.za">www.radicalsystems.co.za</a>&nbsp;|&nbsp;            
             <a href="mailto:info@radicalsystems.co.za">info@radicalsystems.co.za</a>&nbsp;|&nbsp;
-            <span>ver 1.1</span>
+            <span>ver 1.0</span>
 	        </div>
           </div>
         </div>
