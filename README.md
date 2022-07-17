@@ -1,2 +1,2 @@
-# robot-t410-webapp
-Robot-T410 User Interface, build with ReactJS
+# robot-t4x0-webapp
+Robot-T410/T420 User Interface, build with ReactJS
