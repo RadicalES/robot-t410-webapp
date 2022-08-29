@@ -19,7 +19,8 @@ const Network = () => {
         status: "ENABLED",
         dhcp: "FALSE",
         ipAddress: "192.168.1.20",
-        gateway: "192.168.0.1"
+        gateway: "192.168.0.1",
+        dns: "192.168.0.1"
     })
 
     const [ WifiSettings, setWifiSettings ] = useState({
@@ -29,6 +30,7 @@ const Network = () => {
         dhcp: "FALSE",
         ipAddress: "192.168.1.20",
         gateway: "192.168.0.1",
+        dns: "192.168.0.1",
         SSID: "",
         passkey: ""
     })
@@ -36,8 +38,11 @@ const Network = () => {
     const udapteNetSettings = (data) => {
         const wifi = data.data.wifi;
         setWiredSettings(data.data.wired);
-        if('SSID' in data.data.wifiap) {
-            wifi['SSID'] = data.data.wifiap.SSID;
+        console.log("DATA: ", data)
+        if(data.data.wifiap) {
+            if('SSID' in data.data.wifiap) {
+                wifi['SSID'] = data.data.wifiap.SSID;
+            }
         }
         else {
             wifi['SSID'] = 'Not set'
@@ -119,15 +124,19 @@ const Network = () => {
        const wificfg = 'wifi_ipaddr=' + WifiSettings.ipAddress + 
                         '&wifi_gateway=' + WifiSettings.gateway + 
                         '&wifi_dhcp=' + WifiSettings.dhcp + 
+                        '&wifi_dns=' + WifiSettings.dns + 
                         '&wifi_ssid=' + WifiSettings.SSID + 
                         (('passkey' in WifiSettings) ? ('&wifi_passkey=' + WifiSettings.passkey) : "") +
                         '&wifi_enable=ENABLED';
 
         const wiredcfg = 'wired_ipaddr=' + WiredSettings.ipAddress + 
                         '&wired_gateway=' + WiredSettings.gateway + 
+                        '&wired_dns=' + WiredSettings.dns + 
                         '&wired_dhcp=' + WiredSettings.dhcp;
 
         const data = wiredcfg + '&' + wificfg;
+
+        console.log("SET NWK: ", data)
 
         Fetcher('/cgi/setnwk.sh', 'POST', data, netSetResult );
 

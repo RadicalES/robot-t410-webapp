@@ -6,7 +6,8 @@ const Validation = {
     IPAddress : (obj, paramsObj) => {
         const params = paramsObj || {};
         const message = (params.failureMessage !== undefined) ? params.failureMessage : "Must be a valid IP Address/Subnet Mask!";
-        const ary = obj.split(".");
+        const objip = obj.split("/");
+        const ary = objip[0].split(".");
         let ip = true;
         
         for (let i in ary) { 

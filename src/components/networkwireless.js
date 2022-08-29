@@ -10,13 +10,12 @@ const NetworkWireless = ( { config, handleChange } ) => {
     const netWifiDHCP = useRef();
     const netWifiMAC = useRef();
     const netWifiIp = useRef();
-    const netWifiNm = useRef();
+    const netWifiDns = useRef();
     const netWifiGw = useRef();
     const netWifiSsid = useRef();
 
     const netWifiApMAC = useRef();
     const netWifiFreq = useRef();
-    const netWifiLink = useRef();
     const netWifiSignal = useRef();
     const netWifiBitRate = useRef();
     const DataWs = useRef(null);
@@ -35,13 +34,15 @@ const NetworkWireless = ( { config, handleChange } ) => {
     });
 
     const [ NetWifiIpStyle, setNetWifiIpStyle] = useState({ borderColor: "" });
-    const [ NetWifiNmStyle, setNetWifiNmStyle] = useState({ borderColor: "" });
+    const [ NetWifiDnsStyle, setNetWifiDnsStyle] = useState({ borderColor: "" });
     const [ NetWifiGwStyle, setNetWifiGwStyle] = useState({ borderColor: "" });
     const [ NetWifiKeyStyle, setNetWifiKeyStyle] = useState({ borderColor: "" });
 
+  //  console.log("NET WIRELESS CONFIG:", config)
+
     const connectWifiData = () => {
         let { hostname } = window.location;   
-        
+
         if (process.env.NODE_ENV === 'development' && process.env.REACT_APP_WSPROXYIP) {
             hostname = process.env.REACT_APP_WSPROXYIP;
             if (process.env.REACT_APP_WSPROXYPORT) {
@@ -63,8 +64,11 @@ const NetworkWireless = ( { config, handleChange } ) => {
         }
 
         DataWs.current.onmessage = evt => {
+
+        //    console.log("WRL SKT DATA", evt.data)
+
             const d = JSON.parse(evt.data);            
-            if ( ('wifiConfig' in d) && ('wifiLinkStatistics' in d) ) {
+            if ('wifiData' in d) {
                 setWifiApData(d);         
             }
         }
@@ -72,11 +76,10 @@ const NetworkWireless = ( { config, handleChange } ) => {
 
     useEffect( () => {         
         if(InView) {       
-            netWifiApMAC.current.innerHTML = WifiApData.wifiConfig.accessPoint;
-            netWifiFreq.current.innerHTML = WifiApData.wifiConfig.frequency;
-            netWifiLink.current.innerHTML = WifiApData.wifiLinkStatistics.quality;
-            netWifiSignal.current.innerHTML = WifiApData.wifiLinkStatistics.signalLevel;
-            netWifiBitRate.current.innerHTML = WifiApData.wifiConfig.bitRate;
+            netWifiApMAC.current.innerHTML = WifiApData.wifiData.accessPoint;
+            netWifiFreq.current.innerHTML = WifiApData.wifiData.frequency;
+            netWifiSignal.current.innerHTML = WifiApData.wifiData.signalLevel;
+            netWifiBitRate.current.innerHTML = WifiApData.wifiData.bitRate;
         }
     }, [WifiApData])
 
@@ -89,11 +92,13 @@ const NetworkWireless = ( { config, handleChange } ) => {
                 netWifiMAC.current.innerHTML = config.macAddress;
                 netWifiIp.current.value = config.ipAddress;            
                 netWifiGw.current.value = config.gateway;
+                netWifiDns.current.value = config.dns;
                 netWifiSsid.current.value = config.SSID;
 
                 if(config.dhcp === "TRUE") {
                     netWifiIp.current.readOnly = true;
                     netWifiGw.current.readOnly = true;
+                    netWifiDns.current.readOnly = true;
                 }
                 c = c + 1;
                 setUpdated(c);
@@ -102,6 +107,7 @@ const NetworkWireless = ( { config, handleChange } ) => {
                 netWifiMAC.current.innerHTML = "Not installed"
                 netWifiIp.current.readOnly = true;
                 netWifiGw.current.readOnly = true;
+                netWifiDns.current.readOnly = true;
             }
 
             // wait until view has relevant data
@@ -136,6 +142,9 @@ const NetworkWireless = ( { config, handleChange } ) => {
         }
         else if(field === 'gateway') {
             setNetWifiGwStyle(s);
+        } 
+        else if(field === 'dns') {
+            setNetWifiDnsStyle(s);
         }       
         else if(field === 'passkey') {
             setNetWifiKeyStyle(s);
@@ -146,13 +155,13 @@ const NetworkWireless = ( { config, handleChange } ) => {
     const handleDHCPChange = (state) => {
         if(state === true) {
             netWifiIp.current.readOnly = true;
-            netWifiNm.current.readOnly = true;
             netWifiGw.current.readOnly = true;
+            netWifiDns.current.readOnly = true;
         }
         else {
             netWifiIp.current.readOnly = false;
-            netWifiNm.current.readOnly = false;
             netWifiGw.current.readOnly = false;
+            netWifiDns.current.readOnly = true;
         }
         handleChange('dhcp', state)
     }
@@ -183,11 +192,20 @@ const NetworkWireless = ( { config, handleChange } ) => {
                 />                    
             </div>
             <div className="form-group app-group">
-                <label htmlFor="wireless_gateway" className="col-form-label col-form-label-sm applabel">Default Gateway:</label>
+                <label htmlFor="wireless_gateway" className="col-form-label col-form-label-sm applabel">Gateway:</label>
                 <input type="text" className="form-control form-control-sm appipmac" id="wireless_gateway" 
                     onChange={ (e) => {const er = handleChange( "gateway", e.target.value); changeErrorStyle('gateway', er)}}
                     style={NetWifiGwStyle}
                     ref={netWifiGw}                
+                />                    
+            </div>
+
+            <div className="form-group app-group">
+                <label htmlFor="wireless_dns" className="col-form-label col-form-label-sm applabel">DNS:</label>
+                <input type="text" className="form-control form-control-sm appipmac" id="wireless_dns" 
+                    onChange={ (e) => {const er = handleChange( "dns", e.target.value); changeErrorStyle('dns', er)}}
+                    style={NetWifiDnsStyle}
+                    ref={netWifiDns}                
                 />                    
             </div>
 
@@ -220,11 +238,6 @@ const NetworkWireless = ( { config, handleChange } ) => {
             <div className="form-group app-group">
                 <label className="col-form-label col-form-label-sm applabel">Frequency:</label>
                 <label className="form-control form-control-sm appipmac readonly-field" ref={netWifiFreq}>Not set</label>                    
-            </div>
-
-            <div className="form-group app-group">
-                <label className="col-form-label col-form-label-sm applabel">Link Quality:</label>
-                <label className="form-control form-control-sm appipmac readonly-field" ref={netWifiLink}>Not set</label>
             </div>
 
             <div className="form-group app-group">

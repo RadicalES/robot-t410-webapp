@@ -9,15 +9,15 @@ const NetworkWired = ({ config, handleChange }) => {
     const netWiredDHCP = useRef();
     const netWiredMAC = useRef();
     const netWiredIp = useRef();
-    const netWiredNm = useRef();
+    const netWiredDns = useRef();
     const netWiredGw = useRef();
    
     const [ Updated, setUpdated] = useState(0);
     const [ NetWiredIpStyle, setNetWiredIpStyle] = useState({ borderColor: "" });
-    const [ NetWiredNmStyle, setNetWiredNmStyle] = useState({ borderColor: "" });
+    const [ NetWiredDnsStyle, setNetWiredDnsStyle] = useState({ borderColor: "" });
     const [ NetWiredGwStyle, setNetWiredGwStyle] = useState({ borderColor: "" });
 
-    console.log("NET CONFIG:", config)
+    console.log("NET WIRED CONFIG:", config)
 
     useEffect( () => {        
         if(Updated < 2) {
@@ -25,10 +25,12 @@ const NetworkWired = ({ config, handleChange }) => {
             netWiredMAC.current.innerHTML = config.macAddress;
             netWiredIp.current.value = config.ipAddress;            
             netWiredGw.current.value = config.gateway;
+            netWiredDns.current.value = config.dns;
 
             if(config.dhcp === "TRUE") {
                 netWiredIp.current.readOnly = true;
                 netWiredGw.current.readOnly = true;
+                netWiredDns.current.readOnly = true;
             }
 
             setUpdated(Updated + 1);
@@ -45,8 +47,11 @@ const NetworkWired = ({ config, handleChange }) => {
         if(field === 'ipAddress') {
             setNetWiredIpStyle(s);
         }
-        else if(field === 'netmask') {
-            setNetWiredNmStyle(s);
+        else if(field === 'gateway') {
+            setNetWiredGwStyle(s);
+        }
+        else if(field === 'dns') {
+            setNetWiredDnsStyle(s);
         }
         else {
             setNetWiredGwStyle(s);
@@ -56,10 +61,12 @@ const NetworkWired = ({ config, handleChange }) => {
     const handleDHCPChange = (state) => {
         if(state === true) {
             netWiredIp.current.readOnly = true;
+            netWiredDns.current.readOnly = true;
             netWiredGw.current.readOnly = true;
         }
         else {
             netWiredIp.current.readOnly = false;
+            netWiredDns.current.readOnly = true;
             netWiredGw.current.readOnly = false;
         }
 
@@ -95,11 +102,19 @@ const NetworkWired = ({ config, handleChange }) => {
                 />
             </div>
             <div className="form-group app-group">
-                <label htmlFor="wired_gateway" className="col-form-label col-form-label-sm applabel">Default Gateway:</label>
+                <label htmlFor="wired_gateway" className="col-form-label col-form-label-sm applabel">Gateway:</label>
                 <input type="text" className="form-control form-control-sm appipmac" id="wired_gateway" 
                     onChange={ (e) => {const er = handleChange( "gateway", e.target.value); changeErrorStyle('gateway', er)}}
                     style={NetWiredGwStyle}
                     ref={netWiredGw}
+                />                    
+            </div>
+            <div className="form-group app-group">
+                <label htmlFor="wired_dns" className="col-form-label col-form-label-sm applabel">DNS:</label>
+                <input type="text" className="form-control form-control-sm appipmac" id="wired_dns" 
+                    onChange={ (e) => {const er = handleChange( "dns", e.target.value); changeErrorStyle('dns', er)}}
+                    style={NetWiredDnsStyle}
+                    ref={netWiredDns}
                 />                    
             </div>
     </div>

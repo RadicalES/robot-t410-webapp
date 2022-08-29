@@ -57,6 +57,7 @@ const AppSerialWS= ({ config, handleChange }) => {
                     >
                     <option value="ttyUSB0">Serial Port 1</option>
                     <option value="ttyUSB1">Serial Port 2</option>
+                    <option value="ttyACM0">USB Serial Port</option>
                 </select>
             </div>
 

@@ -3,7 +3,7 @@
 # getapp.sh
 # CGI Script to retrieve the device environment data
 #
-# (C) 2017-2020, Radical Electronic Systems - www.radicalsystems.co.za
+# (C) 2017-2022, Radical Electronic Systems - www.radicalsystems.co.za
 # Written by Jan Zwiegers, jan@radicalsystems.co.za
 
 

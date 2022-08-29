@@ -1,0 +1,4 @@
+{"status":"OK",
+    "wired":{"name":"eth0","status":"ENABLED","macAddress":"04:79:b7:a2:64:18","ipAddress":"192.168.100.10","netmask":"255.255.255.0","gateway":"192.168.100.1","dns":"8.8.8.8,8.8.4.4,2001:4860:4860::8888,2001:4860:4860::8844","dhcp":"TRUE"},
+    "wifi":{"name":"wlan0",status:"ENABLED","macAddress":"c0:ee:40:45:f8:2c","ipAddress":"0.0.0.0","netmask":"0.0.0.0","gateway":"0.0.0.0","dns":"0.0.0.0","dhcp":"TRUE"},
+    "wifiap":{"SSID":"Blackbriar5G"},"dnsip":"","ntpip":"ntp2.is.co.za"}
