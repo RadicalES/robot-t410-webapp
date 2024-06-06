@@ -2,7 +2,7 @@
  * Written by Jan Zwiegers, jan@radicalsystems.co.za
  * Robot-T410 UX
  */
-const Fetcher = (path, method, payload, response) => {
+const Fetcher = async (path, method, payload, response) => {
     let params = {        
         method: method,
         cache: 'no-cache',
@@ -19,25 +19,22 @@ const Fetcher = (path, method, payload, response) => {
         params['body'] = payload;
     }
 
-    fetch(path, params)
-    .then( (res) => {
-        return res.json()                
-    })
-    .then( (res) => {
-        const d = {     
+    try {
+        const resp = await fetch(path, params);
+        const data = await resp.json()
+        return {     
             status: 'OK',       
-            data: res,
+            data: data,
             error: null
         }
-        response(d)        
-    })
-    .catch( (error) => {
-        response({
+
+    } catch(error) {
+        return {
             status: 'FAIL',
             data: { status: 'FAIL' },
             error: error
-        })
-    })
+        }
+    }
 
 }
 

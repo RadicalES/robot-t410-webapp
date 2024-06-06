@@ -4,21 +4,11 @@
  */
 import React, { useState, useEffect } from 'react';
 import Fetcher from '../utils/fetcher'
+import { useLoaderData } from 'react-router-dom';
 
 const DeviceInfo = () => {
-
-    const [ RobotInfo, setRobotInfo ] = useState({
-        data: {
-            operatingsystem: "Waiting..."
-        },
-    });
-
-    useEffect( () => {
-        let inView = true;
-        Fetcher('/cgi/getinfo.sh', 'GET', null, (data) => { if(inView) setRobotInfo(data) });
-        return () => {inView = false;}
-    }, [])
-
+    const RobotInfo = useLoaderData()
+    
     return (
 
         <div className="container content">
@@ -43,6 +33,13 @@ const DeviceInfo = () => {
 
     )
 
+}
+
+
+// loader function
+export const devInfoLoader = async () => {
+    const data = await Fetcher('/cgi/getinfo.sh');
+    return data;
 }
 
 export default DeviceInfo;

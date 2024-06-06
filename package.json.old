@@ -1,8 +1,22 @@
 {
-  "name": "robot-t4x0-webapp",
+  "name": "robot-t410-webapp",
   "version": "0.1.0",
   "private": true,
-  "description": "Robot-T410/T420 User Interface",
+  "proxy": "http://192.168.60.137",
+  "dependencies": {
+    "@testing-library/jest-dom": "^4.2.4",
+    "@testing-library/react": "^9.3.2",
+    "@testing-library/user-event": "^7.1.2",
+    "bootstrap": "^4.4.1",
+    "dotenv": "^8.2.0",
+    "jquery": "^3.4.1",
+    "popper.js": "^1.16.1",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
+    "react-router-dom": "^5.1.2",
+    "react-scripts": "3.4.1",
+    "ws": "^7.3.0"
+  },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
@@ -24,16 +38,5 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "http://10.223.40.98",
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "bootstrap": "^5.3.3",
-    "jquery": "^3.7.1",
-    "popper.js": "^1.16.1",
-    "react": "^18.3.1",
-    "react-router-dom": "^6.23.1",
-    "react-scripts": "^5.0.1",
-    "ws": "^8.17.0"
-  }
+  "devDependencies": {}
 }
