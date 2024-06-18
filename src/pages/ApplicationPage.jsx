@@ -15,17 +15,6 @@ const ApplicationPage = () => {
         serverUrl: "Waiting..."
     })
 
-    const saveResult = (result) => {
-        const { status } = result.data;        
-
-        if(status === 'OK') {
-            alert("Default network setting.\nRestart device to take effect.");
-        }
-        else {
-            alert("Failed to reset settings");
-        }
-    }
-
     const handleSubmit = (e) => {
         e.preventDefault();
         const payload = 'serverUrl=' + config.serverUrl;

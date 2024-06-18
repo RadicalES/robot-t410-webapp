@@ -19,6 +19,28 @@ const TelemetryPage = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+
+        const payload = 'enabled=' + config.enabled + 
+        '&broker=' + config.broker + 
+        '&port=' + config.port + 
+        '&user=' + config.username + 
+        '&passwd=' + config.password + 
+        '&pubtopic=' + config.pubtopic;
+
+        Fetcher('cgi/settelemetry.sh', 'POST', payload)
+        .then((resp) => {
+            const { status } = resp;
+
+            if(status === 'OK') {
+                alert("Telemetry settings saved!");
+            }
+            else {
+                alert("Failed to save telemetry settings!");
+            }
+
+        })
+        
+        return true;
     }
 
     return (

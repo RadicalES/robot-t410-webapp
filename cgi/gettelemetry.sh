@@ -7,23 +7,23 @@
 # Written by Jan Zwiegers, jan@radicalsystems.co.za
 
 
-CFGFILE=/etc/formfactor/appconfig
+CFGFILE=/etc/formfactor/telemconfig
 
-TELEM_ENABLED="true"
-TELEM_PUBTOPIC="robot-t410/events"
-TELEM_PORT=1883
-TELEM_BROKER="192.168.100.1"
-TELEM_USER="robot"
-TELEM_PASSWD="t410"
+ENABLED="true"
+PUBTOPIC="robot-t410/events"
+PORT=1883
+BROKER="192.168.100.1"
+USER="robot"
+PASSWD="t410"
 
 if [ -e $CFGFILE ]; then
   . $CFGFILE
 fi
 
-TELEM_CFG="\"enabled\":\"$TELEM_ENABLED\",\"port\":$TELEM_PORT,\"pubtopic\":\"$TELEM_PUBTOPIC\",\"broker\":\"$TELEM_BROKER\",\"username\":\"$TELEM_USER\",\"password\":\"$TELEM_PASSWD\""
+CONFIG="\"enabled\":\"$ENABLED\",\"port\":$PORT,\"pubtopic\":\"$PUBTOPIC\",\"broker\":\"$BROKER\",\"username\":\"$USER\",\"password\":\"$PASSWD\""
 
 
-JSON="\"status\":\"OK\",$TELEM_CFG";
+JSON="\"status\":\"OK\",$CONFIG";
 
 echo -e "Content-Type: application/json\r\n\r\n"
 echo -e "{$JSON}"
