@@ -2,7 +2,7 @@
  * Written by Jan Zwiegers, jan@radicalsystems.co.za
  * Robot-T410 UX
  */
-const Fetcher = async (path, method, payload, response) => {
+const Fetcher = async (path, method, payload) => {
     let params = {        
         method: method,
         cache: 'no-cache',

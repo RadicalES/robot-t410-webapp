@@ -9,14 +9,13 @@
 
 CFGFILE=/etc/formfactor/appconfig
 
-WB_LOAD_URL="http://www.radicalsystems.co.za"
-WB_LAYOUT="portrait"
+SERVER_CONFIG_URL="http://www.radicalsystems.co.za"
 
 if [ -e $CFGFILE ]; then
   . $CFGFILE
 fi
 
-APP_CFG="\"serverUrl\":\"$WB_LOAD_URL\""
+APP_CFG="\"serverUrl\":\"$SERVER_CONFIG_URL\""
 
 JSON="\"status\":\"OK\",$APP_CFG";
 

@@ -10,19 +10,46 @@ import Fetcher from '../utils/fetcher';
 
 const ApplicationPage = () => {
     const data = useLoaderData()
+
     const [ config, setConfig, handleConfigChange ] = useFormData(data?.data || {
         serverUrl: "Waiting..."
     })
 
+    const saveResult = (result) => {
+        const { status } = result.data;        
+
+        if(status === 'OK') {
+            alert("Default network setting.\nRestart device to take effect.");
+        }
+        else {
+            alert("Failed to reset settings");
+        }
+    }
+
     const handleSubmit = (e) => {
         e.preventDefault();
+        const payload = 'serverUrl=' + config.serverUrl;
+        Fetcher('cgi/setapp.sh', 'POST', payload)
+        .then((resp) => {
+            const { status } = resp;
+
+            if(status === 'OK') {
+                alert("Application settings saved!");
+            }
+            else {
+                alert("Failed to save application settings!");
+            }
+
+        })
+        
+        return true;
     }
 
     return (
         <Card className="content">
             <Card.Body>
                 <Card.Title>Application Settings</Card.Title>
-                <Form noValidate onSubmit={handleSubmit} className='mt-2 mb-2'>
+                <Form noValidate className='mt-2 mb-2' onSubmit={handleSubmit}>
                     <AppConfig config={config} handleChange={handleConfigChange} />            
                     <Button variant="outline-primary" type="submit" size="sm" className='me-2'>Save</Button>
                 </Form>

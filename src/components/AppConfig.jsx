@@ -14,6 +14,7 @@ const AppConfiguration = ({ config, handleChange }) => {
                 <Form.Group as={Col}>
                     <Form.Label>Configuration URL</Form.Label>
                     <Form.Control 
+                        id='serverUrl'
                         type="text" 
                         placeholder='Configuration URL'
                         value={config.serverUrl}

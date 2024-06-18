@@ -6,7 +6,7 @@ import React from 'react';
 import { Route, createBrowserRouter, createRoutesFromElements, Outlet, RouterProvider } from 'react-router-dom'
 import DeviceInfoPage, { deviceInfoLoader } from './pages/DeviceInfoPage'
 import RootLayout from './pages/RootLayout';
-import ApplicationPage, { applicationLoader } from './pages/ApplicationPage';
+import ApplicationPage, { applicationLoader, applicationSaveAction } from './pages/ApplicationPage';
 import TelemetryPage, { telemetryLoader } from './pages/TelemetryPage';
 import EthernetPage, { ethernetLoader } from './pages/EthernetPage';
 import WirelessPage, { wirelessLoader } from './pages/WirelessPage';
