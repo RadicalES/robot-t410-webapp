@@ -11,7 +11,7 @@ const EthernetConfig = ({ config, handleChange }) => {
 
 
     return (
-        <div className="tab-content-app">
+        <div className="content-body">
 
             <Row className='mt-2 mb-2'>
                 <Form.Group as={Col}>

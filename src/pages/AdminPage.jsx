@@ -1,5 +1,6 @@
 import { Button, Card, Col, Form, Row } from "react-bootstrap";
 import useFormData from '../hooks/useFormData';
+import Fetcher from '../utils/fetcher';
 
 const AdminPage = () => {
 
@@ -9,8 +10,23 @@ const AdminPage = () => {
         repeat: ""
     })
 
+    const setResult = (result) => {
+        
+    }
+
     const handleSubmit = (e) => {
         e.preventDefault();
+        
+        if(config.password === config.repeat) { 
+            const cfg = 'password=' + config.current + 
+                    '&newPassword=' + config.password;
+
+            Fetcher('/cgi/setpasswd.sh', 'POST', cfg, setResult );
+        }
+        else {
+            alert("Passwords do not match!")
+        }
+        return true;
     }
 
     return (
@@ -18,7 +34,7 @@ const AdminPage = () => {
             <Card.Body>
                 <Card.Title>Administrative Tasks</Card.Title>
                 <Form noValidate onSubmit={handleSubmit} className='mt-2 mb-2'>
-                    <div className="tab-content-app">
+                    <div className="content-body">
                         <Row className="mt-2">
                             <Form.Group as={Col}>
                                 <Form.Label>Current Password</Form.Label>

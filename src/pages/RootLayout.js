@@ -1,6 +1,6 @@
 
 import React from "react";
-import RobotNavbar from "../components/navbar";
+import RobotNavbar from "../components/NavBar";
 import { Outlet, useNavigation } from "react-router-dom";
 import { Container, Spinner } from "react-bootstrap";
 

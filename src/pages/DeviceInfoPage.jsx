@@ -17,7 +17,7 @@ const DeviceInfoPage = () => {
         <Card className="content">
             <Card.Body>
                 <Card.Title>Device Information</Card.Title>
-                <div className="tab-content-app">
+                <div className="content-body">
                     <Form.Group as={Row}>
                         <Form.Label column sm="4" className='ms-auto'>Operating System:</Form.Label>
                         <Col sm="8">

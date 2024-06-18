@@ -9,7 +9,7 @@ const AppConfiguration = ({ config, handleChange }) => {
     console.log("App config: ", config)
 
     return ( 
-        <div className="tab-content-app">
+        <div className="content-body">
             <Row className='mt-2 mb-2'>
                 <Form.Group as={Col}>
                     <Form.Label>Configuration URL</Form.Label>

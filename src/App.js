@@ -1,10 +1,9 @@
-/* (C) 2020-2022, Radical Electronic Systems CC - info@radicalsystems.co.za
+/* (C) 2020-2024, Radical Electronic Systems CC - info@radicalsystems.co.za
  * Written by Jan Zwiegers, jan@radicalsystems.co.za
  * Robot-T420 UX
  */
 import React from 'react';
 import { Route, createBrowserRouter, createRoutesFromElements, Outlet, RouterProvider } from 'react-router-dom'
-import Network, { networkLoader, networkSaveAction } from './components/network'
 import DeviceInfoPage, { deviceInfoLoader } from './pages/DeviceInfoPage'
 import RootLayout from './pages/RootLayout';
 import ApplicationPage, { applicationLoader } from './pages/ApplicationPage';
@@ -35,13 +34,13 @@ const router = createBrowserRouter(
         path='/ethernet' 
         element={<EthernetPage />} 
         loader={ethernetLoader}  
-        action={networkSaveAction}
+        // action={networkSaveAction}
       />
        <Route 
         path='/wifi' 
         element={<WirelessPage />} 
         loader={wirelessLoader}  
-        action={networkSaveAction}
+        // action={networkSaveAction}
       />
       <Route path='/admin' element={<AdminPage />} />
     </Route>

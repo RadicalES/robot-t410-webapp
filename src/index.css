@@ -1,6 +1,5 @@
-
 .content {
-
+  min-height: 480px;
   border-width: 1px;
 	border-style: solid;
 	border-color: #999999;
@@ -8,71 +7,18 @@
   background-color: rgb(250, 250, 250);  
 }
 
-.network-content {
-  padding: 10px;
-  
-}
-
-@media only screen and (max-width: 480px) {
-
-  .form-inline .form-control {
-    display: inline-block;
-    width: 100%;
-    vertical-align: middle;
-  }
-}
-
-@media (min-width: 460px) {  
-  .navbar-expand-sm .navbar-nav .nav-link {
-    padding-right: .5rem;
-    padding-left: .5rem;
-  }
-
-  .appbtn {
-    margin-left: 10px;
-    background-color: #c88000;
-  }
-  
-  .appurl {
-    width: 100%;
-    display: block;
-  }
-
-  .appselect {
-    width: 60%;
-    display: inline-block;
-    height: calc(1.3em + .75rem);
-    font-size: .9rem;
-  }
-
-  .appipmac {
-    width: 65%;
-    display: inline-block;    
-  }
-
-  .applabel {
-    width: 120px;
-  }
- 
-  .navbar-expand-sm {
-    flex-flow: row nowrap;
-    justify-content: space-between;
-    padding-bottom: 4px;
-    padding-top: 4px;    
-  }
-
-  .navbar-expand-sm .navbar-nav {
-    flex-direction: row;
-  }
+.content-body {
+  border-bottom: 1px solid rgb(240, 240, 240);
+  margin-bottom: 10px;
+  background-color: #eee;
+  border-width: 1px;
+	border-style: solid;
+  padding: 0px 10px;
+  margin-top: 0px;
+  border-color:#dadada;
 }
 
 @media (min-width: 560px) {   
-  .appurl {
-    width: 460px;
-    display: inline-block;
-    margin-left: 10px;
-  }
-
   .container, .container-xss {
     max-width: 800px;    
   }
@@ -84,107 +30,13 @@
   padding-bottom: 0px;
 }
 
-.form-group, .app-group {
-  margin-bottom: 0.5rem;
-
-}
-
-/* apply col-form-label-sm post css */
-.readonly-field {
-  opacity: .7;
-  padding-top: calc(.25rem + 1px);
-  padding-bottom: calc(.25rem + 1px);
-  font-size: .875rem;
-  line-height: 1.5;
-  margin-bottom: 0px;
-}
-
-.custom-switch .custom-control-input:focus~.custom-control-label::before{
-  box-shadow: 0 0 0 1px #fff, 0 0 0 0.2rem #f8e986; 
-  border-color: #f8e986;
-}
-
- /* Create a custom checkbox */
-.websock-checkbox{
-  z-index: 0;
-  display: inline-block;
-}
-
-.custom-switch .custom-control-input:checked~.custom-control-label::before {
-  border-color: #c88000;
-  background-color: #c88000;
-}
-
-.network-tabs {
-  padding-top: 10px;
-}
-
-.tab-content-app {
-  /* min-height: 480px; */
-  border-bottom: 1px solid rgb(240, 240, 240);
-  margin-bottom: 10px;
-  background-color: #eee;
-  border-width: 1px;
-	border-style: solid;
-  padding: 0px 10px;
-  margin-top: 0px;
-  border-color:#dadada;
-}
-
-.tab-pane > .active {
-  border: none;
-  border-style: none;
-}
-
-.form-check-input {
-  margin-left: 1rem;
-}
 
 body {
   background-color: #D4D4D4;
 }
 
 .navbar {
-  background:#ffa200;
-}
-
-.robotNavBar {
-  background:#ffa200;
-}
-
-
-a {
-	text-decoration: none;
-	color: #303030;
-}
-
-.readonlyTextBox {
-	border-color: #b5b5b5;
-	border-width: 1px;
-	border-style: solid;
-	color: #444444;
-  background-color: #F8F8F8;
-  margin-left: 10px;
-  width: 65%;
-  max-width: 450px;
-  font-size: .9rem;
-}
-
-h4 {
-	font-weight: bold;
-  padding-left: 10px;
-  padding-top: 10px;
-  text-shadow: 1px 0 0 #eee;
-  color: #887600;
-	border-bottom:#999;
-	border-bottom-style:solid;
-	border-bottom-width: 1px;
-  margin-bottom:10px;
-  font-size: 1.2rem;
-}
-
-.body {
-  background-color: white;
+  background:#636363;
 }
 
 .footer {
@@ -195,22 +47,27 @@ h4 {
 	font-size: 10px;
 }
 
-.active {
-  color: red
-}
 
-.navbar-light .navbar-nav .nav-link.active,
-.navbar-light .navbar-nav .nav-link.active:hover {
-  color: #4e3500;
+.navbar-brand {  
+  color: #ff8037;
   font-weight: bold;
 }
 
-.navbar-light .navbar-brand {  
-  color: #f53302;
+.navbar-nav .nav-link:hover {  
+  color: #ffb171;
   font-weight: bold;
 }
 
-.navbar-light .navbar-nav .nav-link:hover,
-.navbar-light .navbar-brand:hover {  
-  color: #ffa600;
+.nav-link {
+  color: #ffdfba;
+}
+
+.nav-link.active {
+  color: #ffb171 !important;
+  font-weight: bold;
+}
+
+.nav-link.pending {
+  color: #743400 !important;
+  font-weight: bold;
 }
