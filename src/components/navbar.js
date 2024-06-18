@@ -24,8 +24,14 @@ const RobotNavbar = (props) => {
                     <NavLink to="/app" className="nav-item nav-link">
                         Application
                     </NavLink>
-                    <NavLink to="/network" className="nav-item nav-link">
-                        Network
+                    <NavLink to="/telemetry" className="nav-item nav-link">
+                        Telemetry
+                    </NavLink>
+                    <NavLink to="/ethernet" className="nav-item nav-link">
+                        Ethernet
+                    </NavLink>
+                    <NavLink to="/wifi" className="nav-item nav-link">
+                        Wifi
                     </NavLink>
                     <NavLink to="/admin" className="nav-item nav-link">
                         Admin

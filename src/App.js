@@ -7,8 +7,11 @@ import { Route, createBrowserRouter, createRoutesFromElements, Outlet, RouterPro
 import Network, { networkLoader, networkSaveAction } from './components/network'
 import DeviceInfo, { devInfoLoader } from './components/device'
 import Admin from './components/admin'
-import RootLayout from './components/RootLayout';
+import RootLayout from './pages/RootLayout';
 import ApplicationPage, { applicationLoader } from './pages/ApplicationPage';
+import TelemetryPage from './pages/TelemetryPage';
+import EthernetPage, { ethernetLoader } from './pages/EthernetPage';
+import WirelessPage, { wirelessLoader } from './pages/WirelessPage';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -24,9 +27,20 @@ const router = createBrowserRouter(
         loader={applicationLoader}
       />
       <Route 
-        path='/network' 
-        element={<Network />} 
-        loader={networkLoader}  
+        path='/telemetry' 
+        element={<TelemetryPage />} 
+        loader={applicationLoader}
+      />
+      <Route 
+        path='/ethernet' 
+        element={<EthernetPage />} 
+        loader={ethernetLoader}  
+        action={networkSaveAction}
+      />
+       <Route 
+        path='/wifi' 
+        element={<WirelessPage />} 
+        loader={wirelessLoader}  
         action={networkSaveAction}
       />
       <Route path='/admin' element={<Admin />} />

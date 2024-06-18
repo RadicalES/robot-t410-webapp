@@ -5,7 +5,7 @@
 import { useLoaderData } from 'react-router-dom';
 import useFormData from '../hooks/useFormData';
 import AppConfiguration from '../components/AppConfiguration';
-import { Button, Container, Form } from 'react-bootstrap';
+import { Button, Card, Container, Form } from 'react-bootstrap';
 import Fetcher from '../utils/fetcher';
 
 const ApplicationPage = () => {
@@ -19,14 +19,15 @@ const ApplicationPage = () => {
     }
 
     return (
-
-        <Container className="content">
-            <Form noValidate onSubmit={handleSubmit}>
-                <AppConfiguration config={appConfig} handleChange={handleConfigChange} />            
-                <Button variant="outline-primary" type="submit" size="sm" className='me-2'>Save</Button>
-            </Form>
-        </Container>
-
+        <Card className="content">
+            <Card.Body>
+                <Card.Title>Application Settings</Card.Title>
+                <Form noValidate onSubmit={handleSubmit} className='mt-2 mb-2'>
+                    <AppConfiguration config={appConfig} handleChange={handleConfigChange} />            
+                    <Button variant="outline-primary" type="submit" size="sm" className='me-2'>Save</Button>
+                </Form>
+            </Card.Body>
+        </Card>
     );
 
 }
