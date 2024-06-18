@@ -87,42 +87,11 @@ parse_params () {
 
 
 configure_lan () {
-    WIRED_IFCFG="[Match]\nName=eth0\n\n[Network]\nDHCP"
-    WIRED_IFCFG_POST="[Resolve]"
-
-   # echo -e $WIRED_IFCFG >> /etc/systemd/network/eth0.network
-
-    if [ $WIRED_DHCP == "TRUE" ]; then
-        WIRED_IFCFG="$WIRED_IFCFG=ipv4\n"
-    else 
-        WIRED_IFCFG="$WIRED_IFCFG=no\nAddress=$WIRED_IPADDR\nGateway=$WIRED_GATEWAY\n"
-    fi
-
-    WIRED_IFCFG="$WIRED_IFCFG\n$WIRED_IFCFG_POST\nDNS=$WIRED_DNS\n"
-    echo -e $WIRED_IFCFG > /etc/systemd/network/eth0.network
+   
 }
 
 configure_wifi () {
-    WIFI_IFCFG="[Match]\nName=wlan0\n\n[Network]\nDHCP"
-    WIFI_IFCFG_POST="[Resolve]"
-
-    if [ $WIFI_DHCP == "TRUE" ]; then
-        WIFI_IFCFG="$WIFI_IFCFG=ipv4\n"
-    else 
-        WIFI_IFCFG="$WIFI_IFCFG=no\nAddress=$WIFI_IPADDR\nGateway=$WIFI_GATEWAY\n"
-    fi
-
-    WIFI_IFCFG="$WIFI_IFCFG\n$WIFI_IFCFG_POST\nDNS=$WIFI_DNS\n"
-    echo -e $WIFI_IFCFG > /etc/systemd/network/wlan0.network
-
-    if [ "$WIFI_SSID" != "" ]; then
-        echo -e "ctrl_interface=/run/wpa_supplicant" > /etc/wpa_supplicant/wpa_supplicant-wlan0.conf
-        echo -e "ctrl_interface_group=0" >> /etc/wpa_supplicant/wpa_supplicant-wlan0.conf
-        echo -e "update_config=1" >> /etc/wpa_supplicant/wpa_supplicant-wlan0.conf
-        wpa_passphrase $WIFI_SSID $WIFI_KEY >> /etc/wpa_supplicant/wpa_supplicant-wlan0.conf
-        # switch AP mode
-    fi
-
+   
 }
 
 echo -e "Content-Type: application/json\r\n\r\n"

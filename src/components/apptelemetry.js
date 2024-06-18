@@ -16,6 +16,8 @@ const AppTelemetry = ({ config, handleChange }) => {
     const [ BrokerStyle, setBrokerStyle] = useState({ borderColor: "" });
     const [ PortStyle, setPortStyle] = useState({ borderColor: "" });
 
+    console.log("telem: ", config)
+
     useEffect( () => {        
         if(Updated < 2) {
             appTMenable.current.checked = config.enabled === "TRUE";

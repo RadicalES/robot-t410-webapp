@@ -1,122 +1,99 @@
-/* (C) 2020, Radical Electronic Systems CC - info@radicalsystems.co.za
+/* (C) 2024, Radical Electronic Systems CC - info@radicalsystems.co.za
  * Written by Jan Zwiegers, jan@radicalsystems.co.za
- * Robot-T410 UX
+ * Robot-T420 QT UX
  */
-import React, { useState, useEffect, useRef } from 'react';
+import { Col, Form, Row} from 'react-bootstrap';
 
 const NetworkWired = ({ config, handleChange }) => {
-
-    const netWiredDHCP = useRef();
-    const netWiredMAC = useRef();
-    const netWiredIp = useRef();
-    const netWiredDns = useRef();
-    const netWiredGw = useRef();
-   
-    const [ Updated, setUpdated] = useState(0);
-    const [ NetWiredIpStyle, setNetWiredIpStyle] = useState({ borderColor: "" });
-    const [ NetWiredDnsStyle, setNetWiredDnsStyle] = useState({ borderColor: "" });
-    const [ NetWiredGwStyle, setNetWiredGwStyle] = useState({ borderColor: "" });
-
     console.log("NET WIRED CONFIG:", config)
-
-    useEffect( () => {        
-        if(Updated < 2) {
-            netWiredDHCP.current.checked = config.dhcp === "TRUE";
-            netWiredMAC.current.innerHTML = config.macAddress;
-            netWiredIp.current.value = config.ipAddress;            
-            netWiredGw.current.value = config.gateway;
-            netWiredDns.current.value = config.dns;
-
-            if(config.dhcp === "TRUE") {
-                netWiredIp.current.readOnly = true;
-                netWiredGw.current.readOnly = true;
-                netWiredDns.current.readOnly = true;
-            }
-
-            setUpdated(Updated + 1);
-        }
-     }, [config])
-
-    const changeErrorStyle = (field, error) => {
-        let s = {borderColor: ""};
-
-        if(error === false) {            
-            s = {borderColor: "red"};
-        }
-
-        if(field === 'ipAddress') {
-            setNetWiredIpStyle(s);
-        }
-        else if(field === 'gateway') {
-            setNetWiredGwStyle(s);
-        }
-        else if(field === 'dns') {
-            setNetWiredDnsStyle(s);
-        }
-        else {
-            setNetWiredGwStyle(s);
-        }       
-    }    
-
-    const handleDHCPChange = (state) => {
-        if(state === true) {
-            netWiredIp.current.readOnly = true;
-            netWiredDns.current.readOnly = true;
-            netWiredGw.current.readOnly = true;
-        }
-        else {
-            netWiredIp.current.readOnly = false;
-            netWiredDns.current.readOnly = true;
-            netWiredGw.current.readOnly = false;
-        }
-
-        handleChange('dhcp', state)
-    }
 
     return ( 
 
-    <div className="network-content">        
+    <div className="tab-content-app">        
 
-            <div className="form-group app-group">
-                <div className="custom-control custom-switch">                    
-                    <input className="custom-control-input" type="checkbox" id="netwireddhcp"
-                        ref={netWiredDHCP}
-                        onChange={(e) => { handleDHCPChange(e.target.checked)}}  
-                        />
-                    <label htmlFor="netwireddhcp" className="custom-control-label col-form-label-sm">DHCP</label>                    
-                </div>
-            </div>
-        
-            <div className="form-group app-group">
-                <label htmlFor="wired_macaddress" className="col-form-label col-form-label-sm applabel">MAC Address:</label>
-                <label className="form-control form-control-sm appipmac readonly-field" 
-                    ref={netWiredMAC}>                    
-                </label>
-            </div>
-            <div className="form-group app-group">
-                <label htmlFor="wired_ipaddress" className="col-form-label col-form-label-sm applabel">IP Address:</label>
-                <input type="text" className="form-control form-control-sm appipmac" id="wired_ipaddress"                 
-                        onChange={ (e) => { const er = handleChange( "ipAddress", e.target.value); changeErrorStyle('ipAddress', er) }}
-                        style={NetWiredIpStyle}
-                        ref={netWiredIp}
+        <Row className='mt-2 mb-2'>
+            <Form.Group as={Col}>
+                <Form.Check 
+                    type="checkbox" 
+                    label="DHCP" 
+                    checked={config.dhcp === "auto"}
+                    onChange={(e) => { 
+                        handleChange({"name" : "dhcp", "value" : e.currentTarget.checked ? "auto" : "manual"})
+                    }}  
+                    
+                    />
+            </Form.Group>                
+        </Row>
+
+        <Row className='mb-3'>
+            <Form.Group as={Col}>
+                <Form.Label>Interface</Form.Label>
+                <Form.Control 
+                    type="text" 
+                    defaultValue={config.name}
+                    readOnly
+                    />
+            </Form.Group>               
+
+            <Form.Group as={Col}>
+                <Form.Label>MAC Address</Form.Label>
+                <Form.Control 
+                    type="text" 
+                    placeholder='Mac Address'
+                    defaultValue={config.macAddress}
+                    readOnly
+                    />
+            </Form.Group>
+
+        </Row>
+            
+        <Row className='mb-3'>
+            <Form.Group as={Col}>
+                <Form.Label>Ip Address</Form.Label>
+                <Form.Control 
+                    type="text" 
+                    placeholder='Ip Address'
+                    value={config.ipAddress}
+                    onChange={(e) => { 
+                        handleChange({"name" : "ipAddress", "value" : e.currentTarget.value})
+                    }}  
+                    />
+                <Form.Text muted>
+                    Enter Ip Address
+                </Form.Text>
+            </Form.Group>
+
+            <Form.Group as={Col}>
+                <Form.Label>Gateway Address</Form.Label>
+                <Form.Control 
+                    type="text" 
+                    placeholder='Gateway Address' 
+                    value={config.gateway}
+                    onChange={(e) => { 
+                        handleChange({"name" : "gateway", "value" : e.currentTarget.value})
+                    }} 
+                    />
+                <Form.Text muted>
+                    Enter Gateway Address
+                </Form.Text>
+            </Form.Group>
+        </Row>
+            
+        <Form.Group className='mb-3'>
+            <Form.Label>DNS Server Address</Form.Label>
+            <Form.Control 
+                type="text" 
+                placeholder='DNS Address' 
+                value={config.dns}
+                onChange={(e) => { 
+                    handleChange({"name" : "dns", "value" : e.currentTarget.value})
+                }} 
                 />
-            </div>
-            <div className="form-group app-group">
-                <label htmlFor="wired_gateway" className="col-form-label col-form-label-sm applabel">Gateway:</label>
-                <input type="text" className="form-control form-control-sm appipmac" id="wired_gateway" 
-                    onChange={ (e) => {const er = handleChange( "gateway", e.target.value); changeErrorStyle('gateway', er)}}
-                    style={NetWiredGwStyle}
-                    ref={netWiredGw}
-                />                    
-            </div>
-            <div className="form-group app-group">
-                <label htmlFor="wired_dns" className="col-form-label col-form-label-sm applabel">DNS:</label>
-                <input type="text" className="form-control form-control-sm appipmac" id="wired_dns" 
-                    onChange={ (e) => {const er = handleChange( "dns", e.target.value); changeErrorStyle('dns', er)}}
-                    style={NetWiredDnsStyle}
-                    ref={netWiredDns}
-                />                    
-            </div>
+            <Form.Text muted>
+                Enter DNS Address
+            </Form.Text>
+        </Form.Group>
+
     </div>
 
 

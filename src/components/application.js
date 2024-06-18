@@ -4,19 +4,20 @@
  */
 import React, { useState, useEffect } from 'react';
 import Fetcher from '../utils/fetcher'
-import AppBrowser from './appbrowser'
+import AppConfig from './AppConfiguration'
 import AppTelemetry from './apptelemetry'
-import AppSerialWS from './appserialws'
 import Validation from '../utils/validate'
+import { useLoaderData } from 'react-router-dom';
+import { Button, Container, Form, Tab, Tabs } from 'react-bootstrap';
+import useFormData from '../hooks/useFormData';
 
 const Application = () => {
-
-    const [ BrowserSettings, setBrowserSettings ] = useState({
-        appurl: "Waiting...",
-        layout: "portrait"
+    const ApplicationInfo = useLoaderData()
+    const [ serverConfig, setServerConfig, handleServerChange ] = useFormData(ApplicationInfo?.data?.server || {
+        serverurl: "Waiting..."
     })
 
-    const [ TelemetrySettings, setTelemetrySettings ] = useState({
+    const [ telemetryConfig, setTelemetryConfig, handleTelemetryChange ] = useFormData(ApplicationInfo?.data?.telemetry || {
         enabled: "FALSE",
         broker: "Waiting...",
         port: 1883,
@@ -25,100 +26,56 @@ const Application = () => {
         password: ""
     })
 
-    const [ SerialWSSettings, setSerialWSSettings ] = useState({
-        enabled: "FALSE",
-        serialport: "",
-        baudrate: 9600,
-        socketport: 0,
-        allowforeign: "FALSE"
-    })
-
-    const udapteAppSettings = (data) => {
-        setBrowserSettings(data.data.browser);
-        setTelemetrySettings(data.data.telemetry);
-        setSerialWSSettings(data.data.serialws);
-    }
-
-    useEffect( () => {
-        let inView = true;
-        Fetcher('/cgi/getapp.sh', 'GET', "", (data) => { if(inView) udapteAppSettings(data) } );
-        return () => { inView = false; }
-    }, [])
-
     const handleBrowserChange = (field, value) => {
-        const bs = BrowserSettings;
-        let er = false;
+        // const bs = BrowserSettings;
+        // let er = false;
 
-        if(field === 'appurl') {
-            er = Validation.UrlCheck(value);
-            if(er === true) {
-                bs[field] = value;    
-            }
-        }
-        else {
-            bs[field] = value;
-        }
+        // if(field === 'appurl') {
+        //     er = Validation.UrlCheck(value);
+        //     if(er === true) {
+        //         bs[field] = value;    
+        //     }
+        // }
+        // else {
+        //     bs[field] = value;
+        // }
 
-        setBrowserSettings(bs);
+        // setBrowserSettings(bs);
 
-        return er;
+        // return er;
     }
 
-    const handleTelemetryChange = (field, value) => {
-        const ts = TelemetrySettings;
-        let er = false;
+    const handleTelemetryChanged = (field, value) => {
+        //const ts = TelemetrySettings;
+        // let er = false;
 
-        if(field === 'port') {
-            er = Validation.Numericality(value, {minimum: 1000, maximum: 65535});
-            if(er === true) {
-                ts[field] = parseInt(value);
-            }
-        } 
-        else if(field === 'enabled') {
-            ts[field] = value ? 'TRUE' : 'FALSE';
-        }
-        else if(field === 'broker') {
-            er = Validation.IPAddress(value);
-            if(er === true) {
-                ts[field] = value;
-            }
-        }
-        else if(field === 'pubtopic') {            
-            ts[field] = value;
-        }
-        else if(field === 'username') {            
-            ts[field] = value;
-        }
-        else if(field === 'password') {            
-            ts[field] = value;
-        }
+        // if(field === 'port') {
+        //     er = Validation.Numericality(value, {minimum: 1000, maximum: 65535});
+        //     if(er === true) {
+        //         ts[field] = parseInt(value);
+        //     }
+        // } 
+        // else if(field === 'enabled') {
+        //     ts[field] = value ? 'TRUE' : 'FALSE';
+        // }
+        // else if(field === 'broker') {
+        //     er = Validation.IPAddress(value);
+        //     if(er === true) {
+        //         ts[field] = value;
+        //     }
+        // }
+        // else if(field === 'pubtopic') {            
+        //     ts[field] = value;
+        // }
+        // else if(field === 'username') {            
+        //     ts[field] = value;
+        // }
+        // else if(field === 'password') {            
+        //     ts[field] = value;
+        // }
         
-        setTelemetrySettings(ts);
-        return er;
-    }
-
-    const handleSerialWSChange = (field, value) => {
-        const sws = SerialWSSettings;
-        let er = false;
-
-        if(field === 'socketport') {
-            er = Validation.Numericality(value, {minimum: 1000, maximum: 65535});
-            if(er === true) {
-                sws[field] = parseInt(value);
-            }
-        }            
-        else if(field === 'badurate') {
-            sws[field] = parseInt(value);
-        } 
-        else if((field === 'enabled') || (field === 'allowforeign')) {
-            sws[field] = value ? 'TRUE' : 'FALSE';
-        }
-        else {
-            sws[field] = value;
-        }
-
-        setSerialWSSettings(sws);
-        return er;
+        // setTelemetrySettings(ts);
+        // return er;
     }
 
     const appSetResult = (result) => {        
@@ -134,72 +91,42 @@ const Application = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        const aps = 'appurl=' + BrowserSettings.appurl +
-                    '&layout=' + BrowserSettings.layout;
+        // const aps = 'appurl=' + BrowserSettings.appurl +
+        //             '&layout=' + BrowserSettings.layout;
 
-        const tels = 'telen=' + TelemetrySettings.enabled + 
-                    '&telbroker=' + TelemetrySettings.broker + 
-                    '&telport=' + TelemetrySettings.port + 
-                    '&teluser=' + TelemetrySettings.username + 
-                    '&telpasswd=' + TelemetrySettings.password + 
-                    '&telpubtopic=' + TelemetrySettings.pubtopic;
+        // const tels = 'telen=' + TelemetrySettings.enabled + 
+        //             '&telbroker=' + TelemetrySettings.broker + 
+        //             '&telport=' + TelemetrySettings.port + 
+        //             '&teluser=' + TelemetrySettings.username + 
+        //             '&telpasswd=' + TelemetrySettings.password + 
+        //             '&telpubtopic=' + TelemetrySettings.pubtopic;
 
-        const sws = 'srlwsen=' + SerialWSSettings.enabled + 
-                    '&srlwsports=' + SerialWSSettings.serialport + 
-                    '&srlwsbaud=' + SerialWSSettings.baudrate + 
-                    '&srlwsportn=' + SerialWSSettings.socketport + 
-                    '&srlwsforeign=' + SerialWSSettings.allowforeign;
-        const data = aps + '&' + sws + '&' + tels;
+        // const sws = 'srlwsen=' + SerialWSSettings.enabled + 
+        //             '&srlwsports=' + SerialWSSettings.serialport + 
+        //             '&srlwsbaud=' + SerialWSSettings.baudrate + 
+        //             '&srlwsportn=' + SerialWSSettings.socketport + 
+        //             '&srlwsforeign=' + SerialWSSettings.allowforeign;
+        // const data = aps + '&' + sws + '&' + tels;
 
-        Fetcher('/cgi/setapp.sh', 'POST', data, appSetResult );
-        return true;
-    }
-
-    const handleTestWS = (e) => {
-        alert("Not implemented")
+        // Fetcher('/cgi/setapp.sh', 'POST', data, appSetResult );
+        // return true;
     }
 
     return (   
-            <div className="container content network-tabs">
-                <ul className="nav nav-tabs" id="applicationTab" role="tablist">
-                    <li className="nav-item">
-                        <a className="nav-link active" id="app-browser-tab" data-toggle="tab" href="#browser" role="tab" aria-controls="browser" aria-selected="true">Browser</a>
-                    </li>
-                    <li className="nav-item">
-                        <a className="nav-link" id="napp-telemetry-tab" data-toggle="tab" href="#telemetry" role="tab" aria-controls="telemetry" aria-selected="false">Telemetry</a>
-                    </li>
-                    <li className="nav-item">
-                        <a className="nav-link" id="napp-websock-tab" data-toggle="tab" href="#websock" role="tab" aria-controls="websock" aria-selected="false">Serial WS</a>
-                    </li>
-
-                </ul>           
-
-                
-                <form onSubmit={handleSubmit} noValidate>
-                    <div className="tab-content tab-content-app" id="network-tab-content">
-                    
-                        <div className="tab-pane fade show active" id="browser" role="tabpanel" aria-labelledby="browser-tab">
-                            <AppBrowser config={BrowserSettings} handleChange={handleBrowserChange}/>                
-                        </div>
-                    
-                        <div className="tab-pane fade show" id="telemetry" role="tabpanel" aria-labelledby="telemetry-tab">
-                            <AppTelemetry config={TelemetrySettings} handleChange={handleTelemetryChange} />                
-                        </div>
-
-                        <div className="tab-pane fade show" id="websock" role="tabpanel" aria-labelledby="websock-tab">
-                            <AppSerialWS config={SerialWSSettings} handleChange={handleSerialWSChange} />
-                        </div>
-
-                    </div>
-
-                    <input type="submit" className="btn btn-secondary btn-sm appbtn" value="Save Settings" />
-                    <button type="button" className="btn btn-secondary btn-sm appbtn" onClick={handleTestWS}>Test Websocket</button>            
-                </form>
-
-        </div>
-
+        <Container className="content">
+            <Form noValidate onSubmit={handleSubmit}>
+                <AppConfig config={serverConfig} handleChange={handleServerChange} />            
+                <Button variant="outline-primary" type="submit" size="sm" className='me-2'>Save</Button>
+            </Form>
+        </Container>
     )
 
+}
+
+// loader function
+export const applicationLoader = async () => {
+    const data = await Fetcher('/cgi/getapp.sh', 'GET');
+    return data;
 }
 
 export default Application;

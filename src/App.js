@@ -3,13 +3,12 @@
  * Robot-T420 UX
  */
 import React from 'react';
-import RobotNavbar from './components/navbar'
-import { Route, BrowserRouter, Routes, useLocation, createBrowserRouter, createRoutesFromElements, Outlet, RouterProvider } from 'react-router-dom'
-import Application from './components/application'
-import Network from './components/network'
+import { Route, createBrowserRouter, createRoutesFromElements, Outlet, RouterProvider } from 'react-router-dom'
+import Network, { networkLoader, networkSaveAction } from './components/network'
 import DeviceInfo, { devInfoLoader } from './components/device'
 import Admin from './components/admin'
 import RootLayout from './components/RootLayout';
+import ApplicationPage, { applicationLoader } from './pages/ApplicationPage';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -18,9 +17,18 @@ const router = createBrowserRouter(
         index          
         element={<DeviceInfo />}
         loader={devInfoLoader}
-        />            
-      <Route path='/app' element={<Application />} />
-      <Route path='/network' element={<Network />} />
+      />            
+      <Route 
+        path='/app' 
+        element={<ApplicationPage />} 
+        loader={applicationLoader}
+      />
+      <Route 
+        path='/network' 
+        element={<Network />} 
+        loader={networkLoader}  
+        action={networkSaveAction}
+      />
       <Route path='/admin' element={<Admin />} />
     </Route>
  
