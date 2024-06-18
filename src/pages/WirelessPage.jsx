@@ -7,21 +7,24 @@ import useFormData from '../hooks/useFormData';
 import { Button, Card, Form } from 'react-bootstrap';
 import Fetcher from '../utils/fetcher';
 import WirelessConfig from '../components/WirelessConfig';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 const WirelessPage = () => {
     const data = useLoaderData()
+    const status = data?.data?.status === 'OK' || false
     const [ config, setConfig, handleConfigChange ] = useFormData(data?.data || {
         name: "Wireless",
         macAddress: "Waiting...",
-        status: "ENABLED",
-        dhcp: "FALSE",
+        enabled: "false",
+        dhcp: "false",
         ipAddress: "192.168.1.20",
         gateway: "192.168.0.1",
         dns: "192.168.0.1",
         SSID: "",
         passkey: ""
     } )
+
+    const DataWs = useRef(null);
 
     const [ apData, setApData] = useState({
         wifiConfig : {
@@ -33,6 +36,50 @@ const WirelessPage = () => {
             signalLevel : ""
         }
     });
+
+    const connectWifiData = () => {
+        let { hostname } = window.location;   
+
+        if (process.env.NODE_ENV === 'development' && process.env.REACT_APP_WSPROXYIP) {
+            hostname = process.env.REACT_APP_WSPROXYIP;
+            if (process.env.REACT_APP_WSPROXYPORT) {
+                hostname += `:${process.env.REACT_APP_WSPROXYPORT}`;
+            }
+        }
+
+        const url = 'ws://' + hostname + ':7000/';        
+        DataWs.current = new WebSocket(url);
+        
+        DataWs.current.onopen = () => {
+        }
+
+        DataWs.current.onclose = e => {
+        }
+
+        DataWs.current.onerror = err => {
+            DataWs.current.close();
+        }
+
+        DataWs.current.onmessage = evt => {
+
+            console.log("WRL SKT DATA", evt.data)
+
+            const d = JSON.parse(evt.data);            
+            if ('wifiData' in d) {
+                setApData(d);         
+            }
+        }
+    }
+
+    useEffect(() => {
+        connectWifiData()
+        return () => {
+            const ws = DataWs.current;                        
+            if(ws && ws.readyState != WebSocket.CLOSED ) {
+                ws.close();
+            }
+        }
+     }, [])
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -50,6 +97,8 @@ const WirelessPage = () => {
         e.preventDefault();
     }
 
+    console.log("WIFI STATUS: ", status);
+
     return (
 
         <Card className="content">
@@ -65,8 +114,6 @@ const WirelessPage = () => {
                 
             </Card.Body>
         </Card>
-
-
     );
 
 }
@@ -75,7 +122,7 @@ const WirelessPage = () => {
 
 // loader function
 export const wirelessLoader = async () => {
-    const data = await Fetcher('/cgi/getapp.sh', 'GET');
+    const data = await Fetcher('/cgi/getwifi.sh', 'GET');
     return data;
 }
 

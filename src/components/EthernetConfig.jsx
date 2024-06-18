@@ -18,9 +18,9 @@ const EthernetConfig = ({ config, handleChange }) => {
                     <Form.Check 
                         type="checkbox" 
                         label="Enabled" 
-                        checked={config.dhcp === "auto"}
+                        checked={config.enabled === "true"}
                         onChange={(e) => { 
-                            handleChange({"name" : "enabled", "value" : e.currentTarget.checked ? "auto" : "manual"})
+                            handleChange({"name" : "enabled", "value" : e.currentTarget.checked ? "true" : "false"})
                         }}                          
                         />
                 </Form.Group>

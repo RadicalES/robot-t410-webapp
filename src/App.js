@@ -5,21 +5,21 @@
 import React from 'react';
 import { Route, createBrowserRouter, createRoutesFromElements, Outlet, RouterProvider } from 'react-router-dom'
 import Network, { networkLoader, networkSaveAction } from './components/network'
-import DeviceInfo, { devInfoLoader } from './components/device'
-import Admin from './components/admin'
+import DeviceInfoPage, { deviceInfoLoader } from './pages/DeviceInfoPage'
 import RootLayout from './pages/RootLayout';
 import ApplicationPage, { applicationLoader } from './pages/ApplicationPage';
-import TelemetryPage from './pages/TelemetryPage';
+import TelemetryPage, { telemetryLoader } from './pages/TelemetryPage';
 import EthernetPage, { ethernetLoader } from './pages/EthernetPage';
 import WirelessPage, { wirelessLoader } from './pages/WirelessPage';
+import AdminPage from './pages/AdminPage';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path='/' element={<RootLayout />}>
       <Route
         index          
-        element={<DeviceInfo />}
-        loader={devInfoLoader}
+        element={<DeviceInfoPage />}
+        loader={deviceInfoLoader}
       />            
       <Route 
         path='/app' 
@@ -29,7 +29,7 @@ const router = createBrowserRouter(
       <Route 
         path='/telemetry' 
         element={<TelemetryPage />} 
-        loader={applicationLoader}
+        loader={telemetryLoader}
       />
       <Route 
         path='/ethernet' 
@@ -43,7 +43,7 @@ const router = createBrowserRouter(
         loader={wirelessLoader}  
         action={networkSaveAction}
       />
-      <Route path='/admin' element={<Admin />} />
+      <Route path='/admin' element={<AdminPage />} />
     </Route>
  
   )

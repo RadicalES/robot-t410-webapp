@@ -8,6 +8,8 @@ const TelemetryConfiguration = ({ config, handleChange }) => {
 
     console.log("Telemetry config: ", config)
 
+    const enabled = config.enabled === "TRUE" || config.enabled === "true"
+
 
     return (
         <div className="tab-content-app">
@@ -17,9 +19,9 @@ const TelemetryConfiguration = ({ config, handleChange }) => {
                     <Form.Check 
                         type="checkbox" 
                         label="Enabled" 
-                        checked={config.dhcp === "auto"}
+                        checked={enabled}
                         onChange={(e) => { 
-                            handleChange({"name" : "enabled", "value" : e.currentTarget.checked ? "auto" : "manual"})
+                            handleChange({"name" : "enabled", "value" : e.currentTarget.checked ? "true" : "false"})
                         }}  
                         
                         />
@@ -33,9 +35,9 @@ const TelemetryConfiguration = ({ config, handleChange }) => {
                     <Form.Control 
                         type="text" 
                         placeholder='Broker URL / Address'
-                        value={config.telemetry?.broker}
+                        value={config.broker}
                         onChange={(e) => { 
-                            handleChange({"name" : "telemetry.broker", "value" : e.currentTarget.value})
+                            handleChange({"name" : "broker", "value" : e.currentTarget.value})
                         }}  
                         />
                     <Form.Text muted>
@@ -48,9 +50,9 @@ const TelemetryConfiguration = ({ config, handleChange }) => {
                     <Form.Control 
                         type="text" 
                         placeholder='Broker Port' 
-                        value={config.gateway}
+                        value={config.port}
                         onChange={(e) => { 
-                            handleChange({"name" : "telemetry.port", "value" : e.currentTarget.value})
+                            handleChange({"name" : "port", "value" : e.currentTarget.value})
                         }} 
                         />
                     <Form.Text muted>
@@ -66,9 +68,9 @@ const TelemetryConfiguration = ({ config, handleChange }) => {
                     <Form.Control 
                         type="text" 
                         placeholder='Publish Topic'
-                        value={config.telemetry?.pubtopic}
+                        value={config.pubtopic}
                         onChange={(e) => { 
-                            handleChange({"name" : "telemetry.pubtopic", "value" : e.currentTarget.value})
+                            handleChange({"name" : "pubtopic", "value" : e.currentTarget.value})
                         }}  
                         />
                     <Form.Text muted>
@@ -83,9 +85,9 @@ const TelemetryConfiguration = ({ config, handleChange }) => {
                     <Form.Control 
                         type="text" 
                         placeholder='Broker username'
-                        value={config.telemetry?.username}
+                        value={config.username}
                         onChange={(e) => { 
-                            handleChange({"name" : "telemetry.username", "value" : e.currentTarget.value})
+                            handleChange({"name" : "username", "value" : e.currentTarget.value})
                         }}  
                         />
                     <Form.Text muted>
@@ -98,9 +100,9 @@ const TelemetryConfiguration = ({ config, handleChange }) => {
                     <Form.Control 
                         type="text" 
                         placeholder='Broker Password' 
-                        value={config.gateway}
+                        value={config.password}
                         onChange={(e) => { 
-                            handleChange({"name" : "telemetry.password", "value" : e.currentTarget.value})
+                            handleChange({"name" : "password", "value" : e.currentTarget.value})
                         }} 
                         />
                     <Form.Text muted>

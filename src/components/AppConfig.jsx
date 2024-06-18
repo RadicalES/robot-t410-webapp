@@ -1,6 +1,6 @@
-/* (C) 2020, Radical Electronic Systems CC - info@radicalsystems.co.za
+/* (C) 2020-2024, Radical Electronic Systems CC - info@radicalsystems.co.za
  * Written by Jan Zwiegers, jan@radicalsystems.co.za
- * Robot-T410 UX
+ * Robot-T420 UX
  */
 import { Form, Row, Col } from 'react-bootstrap';
 
@@ -16,9 +16,9 @@ const AppConfiguration = ({ config, handleChange }) => {
                     <Form.Control 
                         type="text" 
                         placeholder='Configuration URL'
-                        value={config.serverurl}
+                        value={config.serverUrl}
                         onChange={(e) => { 
-                            handleChange({"name" : "serverurl", "value" : e.currentTarget.value})
+                            handleChange({"name" : "serverUrl", "value" : e.currentTarget.value})
                         }}  
                         />
                     <Form.Text muted>

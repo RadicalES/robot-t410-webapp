@@ -4,18 +4,18 @@
  */
 import { useLoaderData } from 'react-router-dom';
 import useFormData from '../hooks/useFormData';
-import AppConfiguration from '../components/AppConfiguration';
-import { Button, Card, Container, Form } from 'react-bootstrap';
+import { Button, Card, Form } from 'react-bootstrap';
 import Fetcher from '../utils/fetcher';
 import EthernetConfig from '../components/EthernetConfig';
 
 const EthernetPage = () => {
     const data = useLoaderData()
+    const status = data?.data?.status === 'OK' || false
     const [ config, setConfig, handleConfigChange ] = useFormData(data?.data || {
         name: "Wired",
         macAddress: "Waiting...",
-        status: "ENABLED",
-        dhcp: "FALSE",
+        enabled: "false",
+        dhcp: "false",
         ipAddress: "192.168.1.20",
         gateway: "192.168.0.1",
         dns: "192.168.0.1"
@@ -33,7 +33,7 @@ const EthernetPage = () => {
         e.preventDefault();
     }
 
-
+    console.log("ETHERNET STATUS: ", status);
 
     return (
 
@@ -45,8 +45,7 @@ const EthernetPage = () => {
                     <Button variant="outline-primary" type="submit" size="sm" className="me-2">Save</Button>
                     <Button variant="danger" size="sm" className="me-2" onClick={handleReset} >Reset</Button>    
                     <Button variant="warning" size="sm" onClick={handleRestart} className="me-2">Restart Network</Button>
-                </Form>
-                
+                </Form>                
             </Card.Body>
         </Card>
 
@@ -59,7 +58,7 @@ const EthernetPage = () => {
 
 // loader function
 export const ethernetLoader = async () => {
-    const data = await Fetcher('/cgi/getapp.sh', 'GET');
+    const data = await Fetcher('/cgi/getethernet.sh', 'GET');
     return data;
 }
 

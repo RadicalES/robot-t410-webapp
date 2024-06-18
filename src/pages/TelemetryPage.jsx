@@ -2,13 +2,14 @@
 import { useLoaderData } from 'react-router-dom';
 import useFormData from '../hooks/useFormData';
 import { Button, Card, Form } from 'react-bootstrap';
-import TelemetryConfiguration from '../components/TelemetryConfiguration';
+import TelemetryConfig from '../components/TelemetryConfig';
 import Fetcher from '../utils/fetcher';
 
 const TelemetryPage = () => {
-    const TelemetryInfo = useLoaderData()
-    const [ telemetryConfig, setTelemetryConfig, handleConfigChange ] = useFormData(TelemetryInfo?.data || {
-        enabled: "FALSE",
+    const data = useLoaderData()
+    const status = data?.data?.status === 'OK' || false
+    const [ config, setConfig, handleConfigChange ] = useFormData(data?.data || {
+        enabled: "false",
         broker: "Waiting...",
         port: 1883,
         pubtopic: "",
@@ -25,7 +26,7 @@ const TelemetryPage = () => {
             <Card.Body>
                 <Card.Title>Telemetry Settings</Card.Title>
                 <Form noValidate onSubmit={handleSubmit} className='mt-2 mb-2'>
-                    <TelemetryConfiguration config={telemetryConfig} handleChange={handleConfigChange} />            
+                    <TelemetryConfig config={config} handleChange={handleConfigChange} />            
                     <Button variant="outline-primary" type="submit" size="sm" className='me-2'>Save</Button>
                 </Form>
             </Card.Body>
@@ -36,7 +37,7 @@ const TelemetryPage = () => {
 
 // loader function
 export const telemetryLoader = async () => {
-    const data = await Fetcher('/cgi/getapp.sh', 'GET');
+    const data = await Fetcher('/cgi/gettelemetry.sh', 'GET');
     return data;
 }
 
