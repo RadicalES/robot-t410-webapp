@@ -53,7 +53,7 @@ const EthernetConfig = ({ config, handleChange }) => {
                     <Form.Control 
                         type="text" 
                         placeholder='Mac Address'
-                        defaultValue={config.macAddress}
+                        defaultValue={config.macaddr}
                         readOnly
                         />
                 </Form.Group>
@@ -66,9 +66,9 @@ const EthernetConfig = ({ config, handleChange }) => {
                     <Form.Control 
                         type="text" 
                         placeholder='Ip Address'
-                        value={config.ipAddress}
+                        value={config.ipaddr}
                         onChange={(e) => { 
-                            handleChange({"name" : "ipAddress", "value" : e.currentTarget.value})
+                            handleChange({"name" : "ipaddr", "value" : e.currentTarget.value})
                         }}  
                         />
                     <Form.Text muted>

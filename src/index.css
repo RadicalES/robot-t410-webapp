@@ -43,10 +43,14 @@ body {
   padding-bottom: 0px;  
 }
 
+.footer a {
+  color: #743400;
+  text-decoration: none;
+}
+
 .smallText {
 	font-size: 10px;
 }
-
 
 .navbar-brand {  
   color: #ff8037;

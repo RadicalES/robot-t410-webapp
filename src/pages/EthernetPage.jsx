@@ -10,19 +10,42 @@ import EthernetConfig from '../components/EthernetConfig';
 
 const EthernetPage = () => {
     const data = useLoaderData()
-    const status = data?.data?.status === 'OK' || false
+    const status = data?.status === 'OK' || false
     const [ config, setConfig, handleConfigChange ] = useFormData(data?.data || {
         name: "Wired",
-        macAddress: "Waiting...",
+        macaddr: "Waiting...",
         enabled: "false",
         dhcp: "false",
-        ipAddress: "192.168.1.20",
+        ipaddr: "192.168.0.20",
+        netmask: "255.255.255.0",
         gateway: "192.168.0.1",
         dns: "192.168.0.1"
     } )
 
     const handleSubmit = (e) => {
         e.preventDefault();
+
+        const payload = 'enabled=' + config.enabled + 
+        '&ipaddr=' + config.ipaddr + 
+        '&gateway=' + config.gateway + 
+        '&netmask=' + (config.netmask === undefined ? '255.255.255.0' : config.netmask) +
+        '&dhcp=' + config.dhcp + 
+        '&dns=' + config.dns;
+
+        Fetcher('cgi/setethernet.sh', 'POST', payload)
+        .then((resp) => {
+            const { status } = resp;
+
+            if(status === 'OK') {
+                alert("Ethernet settings saved!");
+            }
+            else {
+                alert("Failed to save ethernet settings!");
+            }
+
+        })
+        
+        return true;
     }
 
     const handleReset = (e) => {
@@ -33,7 +56,7 @@ const EthernetPage = () => {
         e.preventDefault();
     }
 
-    console.log("ETHERNET STATUS: ", status);
+    console.log("ETHERNET DATA: ", data);
 
     return (
 

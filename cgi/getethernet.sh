@@ -55,9 +55,9 @@ if [ -n "$DEBUG" ] && [ $DEBUG == "on" ]; then
 fi
 
 if [ -n "$LANIP"  ]; then	
-	LANSETUP="\"macAddress\":\"$LANMAC\",\"enabled\":\"true\",\"name\":\"$LANNAME\",\"uuid\":\"$LANUUID\",\"ipAddress\":\"$LANIP\",\"gateway\":\"$LANGW\",\"dns\":\"$LANDNS\",\"dhcp\":\"$LANDHCP\""
+	LANSETUP="\"macaddr\":\"$LANMAC\",\"enabled\":\"true\",\"name\":\"$LANNAME\",\"uuid\":\"$LANUUID\",\"ipaddr\":\"$LANIP\",\"gateway\":\"$LANGW\",\"dns\":\"$LANDNS\",\"dhcp\":\"$LANDHCP\""
 else
-	LANSETUP="\"name\":\"$LANNAME\",\"enabled\":\"false\",\"macAddress\":\"$LANMAC\""
+	LANSETUP="\"name\":\"$LANNAME\",\"enabled\":\"false\",\"macaddr\":\"$LANMAC\""
 fi
 
 
