@@ -27,14 +27,11 @@ const WirelessPage = () => {
     const DataWs = useRef(null);
 
     const [ apData, setApData] = useState({
-        wifiConfig : {
             accessPoint : "Not set",
-            frequency : ""
-        },
-        wifiLinkStatistics : {
+            frequency : "",
             quality : "",
-            signalLevel : ""
-        }
+            signalLevel : "",
+            bitRate: "",
     });
 
     const connectWifiData = () => {
@@ -57,7 +54,8 @@ const WirelessPage = () => {
         }
 
         DataWs.current.onerror = err => {
-            DataWs.current.close();
+            console.log("WIFI WS ERROR: ", err)
+            //DataWs.current.close();
         }
 
         DataWs.current.onmessage = evt => {
@@ -66,7 +64,7 @@ const WirelessPage = () => {
 
             const d = JSON.parse(evt.data);            
             if ('wifiData' in d) {
-                setApData(d);         
+                setApData(d['wifiData']);         
             }
         }
     }

@@ -2,6 +2,7 @@
  * Written by Jan Zwiegers, jan@radicalsystems.co.za
  * Robot-T410 UX
  */
+import { useEffect, useRef } from 'react';
 import { Form, Row, Col } from 'react-bootstrap';
 
 const WirelessConfig = ({ config, apData, handleChange }) => {
@@ -43,6 +44,7 @@ const WirelessConfig = ({ config, apData, handleChange }) => {
                         type="text" 
                         defaultValue={config.name}
                         readOnly
+            
                         />
                 </Form.Group>               
 
@@ -62,7 +64,7 @@ const WirelessConfig = ({ config, apData, handleChange }) => {
                 <Form.Group as={Col}>
                     <Form.Label>Ip Address</Form.Label>
                     <Form.Control 
-                        type="text" 
+                        type="input" 
                         placeholder='Ip Address'
                         value={config.ipAddress}
                         onChange={(e) => { 
@@ -144,7 +146,7 @@ const WirelessConfig = ({ config, apData, handleChange }) => {
                     <Form.Label>AP MAC Address</Form.Label>
                     <Form.Control 
                         type="text" 
-                        defaultValue={apData.wifiConfig.accessPoint}
+                        defaultValue={apData.accessPoint}
                         readOnly
                         />
                 </Form.Group>               
@@ -152,8 +154,8 @@ const WirelessConfig = ({ config, apData, handleChange }) => {
                 <Form.Group as={Col}>
                     <Form.Label>Bite Rate</Form.Label>
                     <Form.Control 
-                        type="text" 
-                        defaultValue={apData.wifiLinkStatistics.quality}
+                        defaultValue={apData.bitRate}
+                        type="text"                         
                         readOnly
                         />
                 </Form.Group>
@@ -164,7 +166,7 @@ const WirelessConfig = ({ config, apData, handleChange }) => {
                     <Form.Label>Frequency</Form.Label>
                     <Form.Control 
                         type="text" 
-                        defaultValue={apData.wifiConfig.frequency}
+                        defaultValue={apData.frequency}
                         readOnly
                         />
                 </Form.Group>               
@@ -173,7 +175,7 @@ const WirelessConfig = ({ config, apData, handleChange }) => {
                     <Form.Label>Signal Level</Form.Label>
                     <Form.Control 
                         type="text" 
-                        defaultValue={apData.wifiLinkStatistics.signalLevel}
+                        defaultValue={apData.signalLevel}
                         readOnly
                         />
                 </Form.Group>
