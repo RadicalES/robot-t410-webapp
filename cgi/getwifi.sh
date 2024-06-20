@@ -22,6 +22,7 @@ WIFIIF=$(echo $WIFIINFO | awk -F ':' '{print $6}')
 # WLAN SECTION
 WIFIMAC=$(cat /sys/class/net/$WIFIIF/address)
 WIFIDHCP=$(nmcli -g IPV4.METHOD con show $WIFINAME)
+WIFISSID=$(nmcli -g 802-11-wireless.ssid con show $WIFINAME)
 
 if [ -n "$WIFIDHCP" ] && [ $WIFIDHCP == "auto" ]; then
 	WIFICFG=$(ifconfig $WIFIIF | grep 'inet addr')
@@ -59,7 +60,5 @@ else
 	WIFISETUP="\"name\":\"$WIFINAME\",\"enabled\":\"false\",\"macAddress\":\"$WIFIMAC\""
 fi
 
-WIFIAP="{\"SSID\":\"$WIFINAME\"}"
-
 echo -e "Content-Type: application/json\r\n\r\n"
-echo -e "{\"status\":\"OK\",$WIFISETUP,\"wifiap\":$WIFIAP,\"dnsip\":\"$GDNS\",\"ntpip\":\"$GNTP\"}"
+echo -e "{\"status\":\"OK\",$WIFISETUP,\"ssid\":\"$WIFISSID\",\"dnsip\":\"$GDNS\",\"ntpip\":\"$GNTP\"}"
