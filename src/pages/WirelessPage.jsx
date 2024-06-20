@@ -14,13 +14,13 @@ const WirelessPage = () => {
     const status = data?.data?.status === 'OK' || false
     const [ config, setConfig, handleConfigChange ] = useFormData(data?.data || {
         name: "Wireless",
-        macAddress: "Waiting...",
+        macaddr: "Waiting...",
         enabled: "false",
         dhcp: "false",
-        ipAddress: "192.168.1.20",
+        ipaddr: "192.168.1.20",
         gateway: "192.168.0.1",
         dns: "192.168.0.1",
-        SSID: "",
+        ssid: "",
         passkey: ""
     } )
 
@@ -59,9 +59,6 @@ const WirelessPage = () => {
         }
 
         DataWs.current.onmessage = evt => {
-
-            console.log("WRL SKT DATA", evt.data)
-
             const d = JSON.parse(evt.data);            
             if ('wifiData' in d) {
                 setApData(d['wifiData']);         
@@ -81,6 +78,32 @@ const WirelessPage = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+
+        console.log("WIFI SETTINGS: ", config)
+
+        const payload = 'enabled=' + config.enabled + 
+        '&ipaddr=' + config.ipaddr + 
+        '&gateway=' + config.gateway + 
+        '&netmask=' + (config.netmask === undefined ? '255.255.255.0' : config.netmask) +
+        '&dhcp=' + config.dhcp + 
+        '&dns=' + config.dns + 
+        '&ssid=' + config.ssid + 
+        '&passkey=' + config.passkey;
+
+        Fetcher('cgi/setwifi.sh', 'POST', payload)
+        .then((resp) => {
+            const { status } = resp;
+
+            if(status === 'OK') {
+                alert("Wifi settings saved!");
+            }
+            else {
+                alert("Failed to save Wifi settings!");
+            }
+
+        })
+        
+        return true;
     }
 
     const handleReset = (e) => {
@@ -95,7 +118,7 @@ const WirelessPage = () => {
         e.preventDefault();
     }
 
-    console.log("WIFI STATUS: ", status);
+   // console.log("WIFI STATUS: ", status);
 
     return (
 

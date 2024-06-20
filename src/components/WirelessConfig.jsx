@@ -1,13 +1,26 @@
-/* (C) 2020, Radical Electronic Systems CC - info@radicalsystems.co.za
+/* (C) 2020-2024, Radical Electronic Systems CC - info@radicalsystems.co.za
  * Written by Jan Zwiegers, jan@radicalsystems.co.za
- * Robot-T410 UX
+ * Robot-T420 UX
  */
 import { useEffect, useRef } from 'react';
 import { Form, Row, Col } from 'react-bootstrap';
 
 const WirelessConfig = ({ config, apData, handleChange }) => {
 
-    console.log("Wireless config: ", config)
+    const freq = useRef();
+    const mac = useRef();
+    const bitrate = useRef();
+    const signal = useRef();
+
+  //  console.log("Wireless ", config)
+  //  console.log("Ap ", apData)
+
+    useEffect(() => {
+        freq.current.value = apData.frequency + " MHz";
+        mac.current.value = apData.accessPoint;
+        bitrate.current.value = apData.bitRate + " Mbps";
+        signal.current.value = apData.signalLevel + "%";
+    }, [apData])
 
     return (
         <div className="content-body">
@@ -53,7 +66,7 @@ const WirelessConfig = ({ config, apData, handleChange }) => {
                     <Form.Control 
                         type="text" 
                         placeholder='Mac Address'
-                        defaultValue={config.macAddress}
+                        defaultValue={config.macaddr}
                         readOnly
                         />
                 </Form.Group>
@@ -66,7 +79,7 @@ const WirelessConfig = ({ config, apData, handleChange }) => {
                     <Form.Control 
                         type="input" 
                         placeholder='Ip Address'
-                        value={config.ipAddress}
+                        value={config.ipaddr}
                         onChange={(e) => { 
                             handleChange({"name" : "ipAddress", "value" : e.currentTarget.value})
                         }}  
@@ -117,7 +130,7 @@ const WirelessConfig = ({ config, apData, handleChange }) => {
                         placeholder='SSID'
                         value={config.ssid}
                         onChange={(e) => { 
-                            handleChange({"name" : "SSID", "value" : e.currentTarget.value})
+                            handleChange({"name" : "ssid", "value" : e.currentTarget.value})
                         }}  
                         />
                     <Form.Text muted>
@@ -129,8 +142,8 @@ const WirelessConfig = ({ config, apData, handleChange }) => {
                     <Form.Label>Wifi Passkey</Form.Label>
                     <Form.Control 
                         type="password" 
-                        placeholder='passkey'
-                        value={""}
+                        placeholder='password'
+                        value={config.passkey}
                         onChange={(e) => { 
                             handleChange({"name" : "passkey", "value" : e.currentTarget.value})
                         }}  
@@ -145,8 +158,8 @@ const WirelessConfig = ({ config, apData, handleChange }) => {
                 <Form.Group as={Col}>
                     <Form.Label>AP MAC Address</Form.Label>
                     <Form.Control 
-                        type="text" 
-                        defaultValue={apData.accessPoint}
+                        ref={mac}
+                        type="text"
                         readOnly
                         />
                 </Form.Group>               
@@ -154,7 +167,7 @@ const WirelessConfig = ({ config, apData, handleChange }) => {
                 <Form.Group as={Col}>
                     <Form.Label>Bite Rate</Form.Label>
                     <Form.Control 
-                        defaultValue={apData.bitRate}
+                    ref={bitrate}
                         type="text"                         
                         readOnly
                         />
@@ -165,17 +178,17 @@ const WirelessConfig = ({ config, apData, handleChange }) => {
                 <Form.Group as={Col}>
                     <Form.Label>Frequency</Form.Label>
                     <Form.Control 
+                        ref={freq}
                         type="text" 
-                        defaultValue={apData.frequency}
                         readOnly
                         />
                 </Form.Group>               
 
                 <Form.Group as={Col}>
-                    <Form.Label>Signal Level</Form.Label>
+                    <Form.Label>Signal Quality</Form.Label>
                     <Form.Control 
+                        ref={signal}
                         type="text" 
-                        defaultValue={apData.signalLevel}
                         readOnly
                         />
                 </Form.Group>

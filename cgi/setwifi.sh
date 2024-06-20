@@ -11,15 +11,17 @@ APP_DESC="
 # http://www.radicalsystems.co.za info@radicalsystems.co.za\n\n
 "
 
-INTERFACE="eth0"
+INTERFACE="wlan0"
 ENABLED="TRUE"
-IPADDR="192.168.1.20"
+IPADDR="192.168.0.20"
 NETMASK="255.255.255.0"
-GATEWAY="192.168.1.1"
+GATEWAY="192.168.0.1"
 DHCP="auto"
-METRIC="100"
-IFDEV=eth0
-DNS="192.168.1.1"
+METRIC="200"
+IFDEV=wlan0
+DNS="192.168.0.1"
+SSID="ROBOT"
+PASSKEY="NONE"
 NTP=""
 
 IFACECFGFILE=/etc/network/interfaces
@@ -54,6 +56,10 @@ parse_params () {
             DNS=$2
         elif [ $1 == "ntp" ]; then
             NTP=$2
+        elif [ $1 == "ssid" ]; then
+            SSID=$2
+        elif [ $1 == "passkey" ]; then
+            PASSKEY=$2
 
     #    else
     #	echo -en "Unknown tag=$1 value=$2\n" >> interfaces.txt
@@ -63,52 +69,70 @@ parse_params () {
     IFS="$OIFS"
 }
 
-stop_lan () {
+stop_wifi () {
     # nmcli dev disconnect $INTERFACE
     nmcli connection down $INTERFACE
 }
 
-restart_lan () {
+restart_wifi () {
     nmcli dev down $INTERFACE
     nmcli dev up $INTERFACE
 }
 
-configure_lan_static () {
+restart_radio () {
+    nmcli radio wifi off
+    nmcli radio wifi on
+}
+
+configure_wifi_static () {
    nmcli connection add \
-        type ethernet \
+        type wifi \
         con-name $INTERFACE \
         ifname $INTERFACE \
         ipv4.method manual \
         ipv4.address $IPADDR \
         ipv4.gateway $GATEWAY \
         ipv4.dns $DNS \
-        ipv4.route-metric $METRIC /dev/null
+        ipv4.route-metric $METRIC > /dev/null
+
+    nmcli connection modify $INTERFACE \
+        wifi-sec.key-mgmt \
+        wpa-psk \
+        wifi-sec.psk $PASSKEY
 
     nmcli connection up $INTERFACE
 }
 
-configure_lan_dhcp () {
+configure_wifi_dhcp () {
     nmcli connection add \
-        type ethernet \
+        type wifi \
         ifname $INTERFACE \
         con-name $INTERFACE \
         ipv4.method auto \
-        ipv4.route-metric $METRIC > /dev/null
+        ipv4.route-metric $METRIC \
+        ssid $SSID > /dev/null
+
+    nmcli connection modify $INTERFACE \
+        wifi-sec.key-mgmt \
+        wpa-psk \
+        wifi-sec.psk $PASSKEY
 
     nmcli connection up $INTERFACE
 }
 
-modify_lan () {
-    nmcli connection modify $INTERFACE ipv4.dns $DNS
+modify_wifi () {
+  nmcli connection modify $INTERFACE ipv4.dns $DNS
   #  nmcli connection modify $INTERFACE ipv4.address $IPADDR
 }
 
-modify_lan_dhcp () {
+modify_wifi_dhcp () {
     nmcli connection modify $INTERFACE ipv4.method auto
 }
 
-delete_lan () {
-    nmcli connection delete $INTERFACE
+delete_wifis () {
+    nmcli --terse con show | grep wireless | cut -d : -f 1 | \
+        while read name; do nmcli connection delete "$name" > /dev/null; done
+    # nmcli connection delete $INTERFACE
 }
 
 echo -e "Content-Type: application/json\r\n\r\n"
@@ -119,19 +143,19 @@ if [ "$REQUEST_METHOD" = "POST" ]; then
         read -n $CONTENT_LENGTH POST_DATA <&0
         parse_params $POST_DATA
 
-        CONFIG="# Ethernet Settings\nENABLED=$ENABLED\nINTERFACE=$INTERFACE\nDHCP=$DHCP\nIPADDR=$IPADDR\nNETMASK=$NETMASK\nGATEWAY=$GATEWAY\nDNS=$DNS\nMETRIC=$METRIC\n\n"
-        echo -e $APP_DESC > /etc/formfactor/etherconfig
-        echo -e $CONFIG >> /etc/formfactor/etherconfig
+        CONFIG="# Wifi Settings\nENABLED=$ENABLED\nINTERFACE=$INTERFACE\nDHCP=$DHCP\nIPADDR=$IPADDR\nNETMASK=$NETMASK\nGATEWAY=$GATEWAY\nDNS=$DNS\nMETRIC=$METRIC\nSSID=$SSID\nPASSKEY=$PASSKEY\n\n"
+        echo -e $APP_DESC > /etc/formfactor/wificonfig
+        echo -e $CONFIG >> /etc/formfactor/wificonfig
 
-        stop_lan
-        delete_lan
+        stop_wifi
+        delete_wifis
 
         if [ $ENABLED = "true" ]; then
             if [ $DHCP = "auto" ]; then
-                configure_lan_dhcp
+                configure_wifi_dhcp
                 RESPONSE=("$RESPONSE\"DHCP\":\"OK\"")
             else
-                configure_lan_static
+                configure_wifi_static
                 RESPONSE=("$RESPONSE\"DHCP\":\"DISABLED\"")
             fi
         fi

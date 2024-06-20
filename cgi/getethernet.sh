@@ -28,7 +28,7 @@ if [ -n "$LANDHCP" ] && [ $LANDHCP == "auto" ]; then
 	LANCFG=$(ifconfig $LANIF | grep 'inet addr')
 	LANIP=$(echo $LANCFG | awk '/inet addr/ {gsub("addr:", "", $2); print $2}')
 	LANGW=$(ip route | grep $LANIF | awk '/default/ { print $3 }')
-	LANDNS=$(nmcli -g IP4.DNS dev show $LANIF)
+	LANDNS=$(nmcli -g IP4.DNS dev show $LANIF | cut -d \| -f 1)
 	LANMASK=$(echo $LANCFG | awk '/inet addr/ {gsub("Mask:", "", $4); print $4}')
 
 else 

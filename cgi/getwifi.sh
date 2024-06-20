@@ -27,7 +27,7 @@ if [ -n "$WIFIDHCP" ] && [ $WIFIDHCP == "auto" ]; then
 	WIFICFG=$(ifconfig $WIFIIF | grep 'inet addr')
 	WIFIIP=$(echo $WIFICFG | awk '/inet addr/ {gsub("addr:", "", $2); print $2}')
 	WIFIGW=$(ip route | grep $WIFIIF | awk '/default/ { print $3 }')
-	WIFIDNS=$(nmcli -g IP4.DNS dev show $WIFIIF)
+	WIFIDNS=$(nmcli -g IP4.DNS dev show $WIFIIF | cut -d \| -f 1)
 	WIFIMASK=$(echo $WIFICFG | awk '/inet addr/ {gsub("Mask:", "", $4); print $4}')
 
 else 
@@ -54,7 +54,7 @@ if [ -n "$DEBUG" ] && [ $DEBUG == "on" ]; then
 fi
 
 if [ -n "$WIFIIP"  ]; then	
-	WIFISETUP="\"macAddress\":\"$WIFIMAC\",\"enabled\":\"true\",\"name\":\"$WIFIIF\",\"uuid\":\"$WIFIUUID\",\"ssid\":\"$WIFINAME\",\"ipAddress\":\"$WIFIIP\",\"gateway\":\"$WIFIGW\",\"dns\":\"$WIFIDNS\",\"dhcp\":\"$WIFIDHCP\""
+	WIFISETUP="\"macaddr\":\"$WIFIMAC\",\"enabled\":\"true\",\"name\":\"$WIFIIF\",\"uuid\":\"$WIFIUUID\",\"ssid\":\"$WIFINAME\",\"ipaddr\":\"$WIFIIP\",\"gateway\":\"$WIFIGW\",\"dns\":\"$WIFIDNS\",\"dhcp\":\"$WIFIDHCP\""
 else
 	WIFISETUP="\"name\":\"$WIFINAME\",\"enabled\":\"false\",\"macAddress\":\"$WIFIMAC\""
 fi
