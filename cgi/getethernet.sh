@@ -17,7 +17,8 @@ CONNECTIONS=$(nmcli -g NAME,TYPE,ACTIVE,STATE,UUID,DEVICE con show)
 LANINFO=$(echo $CONNECTIONS | tr ' ' '\n' | grep '802-3-ethernet')
 LANNAME=$(echo $LANINFO | awk -F ':' '{print $1}')
 LANUUID=$(echo $LANINFO | awk -F ':' '{print $5}')
-LANIF=$(echo $LANINFO | awk -F ':' '{print $6}')
+#LANIF=$(echo $LANINFO | awk -F ':' '{print $6}')
+LANIF=eth0
 
 
 # ETHERNET SECTION
@@ -55,7 +56,7 @@ if [ -n "$DEBUG" ] && [ $DEBUG == "on" ]; then
 fi
 
 if [ -n "$LANIP"  ]; then	
-	LANSETUP="\"macaddr\":\"$LANMAC\",\"enabled\":\"true\",\"name\":\"$LANNAME\",\"uuid\":\"$LANUUID\",\"ipaddr\":\"$LANIP\",\"gateway\":\"$LANGW\",\"dns\":\"$LANDNS\",\"dhcp\":\"$LANDHCP\""
+	LANSETUP="\"macaddr\":\"$LANMAC\",\"enabled\":\"true\",\"name\":\"eth0\",\"uuid\":\"$LANUUID\",\"ipaddr\":\"$LANIP\",\"gateway\":\"$LANGW\",\"dns\":\"$LANDNS\",\"dhcp\":\"$LANDHCP\""
 else
 	LANSETUP="\"name\":\"$LANNAME\",\"enabled\":\"false\",\"macaddr\":\"$LANMAC\""
 fi

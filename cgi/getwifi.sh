@@ -17,7 +17,8 @@ CONNECTIONS=$(nmcli -g NAME,TYPE,ACTIVE,STATE,UUID,DEVICE con show)
 WIFIINFO=$(echo $CONNECTIONS | tr ' ' '\n' | grep '802-11-wireless')
 WIFINAME=$(echo $WIFIINFO | awk -F ':' '{print $1}')
 WIFIUUID=$(echo $WIFIINFO | awk -F ':' '{print $5}')
-WIFIIF=$(echo $WIFIINFO | awk -F ':' '{print $6}')
+# WIFIIF=$(echo $WIFIINFO | awk -F ':' '{print $6}')
+WIFIIF=wlan0
 
 # WLAN SECTION
 WIFIMAC=$(cat /sys/class/net/$WIFIIF/address)
@@ -54,11 +55,8 @@ if [ -n "$DEBUG" ] && [ $DEBUG == "on" ]; then
 	echo "WIFIMASK: $WIFIMASK"
 fi
 
-if [ -n "$WIFIIP"  ]; then	
-	WIFISETUP="\"macaddr\":\"$WIFIMAC\",\"enabled\":\"true\",\"name\":\"$WIFIIF\",\"uuid\":\"$WIFIUUID\",\"ssid\":\"$WIFINAME\",\"ipaddr\":\"$WIFIIP\",\"gateway\":\"$WIFIGW\",\"dns\":\"$WIFIDNS\",\"dhcp\":\"$WIFIDHCP\""
-else
-	WIFISETUP="\"name\":\"$WIFINAME\",\"enabled\":\"false\",\"macAddress\":\"$WIFIMAC\""
-fi
+
+WIFISETUP="\"macaddr\":\"$WIFIMAC\",\"enabled\":\"true\",\"name\":\"$WIFIIF\",\"uuid\":\"$WIFIUUID\",\"ipaddr\":\"$WIFIIP\",\"gateway\":\"$WIFIGW\",\"dns\":\"$WIFIDNS\",\"dhcp\":\"$WIFIDHCP\""
 
 echo -e "Content-Type: application/json\r\n\r\n"
 echo -e "{\"status\":\"OK\",$WIFISETUP,\"ssid\":\"$WIFISSID\",\"dnsip\":\"$GDNS\",\"ntpip\":\"$GNTP\"}"

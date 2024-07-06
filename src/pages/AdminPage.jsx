@@ -29,6 +29,11 @@ const AdminPage = () => {
         return true;
     }
 
+    const handleReboot = (e) => {
+        e.preventDefault();
+        Fetcher('/cgi/restart.sh', 'POST', {}, null );
+    }
+
     return (
         <Card className="content">
             <Card.Body>
@@ -88,6 +93,7 @@ const AdminPage = () => {
 
                     </div>
                     <Button variant="outline-primary" type="submit" size="sm" className='me-2'>Update</Button>
+                    <Button variant="warning" type="button" onClick={handleReboot} size="sm" className='me-2'>Reboot</Button>
                 </Form>
             </Card.Body>
         </Card>
