@@ -86,6 +86,7 @@ jx = {
 
 				http.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
 				http.setRequestHeader('x-mac', 'AA:BB:CC:00:11:22');
+				http.setRequestHeader('Access-Control-Allow-Origin', '*');
 
 				if((method=="POST") && (param.length > 0)) {
 					http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");

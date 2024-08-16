@@ -37,7 +37,7 @@ window.onload = function() {
 	layer = '';
 	docGetElById("guiversion").innerHTML += "(lib:" + lib_version + ")";
 	loadHome();
-	startStatsInterval();
+	//startStatsInterval();
 }
 
 // General error handler
@@ -453,19 +453,26 @@ function loadContact(evt) {
 //-----------------------------------------------------------------------------
 function loadHome(evt) {
 	layer = 'layerHome';
-	jx.load('getinfo.cgi' , 'json', 'get', null, uuid, "").then((data) => {
-		if("status" in data) {
-			if(data.status == "OK") {
-				this.setFormHomeCB(data)
+	// jx.load('http://10.223.40.91/cgi/getinfo.sh' , 'json', 'get', null, uuid, "").then((data) => {
+	fetch('http://10.223.40.91/cgi/getinfo.sh').then((response) => {
+
+		response.json().then(data => {
+			console.log("DATA:", data)
+
+			if("status" in data) {
+				if(data.status == "OK") {
+					this.setFormHomeCB(data)
+				}
+				else {
+					log(0,'Error: Unknown status!<br/>Result: ' + data.status);
+				}
 			}
 			else {
-				log(0,'Error: Uknown status!<br/>Result: ' + data.status);
+				showMenuLayer(layer);
+				sv('model', 'Firmware error!');
 			}
-		}
-		else {
-			showMenuLayer(layer);
-			sv('model', 'Firmware error!');
-		}
+		})
+		
 	},
 	(error) => {
 		if(error.status == 401) {
@@ -487,11 +494,14 @@ function setFormHomeCB(data) {
 		sv('mandate', id.mandate);
 		sv('hwrev', id.hwrev);
 		sv('firmware', id.firmware);
+		sv('kernel', id.kernel);
 		sv('macaddress', id.macaddress);
 		sv('etherports', id.etherports);
 		sv('serial232ports', id.serial232ports);
 		sv('serial485ports', id.serial485ports);
 		sv('usbslaveports', id.usbslaveports);
+		sv('usbhostports', id.usbhostports);
+		sv('wlanports', id.wlanports);
 		setUptime(id.uptime);
 	}
 	else {
