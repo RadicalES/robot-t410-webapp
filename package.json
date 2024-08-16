@@ -3,11 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "description": "Robot-T410/T420 User Interface",
+  "main": "src/server.js",
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "start": "nodemon ./bin/www",
+    "babel": "./node_modules/.bin/babel"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -24,17 +23,21 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "http://10.223.40.124",
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "bootstrap": "^5.3.3",
-    "jquery": "^3.7.1",
-    "popper.js": "^1.16.1",
-    "react": "^18.3.1",
-    "react-bootstrap": "^2.10.2",
-    "react-router-dom": "^6.23.1",
-    "react-scripts": "^5.0.1",
-    "ws": "^8.17.0"
+    "body-parser": "^1.18.3",
+    "cookie-parser": "~1.4.3",
+    "cors": "^2.8.4",
+    "debug": "~2.6.9",
+    "express": "~4.16.0",
+    "http-errors": "~1.6.2",
+    "moment": "^2.22.2",
+    "morgan": "~1.9.0",
+    "node-event-emitter": "0.0.1",
+    "nodemon": "^2.0.20"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0"
   }
 }

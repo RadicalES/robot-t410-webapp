@@ -1,0 +1,807 @@
+//-----------------------------------------------------------------------------
+// (C) Radical Electronic Systems, info@radicalsystems.co.za
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+// General HTML DOM Functions
+//-----------------------------------------------------------------------------
+var uuid = "loading...";
+var statsInterval = null;
+var rebootTime;
+var rebootTimer
+const lib_version = "1.0.2";
+
+// Element selectors short hand
+// short hand for getting element by Id in the DOM
+function docGetElById(id) {
+	return document.getElementById(id);
+}
+
+// short hand for getting elements by name in the DOM
+function docGetElsByName(nm) {
+	return document.getElementsByName(nm);
+}
+
+// short hand for getting elements by class name in the DOM
+function docGetElsByClsName(nm) {
+	return document.getElementsByClassName(nm);
+}
+
+function docCreateEl(type) {
+	return document.createElement(type);
+}
+
+// Startup
+window.onload = function() {
+	uuid = uuidv4();
+	layer = '';
+	docGetElById("guiversion").innerHTML += "(lib:" + lib_version + ")";
+	loadHome();
+	startStatsInterval();
+}
+
+// General error handler
+// l : level
+// 0 = alert box
+// 1 = info log
+// 2 = warning
+// 3 = error
+// m : message
+function log(l,m) {
+	if(l == 0) {
+		console.log(m);
+		alertError(m);
+	}
+	else if(l == 1) {
+		console.info(m); //Blue color text with icon
+	}
+	else if(l == 2) {
+		console.log(m); //Black color text with no icon
+	}
+	else if(l == 3) {
+		console.debug(m); //Pure black color text
+	}
+	else if(l == 4) {
+		console.warn(m); //Yellow color text with icon
+	}
+	else if(l == 5) {
+		console.error(m); //Red Color text with icon
+	}
+}
+
+// Fetch a value of a HTML Element, find by DOM ID
+function ov(id) {
+	let o = docGetElById(id);
+	if(o) {
+		if(o.type == "checkbox") {
+			//return (obj.checked) ? obj.value : 0;
+			return (o.checked) ? "true" : "false";
+		}
+		else if(o.type == "radio") {
+			return ovrb (id);
+		}
+		else {
+			return docGetElById(id).value;
+		}
+	}
+	else {
+		log(4,"Element undefined: " + id);
+		return "undefined";
+	}
+}
+
+// Fetch HTML Radio Buttons Group check buttons value
+function ovrb(nm) {
+	const oe = docGetElsByName(nm);
+	for(var o of oe) {
+		if(o.checked) return o.value;
+	}	
+}
+
+// Check a HTML Radio Button from a group by name with a specific value
+function srb(id, value) {
+	const oe = docGetElsByName(id);
+	if(oe) {
+		for(var o of oe) {
+			if(o.value == value) {
+				o.checked = true;
+			}
+		}
+	}
+	else {
+		log(4,"Element undefined: " + id);
+	}
+}
+
+// Set a check box, find by HTML DOM ID
+function scb(id, value) {
+	let e = docGetElById(id);
+	if(e) {
+		if(e.type=="checkbox") {
+			if(value==1 || value=="TRUE" || value=="true") {
+				e.checked  = true;
+			}
+			else {
+				e.checked  = false;
+			}
+		}
+		else {
+			log(4,"sb type error: : " + id);
+		}
+	}
+	else {
+		log(4,"sb undefined error: " + id);
+	}
+}
+
+// Set a value of a HTML element with a specific ID
+function sv(id, vl) {
+	let o = docGetElById(id);
+	if(o) {
+		if(o.type == "checkbox") {
+			scb(id, vl);
+		}
+		else if(o.type == "radio") {
+			 srb(id, vl);
+		}
+		else if(o.type == "select") {
+			 sd(id, vk);
+		}
+		else {
+			o.value = vl;
+		}
+	}
+	else {
+		log(4,"sv error: undefined element: " + id);
+	}
+}
+
+// Set value of select input, find by HTML DOM ID
+function ssi(id, value) {
+	const sl = docGetElById(id);
+	if(sl) {
+		for(var s of sl.options) {
+			if(s.value === value) {
+				s.selected = true;
+				break;
+			}
+		}
+	}
+	else {
+		log(4,"Select undefined: " + id);
+	}
+}
+
+function getLibVersion() {
+	return lib_version;
+}
+
+const LAYER_MENUS = {
+	layerHome : 'menuHome',
+	layerApp : 'menuApp',
+	layerContact : 'menuContact',
+	layerAdmin : 'menuAdmin',
+	layerComms : 'menuComms',
+	layerLogin : ''
+}
+
+const LAYER_LOADER = {
+	layerHome : loadHome,
+	layerApp : loadApp,
+	layerContact : loadContact,
+	layerAdmin : loadAdmin,
+	layerComms : loadComms,
+	layerLogin : ''
+}
+
+
+//-----------------------------------------------------------------------------
+// HTML Layer Control
+//-----------------------------------------------------------------------------
+function hidmenu() {
+	const x = docGetElById("navhid");
+	if (x.className.indexOf('w3-show') == -1) {
+		x.classList.add('w3-show');
+	} else { 
+		x.classList.remove('w3-show');
+	}
+}
+
+function hidMnuLyrs() {
+	const lrs = docGetElsByClsName('layer');
+	for(var lr of lrs) {
+		lr.style.display = 'none';
+	}
+	const n = docGetElById('navhdr');
+	const l = n.querySelectorAll('button')
+	for(var i of l) {
+		i.classList.remove('active');
+	}
+}
+
+function showMenuLayer(ln) {
+	hidMnuLyrs();
+	docGetElById(ln).style.display = 'block';
+	const l = LAYER_MENUS[ln];
+	if(l) {
+		docGetElById(LAYER_MENUS[ln]).classList.add('active');
+	}
+}
+
+function loadActiveMenuLayer() {
+	// fix this pointer
+	LAYER_LOADER[layer].call(this);
+}
+
+function showLayerByID(ln) {
+	docGetElById(ln).style.display = 'block';
+}
+
+function hideLayerByID(ln) {
+	docGetElById(ln).style.display = 'none';
+}
+
+function alertInfo(msg) {
+	const i = docGetElById("infoMsg");
+	i.innerHTML = msg;
+	showLayerByID("layerInfoModal");
+}
+
+function alertError(msg) {
+	const i = docGetElById("errorMsg");
+	i.innerHTML = msg;
+	showLayerByID("layerErrModal");
+}
+
+function setUptime(val) {
+	let ut = parseInt(val);
+	ut = Math.round(ut / 60.0);
+	sv('uptime', ut.toString() + " min");
+}
+
+//-----------------------------------------------------------------------------
+// Communications TAB/Layer Functions
+//-----------------------------------------------------------------------------
+function loadComms(evt) {
+	layer = 'layerComms';
+	jx.load('getcommscfg.cgi', 'json', 'get', {}, uuid, "").then((data) =>{
+		if("status" in data) {
+			if (data.status == "OK"){
+				this.setCommsCfgCB(data);
+			}
+			else {
+				log(0,'Unknown result!<br/>Result:' + data.status);
+			}
+		}
+		else {
+			log(0,'Failed to load communications configuration!<br/>Response:' + JSON.stringify(data) );
+		}
+	},
+	(error) => {
+		if(error.status == 401) {
+			loadAuth();
+		}
+		else {
+			log(0,'Error: Uknown error!<br/>Result: ' + error.message);
+		}
+	});
+}
+
+function setNetState (label, s) {
+	docGetElById(label + '_ipa').disabled = s;
+	docGetElById(label + '_nm').disabled = s;
+	docGetElById(label + '_gw').disabled = s;
+	docGetElById(label + '_ntp').disabled = s;
+	docGetElById(label + '_dns').disabled = s;
+}
+
+function setNetwork(label, cfg) {
+	scb(label + '_dhcp', cfg.dhcp);
+	setNetState(label, cfg.dhcp == "TRUE");
+	sv(label + '_mac', cfg.macAddress);
+	sv(label + '_ipa', cfg.ipAddress);
+	sv(label + '_nm', cfg.netmask);
+	sv(label + '_gw', cfg.gateway);
+	sv(label + '_dns', cfg.dns);
+	sv(label + '_ntp', cfg.ntp);
+	sv('net_' + label + '_name', cfg.name);
+	
+	docGetElById('net_' + label + '_name').innerHTML = "Interface: " + cfg.name;
+}
+
+function setSerialPort(type, cfg) {
+	let brs = docGetElById(type + '_baudSelect_port' + cfg.index);	
+
+	if(brs) {
+		while(brs.options.length) {                
+			brs.remove(0);
+		}
+		const bra = cfg.baudrateOptions.split(',');
+		const bros = bra.map((br) => {
+			const bro = docCreateEl("option");
+			bro.text = br;
+			bro.value = br;
+			return bro;
+		})
+		bros.forEach((o) => brs.add(o));
+		brs.value = cfg.baudrate;
+	}
+
+	const el = docGetElById(type + '_name_port' + cfg.index);
+	if(el) {
+		el.innerHTML = "Port: " + cfg.name;
+		scb(type + '_enable_port' + cfg.index, cfg.enabled);
+	}
+}
+
+//HTML Link
+function resetCommsCfg () {
+	jx.load('resetcommscfg.cgi' , 'json', 'get', {}, uuid, "").then((data) => {		
+		if("status" in data) {
+			if (data.status == "OK"){
+				alertInfo('Success: Communications settings reset to default values');
+				loadComms();
+			}
+			else {
+				log(0,'Unknown result!<br/>Result:' + data.status);
+			}
+		}
+		else {
+			log(0,'Failed to reset communications configuration!<br/>Response:' + JSON.stringify(data) );
+		}		
+	},
+	(error) => {
+		if(error.status == 401) {
+			loadAuth();
+		}
+		else {
+			log(0,'Error: Uknown error!<br/>Result: ' + error.message);
+		}
+	});
+}
+
+function setCommsCfgCB(data) {
+	showMenuLayer(layer);
+	
+	if(data.status=="OK") {
+		if("commsConfig" in data) {
+			const cfc = data["commsConfig"];			
+			if("networkConfig" in cfc) {
+				const ncf = cfc["networkConfig"]; // this is an array	
+				ncf.forEach((n) => setNetwork(n.type, n));
+			}
+				
+			if("serialConfig" in cfc) {
+				const sca = cfc["serialConfig"]; // this is an array	
+				sca.forEach((p) => setSerialPort(p.type, p));				
+			}
+		}
+	}
+	else {
+		log(0,'Failed to get communications configuration!\nResult:' + data.status);
+	}
+}
+
+
+function getNetworkSettings(type) {
+	return {
+		type: type, 
+		dhcp: ov(type + '_dhcp'),
+		ipaddress: ov(type + '_ipa'),
+		subnet: ov(type + '_nm'),
+		gateway: ov(type + '_gw'),
+		dns: ov(type + '_dns'),
+		ntp: ov(type + '_ntp')
+	}
+}
+
+function getSerialSettings(type, index) {
+	const brs = docGetElById(type + '_baudSelect_port' + index);
+	const en = ov(type + '_enable_port' + index);
+	
+	return {
+		type: type,
+		index: index,
+		enabled: en,
+		baudrate: brs.value
+	};		
+}
+
+function saveCommsCfg() {
+
+	const cfg = {
+		setCommsConfig : {
+			networkConfig : [
+				getNetworkSettings("wired")
+			],
+			serialConfig : [
+				getSerialSettings("RS232", 0),
+				getSerialSettings("RS232", 1)
+			]
+		}
+	}
+	
+	jx.load('docmd.cgi', 'json', 'post', null, uuid, cfg).then((data) => {
+		if (data.status=='OK') {
+			alertInfo('Success: Saved Communications Configuration!');
+		} else {
+			log(0,'Error: Saving Communications Configuration!\nResult:' + data.status);
+		}
+	},
+	(error) => {
+		if(error.status == 401) {
+			loadAuth();
+		}
+		else {
+			log(0,'Error: Uknown error!<br/>Result: ' + error.message);
+		}
+	});
+	
+	return false;
+}
+
+
+//-----------------------------------------------------------------------------
+// Contact Page TAB/Layer Functions
+//-----------------------------------------------------------------------------
+function loadContact(evt) {
+	showMenuLayer('layerContact');
+}
+
+//-----------------------------------------------------------------------------
+// Home Page TAB/Layer Functions
+//-----------------------------------------------------------------------------
+function loadHome(evt) {
+	layer = 'layerHome';
+	jx.load('getinfo.cgi' , 'json', 'get', null, uuid, "").then((data) => {
+		if("status" in data) {
+			if(data.status == "OK") {
+				this.setFormHomeCB(data)
+			}
+			else {
+				log(0,'Error: Uknown status!<br/>Result: ' + data.status);
+			}
+		}
+		else {
+			showMenuLayer(layer);
+			sv('model', 'Firmware error!');
+		}
+	},
+	(error) => {
+		if(error.status == 401) {
+			loadAuth();
+		}
+		else {
+			log(0,'Error: Uknown error!<br/>Result: ' + error.message);
+		}
+	});
+}
+
+// Update UI with fetched data
+function setFormHomeCB(data) {
+	showMenuLayer(layer);
+	if("deviceInfo" in data) {
+		const id = data['deviceInfo'];
+		sv('model', id.model);
+		sv('serialno', id.serialno);
+		sv('mandate', id.mandate);
+		sv('hwrev', id.hwrev);
+		sv('firmware', id.firmware);
+		sv('macaddress', id.macaddress);
+		sv('etherports', id.etherports);
+		sv('serial232ports', id.serial232ports);
+		sv('serial485ports', id.serial485ports);
+		sv('usbslaveports', id.usbslaveports);
+		setUptime(id.uptime);
+	}
+	else {
+		sv('model', 'Device Error');
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Authentification Page TAB/Layer Functions
+//-----------------------------------------------------------------------------
+function loadAuth() {
+	showMenuLayer('layerLogin');
+	docGetElById('login-password').value = "";
+}
+
+function appLogin() {
+
+	jx.load('auth.cgi', 'json', 'post', {}, uuid, {password: ov('login-password')}).then((data) => {
+		if(data.status == "AUTH") {
+			loadActiveMenuLayer();
+		}
+		else {
+			alertInfo('Failed to login, please enter correct password');
+			sv('login-password', '');
+			loadAuth();
+		}		
+	},
+	(error) => {
+		if(error.status == 401) {
+			loadAuth();
+		}
+		else {
+			log(0,'Error: Uknown error!<br/>Result: ' + error.message);
+		}
+	});
+
+	return false;
+}
+
+//-----------------------------------------------------------------------------
+//Administration Page/Layer Functions
+//-----------------------------------------------------------------------------
+function loadAdmin(evt) {
+	layer = 'layerAdmin';
+	jx.load('getauth.cgi' , 'json', 'get', null, uuid, "").then((data) => {			
+				
+		if("status" in data) {
+ 			if (data.status == "AUTH"){
+				showMenuLayer(layer);
+			}
+			else {
+				log(0,'Unknown result!<br/>Result:' + data.status);
+			}
+		}
+		else {
+			log(0,'Failed to retrieve authorization status!<br/>Response:' + JSON.stringify(data) );
+		}
+		
+	}, (error) => {
+		if(error.status == 401) {
+			loadAuth();
+		}
+		else {
+			log(0,'Error: Uknown error!<br/>Result: ' + error.message);
+		}
+	});
+}
+
+function saveAdmin() {
+	const cfg = {
+		setAdminConfig : {
+			password : ov('current-password'),
+			newPassword: ov('new-password')
+		}
+	}
+		
+	jx.load('docmd.cgi', 'json', 'post', {}, uuid, cfg).then((data) => {
+		if (data.status=='OK') {
+			alertInfo('Success: New password saved!');
+		} else {
+			log(0,'Error: Saving new passowrd!<br/>Result:' + data.status);
+		}
+	},
+	(error) => {
+		if(error.status == 401) {
+			loadAuth();
+		}
+		else {
+			log(0,'Error: Saving new password!<br/>Result: ' + error.message);
+		}
+	});
+
+	return false;
+}
+
+
+//-----------------------------------------------------------------------------
+// Application Page/Layer Functions
+//-----------------------------------------------------------------------------
+function loadApp(evt) {
+	layer = 'layerApp';
+	jx.load('getappcfg.cgi' , 'json', 'get', null, uuid, "").then(
+		(data) => {			
+				
+			if("status" in data) {
+				if (data.status == "OK"){
+					this.setFormAppCB(data);
+				}
+				else {
+					log(0,'Unknown result!<br/>Result:' + data.status);
+				}
+			}
+			else {
+				log(0,'Cannot to retrieve configuration!<br/>Response:' + JSON.stringify(data) );
+			}
+			
+		},
+		(error) => {
+			if(error.status == 401) {
+				loadAuth();
+			}
+			else {
+				log(0,'Cannot to retrieve configuration!<br/>Result: ' + error.message);
+			}
+		});
+}
+
+function resetAppCfg() {
+	layer = 'layerApp'
+	let url = 'resetappcfg.cgi';
+	jx.load(url, 'json', 'get', {}, uuid, "").then((data) => {
+		if("status" in data) {
+			if (data.status == "OK"){
+					alertInfo('Success: Application settings reset to default values');
+					loadApp();
+				}
+				else {
+					log(0,'Unknown result!<br/>Result:' + data.status);
+				}
+			}
+			else {
+				log(0,'Failed to reset application configuration!<br/>Response:' + JSON.stringify(data) );
+			}
+	},
+	(error) => {
+		if(error.status == 401) {
+			loadAuth();
+		}
+		else {
+			log(0,'Error: Failed to reset application configuration!<br/>Result: ' + error.message);
+		}
+	});
+}
+
+function setFormAppCB(data) {
+	showMenuLayer(layer);	
+	if("appConfig" in data) {
+		const cfg = data["appConfig"];		
+		const apes = docGetElById('app_engine');
+		const apss = docGetElById('app_scale');
+		const apcs = docGetElById('app_proto');
+		
+		if(apes) {
+			while(apes.options.length) {                
+				apes.remove(0);
+			}
+			
+			const aea = cfg.engines.split(',');
+			for(var i=0; i<aea.length; i++) {
+				const aeo = docCreateEl("option");
+				const ae = aea[i];
+				aeo.text = ae;
+				aeo.value = ae;
+				apes.add(aeo);
+			}
+		}
+
+		if(apss) {
+			while(apss.options.length) {                
+				apss.remove(0);
+			}
+			
+			const asa = cfg.scales.split(',');
+			for(var i=0; i<asa.length; i++) {
+				const aso = docCreateEl("option");
+				const as = asa[i];
+				aso.text = as;
+				aso.value = as;
+				apss.add(aso);
+			}
+		}
+
+		if(apcs) {
+			while(apcs.options.length) {                
+				apcs.remove(0);
+			}
+			
+			const aca = cfg.protocols.split(',');
+			for(var i=0; i<aca.length; i++) {
+				const aco = docCreateEl("option");
+				const ac = aca[i];
+				aco.text = ac;
+				aco.value = ac;
+				apcs.add(aco);
+			}
+		}
+		
+		sv('app_url', cfg.serverURL);
+		sv('app_engine', cfg.enabled);
+		sv('app_scale', cfg.scale);
+		sv('app_proto', cfg.protocol);
+		sv('app_tag', cfg.tagName);
+		sv('app_lightsOnTime', cfg.lightsOnTime);
+		sv('app_pubMsgs', cfg.pubMessages);
+		sv('app_dropMsgs', cfg.dropMessages);
+	}
+}
+
+function saveAppCfg() {
+	let cfg = {
+		setAppConfig : {
+			enabled : ov('app_engine'),
+			scale : ov('app_scale'),
+			protocol : ov('app_proto'),
+			tagName : ov('app_tag'),
+			lightsOnTime : ov('app_lightsOnTime'),
+			serverURL : ov('app_url')
+		}
+	}
+		
+	jx.load('docmd.cgi', 'json', 'post', {}, uuid, cfg).then(
+		(data) => {
+			if (data.status === 'OK') {
+				alertInfo('Success: Application Configuration Saved!');
+			} else {
+				log(0,'Error: Saving Application Configuration!<br/>Result: ' + data.status);
+			}
+		},
+
+		(error) => {
+			if(error.status == 401) {
+				loadAuth();
+			}
+			else {
+				log(0,'Error: Saving Application Configuration!<br/>Result: ' + error.message);
+			}
+		});
+
+	return false;
+}
+
+//-----------------------------------------------------------------------------
+// Reboot Robot
+//-----------------------------------------------------------------------------
+function deviceReboot () {
+	jx.load('reboot.cgi' , 'json', 'get', {}, uuid, "").then((data) => {
+		if (data.status=='OK') {
+			rebootTime = 10;
+			fwRebootTimer();
+			alertInfo('Success: Device will reboot in ' + rebootTime);
+		} else {
+			log(0,'Error:  Failed to initiate reboot!<br/>Result:' + data.status);
+		}
+	});
+}
+
+// helpers
+function getStats()
+{
+	jx.load('getstats.cgi', 'json', 'get_long', {}, uuid, "").then(
+		(d) => {
+			if (d.status=='OK') {
+				if("statistics" in d) {
+					const s = d['statistics'];
+					setUptime(s.uptime);
+					sv('app_pubMsgs', s.pubMessages);
+					sv('app_dropMsgs', s.dropMessages);
+				}
+			}
+
+			setTimeout(getStats, 2000);
+		}, 
+		(e) => {
+			log(0,'Error while getting statistics!<br/>Result: ' + e.message);
+		}
+	);
+}
+
+function fwRebootTimer() {
+	rebootTime--;
+	alertInfo('Success: Device will reboot in ' + rebootTime);
+
+	if(rebootTime == 0) {
+		clearTimeout(rebootTimer);
+		window.location.reload();
+	}
+	else {
+		rebootTimer = setTimeout(fwRebootTimer, 1000);
+	}
+
+}
+
+function startStatsInterval()
+{
+	setTimeout(getStats, 2000);
+}
+
+// hasher
+function uuidv4() {
+  return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+    (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+  )
+}

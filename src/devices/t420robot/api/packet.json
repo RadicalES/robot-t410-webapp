@@ -1,0 +1,76 @@
+{
+
+    "requestFirmware" : {
+        "MAC" : "AA:BB:CC:00:11:22:33"
+    },
+
+    "requestReset" : {
+        "MAC" : "AA:BB:CC:00:11:22:33"
+    },
+    
+    "requestPing" : {
+        "MAC" : "AA:BB:CC:00:11:22:33"
+    },
+
+    "responsePong" : {
+        "status" : "OK/FAIL",
+        "MAC" : "AA:BB:CC:00:11:22:33"
+    },
+
+    "publishStatus" : {
+        "status" : "READY/!READY",
+        "message" : "SCALE OFFLINE",
+        "MAC" : "AABBCC00112233"
+    },
+    
+    "publishScaleWeight" : {
+        "MAC" : "AABBCC00112233",
+        "id" : "0123456789abcdef",
+        "barcode" : "0123456789abcdef",
+        "weight" : "1100.00",
+        "units" : "kg/NOT-SET",
+        "status" : "NORMAL/OVERRIDE/UNDER/OVER"
+    },
+
+    "requestSetup" : {
+        "MAC" : "AA:BB:CC:00:11:22",
+        "type" : "SOLAS-Scale"
+    },
+
+    "responseSetup" : {
+        "status" : "OK/FAIL",
+        "MAC" : "AA:BB:CC:00:11:22",
+        "lowLimit" : "850",
+        "highLimit" : "1150",
+        "units" : "kg",
+        "name" : "Weighbridge 1",
+        "security" : "OPEN/REQUIRED",
+        "clientURL" : "http://192.168.0.1/scada.cgi"
+    },
+
+    "publishLogon" : {
+        "MAC" : "AA:BB:CC:00:11:22:33",
+        "id" : "0123456789abcdef"
+    },
+
+    "publishLogoff" : {
+        "MAC" : "AA:BB:CC:00:11:22:33"
+    },
+
+    "publishButton" : {
+        "MAC" : "AA:BB:CC:00:11:22:33",
+        "id" : "0123456789abcdef",
+        "value" : "B1/B2/B3/B4/B5"
+    },
+
+    "responseData" : {
+        "status" : "OK/FAIL",
+        "LCD1" : "Palet OK",
+        "LCD2" : "#1001010",
+        "LCD3" : "Weight:",
+        "LCD4" : "1000.0 kg",
+        "Green" : "true/false",
+        "Orange" : "true/false",
+        "Red" : "true/false"
+    }
+}
