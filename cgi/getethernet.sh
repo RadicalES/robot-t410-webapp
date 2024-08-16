@@ -11,7 +11,7 @@
 # nmcli -g GENERAL.STATE dev show wlan0
 # nmcli -g AP dev show
 
-DEBUG=OFF
+DEBUG=ON
 
 CONNECTIONS=$(nmcli -g NAME,TYPE,ACTIVE,STATE,UUID,DEVICE con show)
 LANINFO=$(echo $CONNECTIONS | tr ' ' '\n' | grep '802-3-ethernet')
@@ -42,7 +42,7 @@ else
 
 fi
 
-if [ -n "$DEBUG" ] && [ $DEBUG == "on" ]; then
+if [ -n "$DEBUG" ] && [ $DEBUG == "ON" ]; then
 	echo "LANINFO: $LANINFO"
 	echo "LANIF: $LANIF"
 	echo "LANNAME: $LANNAME"
