@@ -10,6 +10,12 @@ var statsInterval = null;
 var rebootTime;
 var rebootTimer
 const lib_version = "1.0.2";
+const PROXY = "http://10.223.40.91"
+const USE_PROXY = true
+
+function getURL(uri) {
+	return USE_PROXY ? PROXY + "/" + uri : uri
+} 
 
 // Element selectors short hand
 // short hand for getting element by Id in the DOM
@@ -36,6 +42,7 @@ window.onload = function() {
 	uuid = uuidv4();
 	layer = '';
 	docGetElById("guiversion").innerHTML += "(lib:" + lib_version + ")";
+	loadLoading();
 	loadHome();
 	//startStatsInterval();
 }
@@ -191,6 +198,7 @@ const LAYER_LOADER = {
 	layerContact : loadContact,
 	layerAdmin : loadAdmin,
 	layerComms : loadComms,
+	layerLoading : loadLoading,
 	layerLogin : ''
 }
 
@@ -257,6 +265,14 @@ function setUptime(val) {
 	let ut = parseInt(val);
 	ut = Math.round(ut / 60.0);
 	sv('uptime', ut.toString() + " min");
+}
+
+//-----------------------------------------------------------------------------
+// Loading TAB/Layer Functions
+//-----------------------------------------------------------------------------
+function loadLoading(evt) {
+	layer = 'layerLoading';
+	showMenuLayer('layerLoading');
 }
 
 //-----------------------------------------------------------------------------
@@ -453,35 +469,29 @@ function loadContact(evt) {
 //-----------------------------------------------------------------------------
 function loadHome(evt) {
 	layer = 'layerHome';
-	// jx.load('http://10.223.40.91/cgi/getinfo.sh' , 'json', 'get', null, uuid, "").then((data) => {
-	fetch('http://10.223.40.91/cgi/getinfo.sh').then((response) => {
-
-		response.json().then(data => {
-			console.log("DATA:", data)
-
-			if("status" in data) {
-				if(data.status == "OK") {
-					this.setFormHomeCB(data)
-				}
-				else {
-					log(0,'Error: Unknown status!<br/>Result: ' + data.status);
-				}
+	fetch(getURL('cgi/getinfo.sh')).then(response => {
+		console.log("response: ", response)
+		if (!response.ok) {
+			throw new Error(`HTTP error, status = ${response.status}`);
+		}
+		
+		return response.json();
+	}).then(data => {
+		if("status" in data) {
+			if(data.status == "OK") {
+				this.setFormHomeCB(data)
 			}
 			else {
-				showMenuLayer(layer);
-				sv('model', 'Firmware error!');
+				log(0,'Error: Unknown status!<br/>Result: ' + data.status);
 			}
-		})
-		
-	},
-	(error) => {
-		if(error.status == 401) {
-			loadAuth();
 		}
 		else {
-			log(0,'Error: Uknown error!<br/>Result: ' + error.message);
+			showMenuLayer(layer);
+			sv('model', 'Firmware error!');
 		}
-	});
+	}).catch(error => {
+		log(0,'Error: Unknown status!<br/>Result: ' + error.message);
+	})	
 }
 
 // Update UI with fetched data
@@ -603,30 +613,31 @@ function saveAdmin() {
 //-----------------------------------------------------------------------------
 function loadApp(evt) {
 	layer = 'layerApp';
-	jx.load('getappcfg.cgi' , 'json', 'get', null, uuid, "").then(
-		(data) => {			
-				
-			if("status" in data) {
-				if (data.status == "OK"){
-					this.setFormAppCB(data);
-				}
-				else {
-					log(0,'Unknown result!<br/>Result:' + data.status);
-				}
+
+	fetch(getURL('cgi/getapp.sh')).then(response => {
+		console.log("response: ", response)
+		if (!response.ok) {
+			throw new Error(`HTTP error, status = ${response.status}`);
+		}
+		
+		return response.json();
+	}).then(data => {
+		console.log("data: ", data)
+		if("status" in data) {
+			if(data.status == "OK") {
+				this.setFormAppCB(data);
 			}
 			else {
-				log(0,'Cannot to retrieve configuration!<br/>Response:' + JSON.stringify(data) );
+				log(0,'Error: Unknown status!<br/>Result: ' + data.status);
 			}
-			
-		},
-		(error) => {
-			if(error.status == 401) {
-				loadAuth();
-			}
-			else {
-				log(0,'Cannot to retrieve configuration!<br/>Result: ' + error.message);
-			}
-		});
+		}
+		else {
+			showMenuLayer(layer);
+			sv('model', 'Firmware error!');
+		}
+	}).catch(error => {
+		log(0,'Error: Unknown status!<br/>Result: ' + error.message);
+	})
 }
 
 function resetAppCfg() {
@@ -714,9 +725,7 @@ function setFormAppCB(data) {
 		sv('app_scale', cfg.scale);
 		sv('app_proto', cfg.protocol);
 		sv('app_tag', cfg.tagName);
-		sv('app_lightsOnTime', cfg.lightsOnTime);
-		sv('app_pubMsgs', cfg.pubMessages);
-		sv('app_dropMsgs', cfg.dropMessages);
+		
 	}
 }
 

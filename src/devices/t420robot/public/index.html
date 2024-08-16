@@ -43,6 +43,14 @@ Robot-T420 Web Application
 <main class="w3-container">
 	
 	<div class="w3-light-grey w3-border page">
+
+		<div id="layerLoading" class="layer">
+			<div class="w3-modal-content w3-round" style="padding: 1em 0; width:400px;">
+				<div class="w3-container">
+					<strong><p style="font-size: 1.4em;">Loading...</p></strong>
+				</div>
+			</div>
+		</div>
 	
 		<div id="layerErrModal" class="w3-modal">
 			<div class="w3-modal-content w3-red w3-round" style="padding: 1em 0; width:400px;">
@@ -331,12 +339,7 @@ Robot-T420 Web Application
 							<input class="w3-input input-long" id="app_url" />
 						</div>
 					</div>
-
-				
-					<h4>Statistics</h4>			
-					<label class="is-label">Published Messages</label> <input class="roTextBox" id="app_pubMsgs" value="0" readonly="readonly" /><p></p>
-					<label class="is-label">Dropped Messages</label> <input class="roTextBox" id="app_dropMsgs" value="0" readonly="readonly" /><p></p>
-				
+					
 				</div>
 			
 				<input class="w3-button w3-round w3-red" type="button" value="Reset Settings" onclick="resetAppCfg()" />
