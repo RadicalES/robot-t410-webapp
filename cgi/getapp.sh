@@ -10,7 +10,10 @@
 CFGFILE=/etc/formfactor/appconfig
 
 SERVER_CONFIG_URL="http://www.radicalsystems.co.za"
-TAG_NAME="NOT SET"
+API_PROTOCOL='ROBOT-API'
+APP_ENGINE='TERMINAL'
+SCALE_TYPE='RICHTER'
+TAG_NAME='NOT-SET'
 
 if [ -e $CFGFILE ]; then
   . $CFGFILE
@@ -22,11 +25,11 @@ APP_CFG="{
   \"tagName\":\"$TAG_NAME\",
   \"serverURL\":\"$SERVER_CONFIG_URL\",
   \"engines\":\"TERMINAL,FORKLIFT\",
-  \"enabled\":\"FORKLIFT\",
+  \"engine\":\"$APP_ENGINE\",
   \"protocols\":\"ROBOT-API,FARSOFT-API\",
-  \"protocol\":\"FARSOFT-API\",
+  \"protocol\":\"$API_PROTOCOL\",
   \"scales\":\"RICHTER\",
-  \"scale\":\"RICHTER\"
+  \"scale\":\"$SCALE_TYPE\"
   
   }"
 

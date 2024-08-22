@@ -205,41 +205,83 @@ Robot-T420 Web Application
 				<div class="w3-card" style="padding: 1em; margin-bottom: 2em;">
 					<legend>Network Interfaces</legend>
 					
-					<h3 id="net_wired_name"></h3>
-					<div class="w3-row">
-						<div class="w3-col l6 m6 irow">
-							<input class="w3-check small-check" type="checkbox" id="wired_dhcp" value="1" onclick="setNetState('wired',this.checked);" />
-							<label>DHCP</label>
+					<div id="layerComms_wired" style="margin-top: 1em;">
+						<h3 id="net_wired_name"></h3>
+						<div class="w3-row">
+							<div class="w3-col l6 m6 irow">
+								<input class="w3-check small-check" type="checkbox" id="wired_dhcp" value="1" onclick="setNetState('wired',this.checked);" />
+								<label>DHCP</label>
+							</div>
+						</div>
+						<div class="w3-row">
+							<div class="w3-col l6 m6 irow">
+								<label>MAC Address:</label> 
+								<input class="w3-input input-short" name="wired_mac" disabled id="wired_mac" value="" />
+							</div>
+							<div class="w3-col l6 m6 irow">
+								<label>IP Address:</label> 
+								<input class="w3-input input-short" id="wired_ipa" value="" />
+							</div>
+						</div>
+						<div class="w3-row">
+							<div class="w3-col l6 m6 irow">
+								<label>Subnet Mask:</label>
+								<input class="w3-input input-short"  id="wired_nm" value="" />
+							</div>
+							<div class="w3-col l6 m6 irow">
+								<label>Default Gateway:</label>
+								<input class="w3-input input-short" id="wired_gw" value="" />
+							</div>
+						</div>
+						<div class="w3-row">
+							<div class="w3-col l6 m6 irow">
+								<label>DNS Server:</label>
+								<input class="w3-input input-short" id="wired_dns" value="" />
+							</div>
+							<div class="w3-col l6 m6 irow">
+								<label>NTP Server:</label>
+								<input class="w3-input input-short" id="wired_ntp" value="" />
+							</div>
 						</div>
 					</div>
-					<div class="w3-row">
-						<div class="w3-col l6 m6 irow">
-							<label>MAC Address:</label> 
-							<input class="w3-input input-short" name="wired_mac" disabled id="wired_mac" value="" />
+
+					<div id="layerComms_wireless" style="margin-top: 1em;">
+						<h3 id="net_wireless_name"></h3>
+						<div class="w3-row">
+							<div class="w3-col l6 m6 irow">
+								<input class="w3-check small-check" type="checkbox" id="wireless_dhcp" value="1" onclick="setNetState('wired',this.checked);" />
+								<label>DHCP</label>
+							</div>
 						</div>
-						<div class="w3-col l6 m6 irow">
-							<label>IP Address:</label> 
-							<input class="w3-input input-short" id="wired_ipa" value="" />
+						<div class="w3-row">
+							<div class="w3-col l6 m6 irow">
+								<label>MAC Address:</label> 
+								<input class="w3-input input-short" name="wireless_mac" disabled id="wireless_mac" value="" />
+							</div>
+							<div class="w3-col l6 m6 irow">
+								<label>IP Address:</label> 
+								<input class="w3-input input-short" id="wireless_ipa" value="" />
+							</div>
 						</div>
-					</div>
-					<div class="w3-row">
-						<div class="w3-col l6 m6 irow">
-							<label>Subnet Mask:</label>
-							<input class="w3-input input-short"  id="wired_nm" value="" />
+						<div class="w3-row">
+							<div class="w3-col l6 m6 irow">
+								<label>Subnet Mask:</label>
+								<input class="w3-input input-short"  id="wireless_nm" value="" />
+							</div>
+							<div class="w3-col l6 m6 irow">
+								<label>Default Gateway:</label>
+								<input class="w3-input input-short" id="wireless_gw" value="" />
+							</div>
 						</div>
-						<div class="w3-col l6 m6 irow">
-							<label>Default Gateway:</label>
-							<input class="w3-input input-short" id="wired_gw" value="" />
-						</div>
-					</div>
-					<div class="w3-row">
-						<div class="w3-col l6 m6 irow">
-							<label>DNS Server:</label>
-							<input class="w3-input input-short" id="wired_dns" value="" />
-						</div>
-						<div class="w3-col l6 m6 irow">
-							<label>NTP Server:</label>
-							<input class="w3-input input-short" id="wired_ntp" value="" />
+						<div class="w3-row">
+							<div class="w3-col l6 m6 irow">
+								<label>DNS Server:</label>
+								<input class="w3-input input-short" id="wireless_dns" value="" />
+							</div>
+							<div class="w3-col l6 m6 irow">
+								<label>NTP Server:</label>
+								<input class="w3-input input-short" id="wireless_ntp" value="" />
+							</div>
 						</div>
 					</div>
 				</div>
@@ -339,7 +381,7 @@ Robot-T420 Web Application
 							<input class="w3-input input-long" id="app_url" />
 						</div>
 					</div>
-					
+
 				</div>
 			
 				<input class="w3-button w3-round w3-red" type="button" value="Reset Settings" onclick="resetAppCfg()" />

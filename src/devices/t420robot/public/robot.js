@@ -9,8 +9,8 @@ var uuid = "loading...";
 var statsInterval = null;
 var rebootTime;
 var rebootTimer
-const lib_version = "1.0.2";
-const PROXY = "http://10.223.40.91"
+const lib_version = "1.0.3";
+const PROXY = "http://10.223.40.98"
 const USE_PROXY = true
 
 function getURL(uri) {
@@ -35,6 +35,85 @@ function docGetElsByClsName(nm) {
 
 function docCreateEl(type) {
 	return document.createElement(type);
+}
+
+function getData(cgi, callback) {
+	const params = {
+		cache: 'no-cache',
+		credentials: 'same-origin',
+		headers: {
+			'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Credentials':true,
+            'Access-Control-Allow-Methods':'GET'
+		}
+	}
+	fetch(getURL('cgi/'+cgi), params).then(response => {
+		console.log("get response: ", response)
+		if (!response.ok) {
+			throw new Error(`HTTP error, status = ${response.status}`);
+		}
+		
+		return response.json();
+	}).then(data => {
+		console.log("data: ", data)
+		if("status" in data) {
+			if(data.status == "OK") {
+				callback(data);
+			}
+			else {
+				log(0,'Error: Unknown status!<br/>Result: ' + data.status);
+			}
+		}
+		else {
+			log(0,'Error: data error!<br/>Result: ' + data.message);;
+		}
+	}).catch(error => {
+		log(0,'Error: Unknown status!<br/>Result: ' + error.message);
+	})
+}
+
+function setData(cgi, data, callback) {
+	const headers = new Headers();
+	headers.append('Content-Type', 'text/plain');
+	// Note: Custom headers causes OPTIONS request which is not supported by Hiawatha
+	// headers.append('Access-Control-Allow-Origin', 'http://localhost:8081');
+	// headers.append('Access-Control-Allow-Headers', 'x-requested-with, Content-Type, origin, authorization, accept, client-security-token');
+	// headers.append('Access-Control-Allow-Credentials', true);
+	// headers.append('Access-Control-Allow-Methods', 'POST, OPTIONS');
+
+	const params = {
+		method: 'POST',
+		cache: 'no-cache',
+		mode: 'cors',
+		body: data,
+		headers: headers
+	}
+
+	fetch(getURL('cgi/'+cgi), params).then(response => {
+		console.log("post response: ", response)
+		if (!response.ok) {
+			throw new Error(`HTTP error, status = ${response.status}`);
+		}
+
+		const contentType = response.headers.get('Content-Type');
+
+		if (!contentType || !contentType.includes("application/json")) {
+			throw new TypeError(`JSON data expected, got ${contentType}`);
+		}
+		
+		return response.json();
+	}).then(data => {
+		console.log("data: ", data)
+		if("status" in data) {
+			callback(data);
+		}
+		else {
+			log(0,'Error: data error!<br/>Result: ' + data.message);;
+		}
+	}).catch(error => {
+		log(0,'Error: Unknown status!<br/>Result: ' + error.message);
+	})
 }
 
 // Startup
@@ -280,27 +359,8 @@ function loadLoading(evt) {
 //-----------------------------------------------------------------------------
 function loadComms(evt) {
 	layer = 'layerComms';
-	jx.load('getcommscfg.cgi', 'json', 'get', {}, uuid, "").then((data) =>{
-		if("status" in data) {
-			if (data.status == "OK"){
-				this.setCommsCfgCB(data);
-			}
-			else {
-				log(0,'Unknown result!<br/>Result:' + data.status);
-			}
-		}
-		else {
-			log(0,'Failed to load communications configuration!<br/>Response:' + JSON.stringify(data) );
-		}
-	},
-	(error) => {
-		if(error.status == 401) {
-			loadAuth();
-		}
-		else {
-			log(0,'Error: Uknown error!<br/>Result: ' + error.message);
-		}
-	});
+	loadLoading();
+	getData('getcomms.sh', this.setCommsCfgCB);
 }
 
 function setNetState (label, s) {
@@ -312,8 +372,9 @@ function setNetState (label, s) {
 }
 
 function setNetwork(label, cfg) {
+	showLayerByID('layerComms_' + label)
 	scb(label + '_dhcp', cfg.dhcp);
-	setNetState(label, cfg.dhcp == "TRUE");
+	setNetState(label, cfg.dhcp == "auto");
 	sv(label + '_mac', cfg.macAddress);
 	sv(label + '_ipa', cfg.ipAddress);
 	sv(label + '_nm', cfg.netmask);
@@ -377,7 +438,9 @@ function resetCommsCfg () {
 }
 
 function setCommsCfgCB(data) {
-	showMenuLayer(layer);
+	showMenuLayer('layerComms');
+	hideLayerByID('layerComms_wired')
+	hideLayerByID('layerComms_wireless')
 	
 	if(data.status=="OK") {
 		if("commsConfig" in data) {
@@ -401,13 +464,13 @@ function setCommsCfgCB(data) {
 
 function getNetworkSettings(type) {
 	return {
-		type: type, 
-		dhcp: ov(type + '_dhcp'),
-		ipaddress: ov(type + '_ipa'),
-		subnet: ov(type + '_nm'),
-		gateway: ov(type + '_gw'),
-		dns: ov(type + '_dns'),
-		ntp: ov(type + '_ntp')
+		[type + '_' + enable]: true,
+		[type + '_' + dhcp]: ov(type + '_dhcp'),
+		[type + '_' + ipaddress]: ov(type + '_ipa'),
+		[type + '_' + subnet]: ov(type + '_nm'),
+		[type + '_' + gateway]: ov(type + '_gw'),
+		[type + '_' + dns]: ov(type + '_dns'),
+		[type + '_' + ntp]: ov(type + '_ntp')
 	}
 }
 
@@ -436,6 +499,8 @@ function saveCommsCfg() {
 			]
 		}
 	}
+
+	setData('')
 	
 	jx.load('docmd.cgi', 'json', 'post', null, uuid, cfg).then((data) => {
 		if (data.status=='OK') {
@@ -556,28 +621,7 @@ function appLogin() {
 //-----------------------------------------------------------------------------
 function loadAdmin(evt) {
 	layer = 'layerAdmin';
-	jx.load('getauth.cgi' , 'json', 'get', null, uuid, "").then((data) => {			
-				
-		if("status" in data) {
- 			if (data.status == "AUTH"){
-				showMenuLayer(layer);
-			}
-			else {
-				log(0,'Unknown result!<br/>Result:' + data.status);
-			}
-		}
-		else {
-			log(0,'Failed to retrieve authorization status!<br/>Response:' + JSON.stringify(data) );
-		}
-		
-	}, (error) => {
-		if(error.status == 401) {
-			loadAuth();
-		}
-		else {
-			log(0,'Error: Uknown error!<br/>Result: ' + error.message);
-		}
-	});
+	showMenuLayer(layer);
 }
 
 function saveAdmin() {
@@ -721,7 +765,7 @@ function setFormAppCB(data) {
 		}
 		
 		sv('app_url', cfg.serverURL);
-		sv('app_engine', cfg.enabled);
+		sv('app_engine', cfg.engine);
 		sv('app_scale', cfg.scale);
 		sv('app_proto', cfg.protocol);
 		sv('app_tag', cfg.tagName);
@@ -730,34 +774,21 @@ function setFormAppCB(data) {
 }
 
 function saveAppCfg() {
-	let cfg = {
-		setAppConfig : {
-			enabled : ov('app_engine'),
-			scale : ov('app_scale'),
-			protocol : ov('app_proto'),
-			tagName : ov('app_tag'),
-			lightsOnTime : ov('app_lightsOnTime'),
-			serverURL : ov('app_url')
-		}
-	}
-		
-	jx.load('docmd.cgi', 'json', 'post', {}, uuid, cfg).then(
-		(data) => {
-			if (data.status === 'OK') {
-				alertInfo('Success: Application Configuration Saved!');
-			} else {
-				log(0,'Error: Saving Application Configuration!<br/>Result: ' + data.status);
-			}
-		},
 
-		(error) => {
-			if(error.status == 401) {
-				loadAuth();
-			}
-			else {
-				log(0,'Error: Saving Application Configuration!<br/>Result: ' + error.message);
-			}
-		});
+	const payload = 
+	'serverUrl=' + ov('app_url') +
+	'&engine=' + ov('app_engine') +
+	'&scale=' + ov('app_scale') +
+	'&protocol=' + ov('app_proto') +
+	'&tagName=' + ov('app_tag');
+
+	setData('setapp.sh', payload, (data) => {
+		if (data.status === 'OK') {
+			alertInfo('Success: Application Configuration Saved!');
+		} else {
+			log(0,'Error: Saving Application Configuration!<br/>Result: ' + data.status);
+		}
+	})
 
 	return false;
 }

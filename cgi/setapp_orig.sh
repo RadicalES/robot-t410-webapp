@@ -13,10 +13,6 @@ APP_DESC="
 
 # Default Config Server URL
 SERVER_CONFIG_URL="http://127.0.0.1"
-API_PROTOCOL='ROBOT-API'
-APP_ENGINE='TERMINAL'
-SCALE_TYPE='RICHTER'
-TAG_NAME='NOT-SET'
 
 parse_params () {
   PARAM=$1
@@ -41,18 +37,6 @@ parse_params () {
       if [ $1 == "serverUrl" ]; then
         SERVER_CONFIG_URL=$2;
 
-      elif [ $1 == "protocol" ]; then
-        API_PROTOCOL=$2;
-
-      elif [ $1 == "tagName" ]; then
-        TAG_NAME=$2;
-
-      elif [ $1 == "scale" ]; then
-        SCALE_TYPE=$2;
-
-      elif [ $1 == "engine" ]; then
-        APP_ENGINE=$2;
-
   #    else
   #	echo -en "Unknown tag=$1 value=$2\n" >> interfaces.txt
       fi
@@ -63,15 +47,10 @@ parse_params () {
 
 configure_app () {
 
-  APP_CFG="# Application Settings\n\n
-    SERVER_CONFIG_URL=$SERVER_CONFIG_URL\n
-    API_PROTOCOL=$API_PROTOCOL\n
-    APP_ENGINE=$APP_ENGINE\n
-    SCALE_TYPE=$SCALE_TYPE\n
-    TAG_NAME=$TAG_NAME\n
-    "
-  echo -e "$APP_DESC" > /etc/formfactor/appconfig;
-  echo -e $APP_CFG >> /etc/formfactor/appconfig
+  APP_CFG="# Application Settings\nSERVER_CONFIG_URL=$SERVER_CONFIG_URL\n\n"
+
+  echo -e $APP_DESC > /etc/formfactor/appconfig
+  echo -e $APP_CFG > /etc/formfactor/appconfig
 }
 
 echo -e "Access-Control-Allow-Origin: *\r\nContent-Type: application/json\r\n\r\n"
