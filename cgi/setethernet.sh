@@ -7,7 +7,7 @@
 # Written by Jan Zwiegers, jan@radicalsystems.co.za
 
 APP_DESC="
-# Robot-T420 Application Settings\n# (C) 2017-2024, Radical Electronic Systems\n\
+# Robot-T420 Ethernet Settings\n# (C) 2017-2024, Radical Electronic Systems\n\
 # http://www.radicalsystems.co.za info@radicalsystems.co.za\n\n
 "
 
@@ -111,8 +111,7 @@ delete_lan () {
     nmcli connection delete $INTERFACE
 }
 
-echo -e "Content-Type: application/json\r\n\r\n"
-RESPONSE="{"
+echo -e "Access-Control-Allow-Origin: *\r\nContent-Type: application/json\r\n\r\n"
 
 if [ "$REQUEST_METHOD" = "POST" ]; then
     if [ "$CONTENT_LENGTH" -gt 0 ]; then
@@ -123,26 +122,24 @@ if [ "$REQUEST_METHOD" = "POST" ]; then
         echo -e $APP_DESC > /etc/formfactor/etherconfig
         echo -e $CONFIG >> /etc/formfactor/etherconfig
 
-        stop_lan
-        delete_lan
+        # stop_lan
+        # delete_lan
 
-        if [ $ENABLED = "true" ]; then
-            if [ $DHCP = "auto" ]; then
-                configure_lan_dhcp
-                RESPONSE=("$RESPONSE\"DHCP\":\"OK\"")
-            else
-                configure_lan_static
-                RESPONSE=("$RESPONSE\"DHCP\":\"DISABLED\"")
-            fi
-        fi
+        # if [ $ENABLED = "true" ]; then
+        #     if [ $DHCP = "auto" ]; then
+        #         configure_lan_dhcp
+        #         RESPONSE=("$RESPONSE\"DHCP\":\"OK\"")
+        #     else
+        #         configure_lan_static
+        #         RESPONSE=("$RESPONSE\"DHCP\":\"DISABLED\"")
+        #     fi
+        # fi
 
-        RESPONSE=("$RESPONSE,\"status\":\"OK\"")
+        echo -e "{\"status\":\"OK\"}"
     else 
         echo -e "{\"status\":\"FAILED\", \"message\":\"no data in body\"}"
     fi
 else
-    RESPONSE=("$RESPONSE\"status\":\"FAILED\", \"message\":\"not a post\"")
+    echo -e "{\"status\":\"FAILED\", \"message\":\"not a post\"}"
 fi
 
-RESPONSE=("$RESPONSE}")
-echo -e $RESPONSE

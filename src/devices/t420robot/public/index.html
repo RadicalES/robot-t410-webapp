@@ -11,7 +11,6 @@ Robot-T420 Web Application
 	<link rel="icon" href="favicon.png" type="image/png" />
 	<link rel="stylesheet" href="w3.css" type="text/css">
 	<link href="site.css" rel="stylesheet" type="text/css" />
-	<script type="text/javascript" src="jx.js"></script>
 	<script type="text/javascript" src="robot.js"></script>
 	<script type="text/javascript" src="validation.js"></script>
 </head>
@@ -200,8 +199,7 @@ Robot-T420 Web Application
 		</div>
 
 		<div id="layerComms" class="layer">
-			<form name="formComms" action="" method="post" onsubmit="return saveCommsCfg()">
-
+			<form id="formComms" action="" method="post" onsubmit="return saveCommsCfg()">
 				<div class="w3-card" style="padding: 1em; margin-bottom: 2em;">
 					<legend>Network Interfaces</legend>
 					
@@ -249,7 +247,7 @@ Robot-T420 Web Application
 						<h3 id="net_wireless_name"></h3>
 						<div class="w3-row">
 							<div class="w3-col l6 m6 irow">
-								<input class="w3-check small-check" type="checkbox" id="wireless_dhcp" value="1" onclick="setNetState('wired',this.checked);" />
+								<input class="w3-check small-check" type="checkbox" id="wireless_dhcp" value="1" onclick="setNetState('wireless',this.checked);" />
 								<label>DHCP</label>
 							</div>
 						</div>
@@ -281,6 +279,16 @@ Robot-T420 Web Application
 							<div class="w3-col l6 m6 irow">
 								<label>NTP Server:</label>
 								<input class="w3-input input-short" id="wireless_ntp" value="" />
+							</div>
+						</div>
+						<div class="w3-row">
+							<div class="w3-col l6 m6 irow">
+								<label>AP SSID:</label>
+								<input class="w3-input input-short" id="wireless_ssid" value="" />
+							</div>
+							<div class="w3-col l6 m6 irow">
+								<label>Passkey:</label>
+								<input class="w3-input input-short" type="password" id="wireless_passkey" value="" />
 							</div>
 						</div>
 					</div>

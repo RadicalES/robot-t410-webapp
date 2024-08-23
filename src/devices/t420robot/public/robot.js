@@ -462,61 +462,75 @@ function setCommsCfgCB(data) {
 }
 
 
-function getNetworkSettings(type) {
-	return {
-		[type + '_' + enable]: true,
-		[type + '_' + dhcp]: ov(type + '_dhcp'),
-		[type + '_' + ipaddress]: ov(type + '_ipa'),
-		[type + '_' + subnet]: ov(type + '_nm'),
-		[type + '_' + gateway]: ov(type + '_gw'),
-		[type + '_' + dns]: ov(type + '_dns'),
-		[type + '_' + ntp]: ov(type + '_ntp')
-	}
+function getWiredSettings() {
+	return 'enabled=true' + 
+		'&dhcp=' + (ov('wired_dhcp') === 'true' ? 'auto' : 'manual') +
+		'&ipaddr=' + ov('wired_ipa') + 
+		'&netmask=' + ov('wired_nm') +
+		'&gateway=' + ov('wired_gw') +
+		'&dns=' +  ov('wired_dns') +
+		'&ntp=' + ov('wired_ntp')
 }
 
-function getSerialSettings(type, index) {
-	const brs = docGetElById(type + '_baudSelect_port' + index);
-	const en = ov(type + '_enable_port' + index);
+function getWirelessSettings() {
+	return 'enabled=true' + 
+		'&dhcp=' + (ov('wireless_dhcp') === 'true' ? 'auto' : 'manual') +
+		'&ipaddr=' + ov('wireless_ipa') + 
+		'&netmask=' + ov('wireless_nm') +
+		'&gateway=' + ov('wireless_gw') +
+		'&dns=' +  ov('wireless_dns') +
+		'&ntp=' + ov('wireless_ntp') +
+		'&ssid=' + ov('wireless_ssid') +
+		'&passkey=' + ov('wireless_passkey')
+}
+
+function getSerialSettings() {
+	const brs0 = docGetElById('RS232_baudSelect_port0').value;
+	const brs1 = docGetElById('RS232_baudSelect_port1').value;
+	const en0 = ov('RS232_enable_port0');
+	const en1 = ov('RS232_enable_port1');
 	
-	return {
-		type: type,
-		index: index,
-		enabled: en,
-		baudrate: brs.value
-	};		
+	return `serial_enabled_0=${en0}&serial_enabled_1=${en1}&serial_baudrate_0=${brs0}&serial_baudrate_1=${brs1}`;		
 }
 
 function saveCommsCfg() {
 
-	const cfg = {
-		setCommsConfig : {
-			networkConfig : [
-				getNetworkSettings("wired")
-			],
-			serialConfig : [
-				getSerialSettings("RS232", 0),
-				getSerialSettings("RS232", 1)
-			]
-		}
-	}
+	const wiredCfg = getWiredSettings();
+	const wiredlessCfg = getWirelessSettings();
+	const serialCfg = getSerialSettings();
 
-	setData('')
-	
-	jx.load('docmd.cgi', 'json', 'post', null, uuid, cfg).then((data) => {
-		if (data.status=='OK') {
-			alertInfo('Success: Saved Communications Configuration!');
-		} else {
-			log(0,'Error: Saving Communications Configuration!\nResult:' + data.status);
-		}
-	},
-	(error) => {
-		if(error.status == 401) {
-			loadAuth();
+	setData('setethernet.sh', wiredCfg, (data) => {
+
+		if(data.status === 'OK') {
+			
+			setData('setwifi.sh', wiredlessCfg, (data) => {
+
+					if(data.status === 'OK') {
+
+						setData('setserial.sh', serialCfg, (data) => {
+							
+							if(data.status === 'OK') {
+								alertInfo('Success: Communications Settings Saved!');
+							}
+							else {
+								log(0,'Error while saving serial settings!<br/>Result: ' + ((typeof data.message !== 'undefined') ? data.message : "Unknown error occured!"));			
+							}
+						
+						});
+
+						
+					}
+					else {
+						log(0,'Error while saving wireless settings!<br/>Result: ' + ((typeof data.message !== 'undefined') ? data.message : "Unknown error occured!"));			
+					}
+
+				});
 		}
 		else {
-			log(0,'Error: Uknown error!<br/>Result: ' + error.message);
+			log(0,'Error while saving ethernet settings!<br/>Result: ' + ((typeof data.message !== 'undefined') ? data.message : "Unknown error occured!"));
 		}
-	});
+
+	})
 	
 	return false;
 }
@@ -572,24 +586,17 @@ function loadAuth() {
 
 function appLogin() {
 
-	jx.load('auth.cgi', 'json', 'post', {}, uuid, {password: ov('login-password')}).then((data) => {
-		if(data.status == "AUTH") {
-			loadActiveMenuLayer();
+	setData('auth.sh', {password: ov('login-password')}, (data) => {
+			if(data.status == "AUTH") {
+				loadActiveMenuLayer();
+			}
+			else {
+				alertInfo('Failed to login, please enter correct password');
+				sv('login-password', '');
+				loadAuth();
+			}		
 		}
-		else {
-			alertInfo('Failed to login, please enter correct password');
-			sv('login-password', '');
-			loadAuth();
-		}		
-	},
-	(error) => {
-		if(error.status == 401) {
-			loadAuth();
-		}
-		else {
-			log(0,'Error: Uknown error!<br/>Result: ' + error.message);
-		}
-	});
+	);	
 
 	return false;
 }
@@ -609,22 +616,11 @@ function saveAdmin() {
 			newPassword: ov('new-password')
 		}
 	}
-		
-	jx.load('docmd.cgi', 'json', 'post', {}, uuid, cfg).then((data) => {
-		if (data.status=='OK') {
-			alertInfo('Success: New password saved!');
-		} else {
-			log(0,'Error: Saving new passowrd!<br/>Result:' + data.status);
+
+	setData('docmd.sh', cfg, (data) => {
+		alertInfo('Success: New password saved!');
 		}
-	},
-	(error) => {
-		if(error.status == 401) {
-			loadAuth();
-		}
-		else {
-			log(0,'Error: Saving new password!<br/>Result: ' + error.message);
-		}
-	});
+	);
 
 	return false;
 }
@@ -734,15 +730,12 @@ function saveAppCfg() {
 // Reboot Robot
 //-----------------------------------------------------------------------------
 function deviceReboot () {
-	jx.load('reboot.cgi' , 'json', 'get', {}, uuid, "").then((data) => {
-		if (data.status=='OK') {
-			rebootTime = 10;
+	getData('restart.sh', (data) => {
+			rebootTime = 20;
 			fwRebootTimer();
 			alertInfo('Success: Device will reboot in ' + rebootTime);
-		} else {
-			log(0,'Error:  Failed to initiate reboot!<br/>Result:' + data.status);
 		}
-	});
+	);
 }
 
 // helpers
