@@ -43,12 +43,12 @@ function getData(cgi, callback) {
 		credentials: 'same-origin',
 		headers: {
 			'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Credentials':true,
-            'Access-Control-Allow-Methods':'GET'
+            // 'Access-Control-Allow-Origin': '*',
+            // 'Access-Control-Allow-Credentials':true,
+            // 'Access-Control-Allow-Methods':'GET'
 		}
 	}
-	fetch(getURL('cgi/'+cgi), params).then(response => {
+	fetch(getURL('cgi/'+cgi)).then(response => {
 		console.log("get response: ", response)
 		if (!response.ok) {
 			throw new Error(`HTTP error, status = ${response.status}`);
@@ -533,35 +533,13 @@ function loadContact(evt) {
 // Home Page TAB/Layer Functions
 //-----------------------------------------------------------------------------
 function loadHome(evt) {
-	layer = 'layerHome';
-	fetch(getURL('cgi/getinfo.sh')).then(response => {
-		console.log("response: ", response)
-		if (!response.ok) {
-			throw new Error(`HTTP error, status = ${response.status}`);
-		}
-		
-		return response.json();
-	}).then(data => {
-		if("status" in data) {
-			if(data.status == "OK") {
-				this.setFormHomeCB(data)
-			}
-			else {
-				log(0,'Error: Unknown status!<br/>Result: ' + data.status);
-			}
-		}
-		else {
-			showMenuLayer(layer);
-			sv('model', 'Firmware error!');
-		}
-	}).catch(error => {
-		log(0,'Error: Unknown status!<br/>Result: ' + error.message);
-	})	
+	loadLoading();
+	getData('getinfo.sh', this.setFormHomeCB);
 }
 
 // Update UI with fetched data
 function setFormHomeCB(data) {
-	showMenuLayer(layer);
+	showMenuLayer('layerHome');
 	if("deviceInfo" in data) {
 		const id = data['deviceInfo'];
 		sv('model', id.model);
@@ -657,62 +635,21 @@ function saveAdmin() {
 //-----------------------------------------------------------------------------
 function loadApp(evt) {
 	layer = 'layerApp';
-
-	fetch(getURL('cgi/getapp.sh')).then(response => {
-		console.log("response: ", response)
-		if (!response.ok) {
-			throw new Error(`HTTP error, status = ${response.status}`);
-		}
-		
-		return response.json();
-	}).then(data => {
-		console.log("data: ", data)
-		if("status" in data) {
-			if(data.status == "OK") {
-				this.setFormAppCB(data);
-			}
-			else {
-				log(0,'Error: Unknown status!<br/>Result: ' + data.status);
-			}
-		}
-		else {
-			showMenuLayer(layer);
-			sv('model', 'Firmware error!');
-		}
-	}).catch(error => {
-		log(0,'Error: Unknown status!<br/>Result: ' + error.message);
-	})
+	loadLoading();
+	getData('getapp.sh', this.setFormAppCB);
 }
 
 function resetAppCfg() {
 	layer = 'layerApp'
-	let url = 'resetappcfg.cgi';
-	jx.load(url, 'json', 'get', {}, uuid, "").then((data) => {
-		if("status" in data) {
-			if (data.status == "OK"){
-					alertInfo('Success: Application settings reset to default values');
-					loadApp();
-				}
-				else {
-					log(0,'Unknown result!<br/>Result:' + data.status);
-				}
-			}
-			else {
-				log(0,'Failed to reset application configuration!<br/>Response:' + JSON.stringify(data) );
-			}
-	},
-	(error) => {
-		if(error.status == 401) {
-			loadAuth();
+	getData('resetappcfg.sh', () => {
+			alertInfo('Success: Application settings reset to default values');
+			loadApp();
 		}
-		else {
-			log(0,'Error: Failed to reset application configuration!<br/>Result: ' + error.message);
-		}
-	});
+	);
 }
 
 function setFormAppCB(data) {
-	showMenuLayer(layer);	
+	showMenuLayer('layerApp');	
 	if("appConfig" in data) {
 		const cfg = data["appConfig"];		
 		const apes = docGetElById('app_engine');
