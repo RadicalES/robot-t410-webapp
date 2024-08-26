@@ -11,7 +11,7 @@ var rebootTime;
 var rebootTimer
 const lib_version = "1.0.3";
 const PROXY = "http://10.223.40.98"
-const USE_PROXY = true
+const USE_PROXY = false
 
 function getURL(uri) {
 	return USE_PROXY ? PROXY + "/" + uri : uri
@@ -413,30 +413,17 @@ function setSerialPort(type, cfg) {
 
 //HTML Link
 function resetCommsCfg () {
-	jx.load('resetcommscfg.cgi' , 'json', 'get', {}, uuid, "").then((data) => {		
-		if("status" in data) {
-			if (data.status == "OK"){
-				alertInfo('Success: Communications settings reset to default values');
-				loadComms();
-			}
-			else {
-				log(0,'Unknown result!<br/>Result:' + data.status);
-			}
+
+	layer = 'layerComms'
+	getData('resetcommscfg.sh', () => {
+			alertInfo('Success: Communications settings reset to default values');
+			loadComms();
 		}
-		else {
-			log(0,'Failed to reset communications configuration!<br/>Response:' + JSON.stringify(data) );
-		}		
-	},
-	(error) => {
-		if(error.status == 401) {
-			loadAuth();
-		}
-		else {
-			log(0,'Error: Uknown error!<br/>Result: ' + error.message);
-		}
-	});
+	);
+
 }
 
+// Get Comms callback
 function setCommsCfgCB(data) {
 	showMenuLayer('layerComms');
 	hideLayerByID('layerComms_wired')
