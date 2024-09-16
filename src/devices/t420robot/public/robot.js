@@ -9,8 +9,8 @@ var uuid = "loading...";
 var statsInterval = null;
 var rebootTime;
 var rebootTimer
-const lib_version = "1.0.3";
-const PROXY = "http://10.223.40.98"
+const lib_version = "1.0.4";
+const PROXY = "http://10.0.0.1"
 const USE_PROXY = false
 
 function getURL(uri) {
@@ -204,7 +204,7 @@ function scb(id, value) {
 	let e = docGetElById(id);
 	if(e) {
 		if(e.type=="checkbox") {
-			if(value==1 || value=="TRUE" || value=="true") {
+			if(value==1 || value=="TRUE" || value=="true" || value=='auto') {
 				e.checked  = true;
 			}
 			else {
@@ -384,6 +384,13 @@ function setNetwork(label, cfg) {
 	sv('net_' + label + '_name', cfg.name);
 	
 	docGetElById('net_' + label + '_name').innerHTML = "Interface: " + cfg.name;
+
+	if(label == 'wireless') {
+		sv(label + '_ssid', cfg.ssid);
+		sv(label + '_ap_mac', cfg.apmac);
+		sv(label + '_ap_signal', cfg.apsignal + "%");
+	}
+	
 }
 
 function setSerialPort(type, cfg) {

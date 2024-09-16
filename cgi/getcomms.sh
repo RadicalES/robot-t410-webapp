@@ -79,6 +79,22 @@ WIFIUUID=$(echo $WIFIINFO | awk -F ':' '{print $5}')
 WIFIIF='wlan0'
 WIFIMAC=$(cat /sys/class/net/$WIFIIF/address)
 WIFIDHCP=$(nmcli -g IPV4.METHOD con show $WIFINAME)
+# GET AP SSID
+WIFISSID=$(nmcli -g 802-11-wireless.ssid con show $WIFINAME)
+WIFIAPMAC='Unknown'
+WIFIAPSIGNAL='Unknown'
+
+if [ -n "$WIFISSID" ]; then
+  # Active AP
+  WIFIAP=$(nmcli -g SSID,BSSID,SIGNAL dev wifi | grep $WIFISSID)
+
+  if [ -n "$WIFIAP" ]; then
+    WIFIAPMAC=$(echo $WIFIAP | sed -r 's/\\:/\|/g' | cut -d ":" -f 2)
+    WIFIAPSIGNAL=$(echo $WIFIAP | sed -r 's/\\:/\|/g' | cut -d ":" -f 3)
+    WIFIAPMAC=$(echo $WIFIAPMAC | tr '|' ':')
+  fi
+
+fi
 
 if [ -n "$WIFIDHCP" ] && [ $WIFIDHCP == "auto" ]; then
 	WIFICFG=$(ifconfig $WIFIIF | grep 'inet addr')
@@ -107,7 +123,10 @@ if [ -n "$WIFIIP"  ]; then
     \"netmask\":\"$WIFIMASK\",
     \"gateway\":\"$WIFIGW\",
     \"dns\":\"$WIFIDNS\",
-    \"ntp\":\"192.168.1.1\"
+    \"ntp\":\"192.168.1.1\",
+    \"ssid\":\"$WIFISSID\",
+    \"apmac\":\"$WIFIAPMAC\",
+    \"apsignal\":\"$WIFIAPSIGNAL\"
     }"
 else
   WLAN_CFG="{
@@ -129,12 +148,14 @@ BAUDRATES="1200,2400,4800,9600,19200,38400,57600,115200"
 
 SERIAL_CFG="\"serialConfig\":[{
   \"index\":\"0\",
+  \"name\":\"ttyUSB0\",
   \"enabled\":\"TRUE\",
   \"type\":\"RS232\",
   \"baudrate\":\"9600\",
   \"baudrateOptions\":\"$BAUDRATES\"
   },{  
   \"index\":\"1\",
+  \"name\":\"ttyUSB1\",
   \"enabled\":\"TRUE\",
   \"type\":\"RS232\",
   \"baudrate\":\"9600\",
