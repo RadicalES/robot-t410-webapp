@@ -645,6 +645,22 @@ function setFormAppCB(data) {
 		const apes = docGetElById('app_engine');
 		const apss = docGetElById('app_scale');
 		const apcs = docGetElById('app_proto');
+		const apst = docGetElById('app_start');
+
+		if(apst) {
+			while(apst.options.length) {                
+				apst.remove(0);
+			}
+			
+			const staps = cfg.startapps.split(',');
+			for(var i=0; i<staps.length; i++) {
+				const aeo = docCreateEl("option");
+				const ae = staps[i];
+				aeo.text = ae;
+				aeo.value = ae;
+				apst.add(aeo);
+			}
+		}
 		
 		if(apes) {
 			while(apes.options.length) {                
@@ -696,6 +712,7 @@ function setFormAppCB(data) {
 		sv('app_scale', cfg.scale);
 		sv('app_proto', cfg.protocol);
 		sv('app_tag', cfg.tagName);
+		sv('app_start', cfg.startapp);
 		
 	}
 }

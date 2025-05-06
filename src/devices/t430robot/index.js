@@ -1,10 +1,10 @@
-const t202 = require('./t420robot');
+const t430 = require('./t430robot');
 const path = require('path');
 
 module.exports = {
 		
   getStaticWWWpath() {
-	return path.join("t420robot", t202.getWWWPath());  
+	return path.join("t430robot", t430.getWWWPath());  
   },
 
   auth(req, res) {
@@ -15,11 +15,11 @@ module.exports = {
       const p = m["password"];
       const u = req.query.uid;
   		
-      if(t202.authenticate(u, p)) {
+      if(t430.authenticate(u, p)) {
         r = {
           status: "AUTH",
           uid: u,
-          session: t202.getSession()
+          session: t430.getSession()
         }
       }
     }
@@ -38,7 +38,7 @@ module.exports = {
     const rs = {
       status : "OK",
       deviceInfo : {
-        model:"Robot-T202-A",
+        model:"Robot-t430-A",
         serialno:"100001",
         mandate:"27-02-2019",
         firmware:"1.0.1",
@@ -50,7 +50,7 @@ module.exports = {
         usbslaveports:"1",
         scriptsupp:"NO",
         flashsize:"0 MB",
-        uptime: t202.getUptime()
+        uptime: t430.getUptime()
       }
     }
 
@@ -59,7 +59,7 @@ module.exports = {
 
 
   reboot(req, res) {
-    if(t202.isAuthenticated(req.query.uid)) {
+    if(t430.isAuthenticated(req.query.uid)) {
       res.status(200).json({status:"OK"});
     }
     else {
@@ -68,7 +68,7 @@ module.exports = {
   },
 
   getauth(req, res) {
-    if(t202.isAuthenticated(req.query.uid)) {
+    if(t430.isAuthenticated(req.query.uid)) {
       res.status(200).json({status:"AUTH"});
     }
     else {
@@ -78,12 +78,12 @@ module.exports = {
   },
   
   getcommscfg(req, res) {
-	  if(t202.isAuthenticated(req.query.uid)) {
+	  if(t430.isAuthenticated(req.query.uid)) {
         const cfg = {
           status: "OK",
           commsConfig : {
-            networkConfig : t202.getNetworkConfig(),
-            serialConfig : t202.getSerialConfig()
+            networkConfig : t430.getNetworkConfig(),
+            serialConfig : t430.getSerialConfig()
           }
         }
 
@@ -95,9 +95,9 @@ module.exports = {
   },
   
   resetcommscfg(req, res) {
-	  if(t202.isAuthenticated(req.query.uid)) {
-		    t202.resetNetworkConfig();
-		    t202.resetSerialConfig();
+	  if(t430.isAuthenticated(req.query.uid)) {
+		    t430.resetNetworkConfig();
+		    t430.resetSerialConfig();
 	      res.status(200).json({status: "OK"});
 	    }
 	    else {
@@ -106,10 +106,10 @@ module.exports = {
   },
   
   getappcfg(req, res) {
-    if(t202.isAuthenticated(req.query.uid)) {
+    if(t430.isAuthenticated(req.query.uid)) {
       const cfg = { 
         status:"OK",
-        appConfig: t202.getAppConfig(),
+        appConfig: t430.getAppConfig(),
       };
       res.status(200).json(cfg);
     }
@@ -119,18 +119,18 @@ module.exports = {
   },
 
   doCommand(req, res) {
-    if(t202.isAuthenticated(req.query.uid)) {
+    if(t430.isAuthenticated(req.query.uid)) {
       const m = req.body;
       if("setAppConfig" in m) {
     	  const cfg = m["setAppConfig"];
         console.log("APP CFG: ", cfg);
-    	  t202.setAppConfig(cfg);
+    	  t430.setAppConfig(cfg);
         res.status(200).json({status:"OK"})
       }
       else if("setAdminConfig" in m) {
         const cfg = m["setAdminConfig"];
     	  
-    	  if(t202.setPassword(cfg.password, cfg.newPassword)) {
+    	  if(t430.setPassword(cfg.password, cfg.newPassword)) {
     		  res.status(200).json({status:"OK"});
     	  }
     	  else {
@@ -142,12 +142,12 @@ module.exports = {
 
         if("networkConfig" in cfg) {
           let d = cfg["networkConfig"];
-          t202.setNetworkConfig(d);
+          t430.setNetworkConfig(d);
         }
         
         if("serialConfig" in cfg) {
           let d = cfg["serialConfig"];
-          t202.setSerialConfig(d);
+          t430.setSerialConfig(d);
         }
         
         res.status(200).json({status:"OK"});	   
@@ -164,9 +164,9 @@ module.exports = {
   },
 
   resetappcfg(req, res) {
-    if(t202.isAuthenticated(req.query.uid)) {
+    if(t430.isAuthenticated(req.query.uid)) {
       res.status(200).json({status:"OK"});
-      t202.resetAppConfig();
+      t430.resetAppConfig();
     }
     else {
       res.status(401).json({status:"NOTAUTH"});
@@ -174,9 +174,9 @@ module.exports = {
   },
 
   getstats(req, res) {
-    const app = t202.getAppStats();
+    const app = t430.getAppStats();
     const stats = {
-      uptime: t202.getUptime(),
+      uptime: t430.getUptime(),
       pubMessages : app.pubMessages,
       dropMessages : app.dropMessages
     }
@@ -240,7 +240,7 @@ module.exports = {
   },
   
   waitevent(req, res) {
-	  t202.waitForEvent(res);    
+	  t430.waitForEvent(res);    
   },
 
   init() {}

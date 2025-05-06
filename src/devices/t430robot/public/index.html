@@ -7,7 +7,7 @@ Robot-T420 Web Application
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
-	<title>Robot-T420</title>
+	<title>Robot-T430</title>
 	<link rel="icon" href="favicon.png" type="image/png" />
 	<link rel="stylesheet" href="w3.css" type="text/css">
 	<link href="site.css" rel="stylesheet" type="text/css" />
@@ -365,32 +365,23 @@ Robot-T420 Web Application
 		<div id="layerApp" class="layer">
 			<form id="formApplication" action="" method="post" onsubmit="return saveAppCfg()">
 				<div class="w3-card" style="padding: 1em; margin-bottom: 2em;">
-					<h2>Application Profiles</h2> <p></p>
+					<h2>Application Configuration</h2> <p></p>
+					<h3>Startup</h3>		
+					<div class="w3-row">
+						<div class="w3-col l6 m6 irow">
+							<label class="s-label">Application</label> 
+							<select class="w3-select w3-border select-short" id="app_start">
+							</select>					
+						</div>
+					</div>
+
 					<h3>Application Engine</h3>		
 				
 					<div class="w3-row">
 						<div class="w3-col l6 m6 irow">
 							<label class="s-label">Tag Name</label> 
 							<input class="w3-input in-rest" id="app_tag"/>					
-						</div>
-						<div class="w3-col l6 m6 irow">
-							<label class="s-label">Type</label> 
-							<select class="w3-select w3-border select-short" id="app_engine">
-							</select>					
-						</div>
-					</div>
-
-					<div class="w3-row">
-						<div class="w3-col l6 m6 irow">
-							<label class="s-label">Protocol</label> 
-							<select class="w3-select w3-border select-short" id="app_proto">
-							</select>					
-						</div>
-						<div class="w3-col l6 m6 irow">
-							<label class="s-label">Scale</label> 
-							<select class="w3-select w3-border select-short" id="app_scale">
-							</select>
-						</div>
+						</div>						
 					</div>
 
 					<div class="w3-row">
@@ -423,15 +414,15 @@ Robot-T420 Web Application
 
 <footer class="w3-container">
 	<div class="w3-right">
-		<a href="http://radicalsystems.co.za/index.php/products-robot-t420">Robot-T420</a>&nbsp;|&nbsp;be in control
+		<a href="http://radicalsystems.co.za/index.php/products-robot-t430">Robot-T430</a>&nbsp;|&nbsp;be in control
 		<div class="smallText" id="guiversion">
-				release: 1.0.3
+				release: 1.0.0
 		</div>
 	</div>
 	<div>
 		<a href="http://www.radicalsystems.co.za">www.radicalsystems.co.za</a>&nbsp;|&nbsp;<a href="mailto:info@radicalsystems.co.za">info@radicalsystems.co.za</a>
 		<div class="smallText">
-			&copy; 2012-2024 Radical Electronic Systems CC. All rights reserved.
+			&copy; 2012-2025 Radical Electronic Systems CC. All rights reserved.
 		</div>
 	</div>
 

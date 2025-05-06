@@ -2,7 +2,7 @@
   "name": "robot-t4x0-webapp",
   "version": "0.1.0",
   "private": true,
-  "description": "Robot-T410/T420 User Interface",
+  "description": "Robot-T430 User Interface",
   "main": "src/server.js",
   "scripts": {
     "start": "nodemon ./bin/www",

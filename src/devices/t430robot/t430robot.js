@@ -5,7 +5,7 @@ const Serial = require('./serialport');
 const USB = require('./usbport');
 const EventEmitter = require('events');
 
-class T202Device {
+class T430Device {
 
   constructor() {
 	//super();	  
@@ -23,6 +23,8 @@ class T202Device {
     this.scales = "MICRO-A12E,RICHTER";
     this.engines = "DISABLED,SCALE,TERMINAL,BINTIP";
     this.engine = "TERMINAL";
+    this.startapps = "DESKTOP,BROWSER"
+    this.startapp = "BROWSER"
     this.protocols = "ROBOT-API,FARSOFT-SCALE";
     this.protocol = "FARSOFT-SCALE";
     this.serverURL = "http://192.168.60.10/scale.cgi";
@@ -34,22 +36,22 @@ class T202Device {
   }
   
   static getInstance() {
-    if( ! (this instanceof T202Device)) {
-      return new T202Device();
+    if( ! (this instanceof T430Device)) {
+      return new T430Device();
     }
 
     return this;
   }
 
   isAuthenticated(uid) {
-    console.log("T202:isAuth uid=" + uid);
+    console.log("T430:isAuth uid=" + uid);
     if((uid == this.uid) && (this.auth)) {
       this.pubMessages++; // simulate
       return true;
     }
 
     this.dropMessages++; // simulate
-    return false;
+    return true;
   }
   
   getWWWPath() {
@@ -80,6 +82,8 @@ class T202Device {
       engines : this.engines,
       scales : this.scales,
       scale : this.scale,
+      startapps : this.startapps,
+      startapp : this.startapp,
       protocols : this.protocols,
       protocol : this.protocol,
       lightsOnTime: this.lightsOnTime,
@@ -177,7 +181,7 @@ class T202Device {
 }
 
 
-const t202 = new T202Device();
-module.exports = t202;
+const t430 = new T430Device();
+module.exports = t430;
 
 
