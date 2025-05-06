@@ -31,6 +31,7 @@ module.exports = (app) => {
   app.get('/resetcommscfg.cgi', t430.resetcommscfg);
 
   app.post('/scale.cgi', t430.scale);
+  app.post('/cgi/setapp.sh', t430.setappcfg);
 
 
 };

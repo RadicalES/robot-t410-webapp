@@ -9,7 +9,7 @@ var uuid = "loading...";
 var statsInterval = null;
 var rebootTime;
 var rebootTimer
-const lib_version = "1.0.4";
+const lib_version = "1.0.5";
 const PROXY = "http://10.0.0.1"
 const USE_PROXY = false
 
@@ -89,6 +89,8 @@ function setData(cgi, data, callback) {
 		body: data,
 		headers: headers
 	}
+
+	console.log("DATA: " + data)
 
 	fetch(getURL('cgi/'+cgi), params).then(response => {
 		console.log("post response: ", response)
@@ -724,6 +726,7 @@ function saveAppCfg() {
 	'&engine=' + ov('app_engine') +
 	'&scale=' + ov('app_scale') +
 	'&protocol=' + ov('app_proto') +
+	'&startApp=' + ov('app_start') +
 	'&tagName=' + ov('app_tag');
 
 	setData('setapp.sh', payload, (data) => {

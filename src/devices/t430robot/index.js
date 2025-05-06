@@ -118,6 +118,17 @@ module.exports = {
     }
   },
 
+  setappcfg(req, res) {
+    if(t430.isAuthenticated(req.query.uid)) {
+      const cfg = req.body
+      t430.setAppConfig(cfg),
+      res.status(200).json({status: "OK"});
+    }
+    else {
+      res.status(401).json({status:"NOTAUTH"});
+    }
+  },
+
   doCommand(req, res) {
     if(t430.isAuthenticated(req.query.uid)) {
       const m = req.body;

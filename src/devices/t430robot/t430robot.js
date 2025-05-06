@@ -102,13 +102,19 @@ class T430Device {
   }
 
   setAppConfig(cfg) {
-    console.log("setAppConfig: " + JSON.stringify(cfg));
-    this.scale = cfg.scale;
-    this.engine = cfg.enabled;
-    this.protocol = cfg.protocol;
-    this.serverURL = cfg.serverURL;
-    this.tagName = cfg.tagName;
-    this.lightsOnTime = cfg.lightsOnTime;
+    const cfgs = cfg.split("&") 
+    let cfgObj = {}
+    for(let c in cfgs) {
+      const s = cfgs[c].split("=")
+      cfgObj[s[0]] = s[1]
+    }
+    console.log("setAppConfig: ", cfgObj);
+    this.scale = cfgObj['scale'];
+    this.engine = cfgObj['engine'];
+    this.protocol = cfgObj['protocol'];
+    this.serverURL = cfgObj['serverUrl'];
+    this.tagName = cfgObj['tagName'];
+    this.startapp = cfgObj['startApp'];
   }
   
   resetAppConfig() {
