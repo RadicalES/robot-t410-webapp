@@ -83,7 +83,7 @@ module.exports = {
           status: "OK",
           commsConfig : {
             networkConfig : t430.getNetworkConfig(),
-            serialConfig : t430.getSerialConfig()
+            cardreaderConfig : t430.getCardConfg()
           }
         }
 

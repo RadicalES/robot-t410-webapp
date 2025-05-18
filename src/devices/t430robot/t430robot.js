@@ -3,6 +3,7 @@ const moment = require('moment');
 const Network = require('./network');
 const Serial = require('./serialport');
 const USB = require('./usbport');
+const CardReader = require('./cardreader');
 const EventEmitter = require('events');
 
 class T430Device {
@@ -18,6 +19,7 @@ class T430Device {
     this.network = new Network("AA:BB:CC:00:11:22",true,"192.168.1.20","255.255.255.0","192.168.1.1","192.168.1.100","192.168.1.100");
     this.rs232port0 = new Serial("RS232", "Scale", 115200, "1", "EVEN", 0);
     this.rs232port1 = new Serial("RS232", "Scanner", 115200, "1", "EVEN", 1);
+    this.cardReader = new CardReader(0, true, true, 8100, "[CARD}%s")
     this.usbport = new USB("USB");    
     this.scale = "RICHTER";
     this.scales = "MICRO-A12E,RICHTER";
@@ -142,6 +144,10 @@ class T430Device {
   resetNetworkConfig() {
 	  this.network.resetConfig();
   }
+
+  getCardReaderConfig() {
+
+  }
   
   setPassword(oldPassword, newPassword) {
 	  if(this.password === oldPassword) {
@@ -157,6 +163,10 @@ class T430Device {
         this.rs232port0.getConfig(),
         this.usbport.getConfig()
       ];
+  }
+
+  getCardConfg() {
+    return [this.cardReader.getConfig()];
   }
   
   resetSerialConfig() {

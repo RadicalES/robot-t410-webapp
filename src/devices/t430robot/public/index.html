@@ -306,25 +306,27 @@ Robot-T430 Web Application
 
 				<div class="w3-card" style="padding: 1em; margin-bottom: 2em;">
 					<legend>Websocket Servers</legend>
-					<h3 id="card_reader">Card Reader</h3>
-					<div class="w3-row">
-						<div class="w3-col l6 m6 irow">
-							<input class="w3-check small-check" type="checkbox" id="cardreader_enable"/>
-							<label>Enabled</label> 
+					<div id="layerComms_cardreader" style="margin-top: 1em;">
+						<h3 >Card Reader</h3>
+						<div class="w3-row">
+							<div class="w3-col l6 m6 irow">
+								<input class="w3-check small-check" type="checkbox" id="cardreader_enabled"/>
+								<label>Enabled</label> 
+							</div>
+							<div class="w3-col l6 m6 irow">
+								<input class="w3-check small-check" type="checkbox" id="cardreader_foreign_connect"/>
+								<label>Allow Foreign Connections</label> 
+							</div>
 						</div>
-						<div class="w3-col l6 m6 irow">
-							<input class="w3-check small-check" type="checkbox" id="cardreader_enable"/>
-							<label>Allow Foreign Connections</label> 
-						</div>
-					</div>
-					<div class="w3-row">
-						<div class="w3-col l6 m6 irow">
-							<label>Websocket Port</label> 
-							<input class="w3-input input-short" id="cardreader_server_port" value="8100" />
-						</div>
-						<div class="w3-col l6 m6 irow">
-							<label>Output Format:</label> 
-							<input class="w3-input input-short" id="cardreader_output_format" value="[CARD]:%s" />
+						<div class="w3-row">
+							<div class="w3-col l6 m6 irow">
+								<label>Websocket Port</label> 
+								<input class="w3-input input-short" id="cardreader_server_port" value="8100" />
+							</div>
+							<div class="w3-col l6 m6 irow">
+								<label>Output Format:</label> 
+								<input class="w3-input input-short" id="cardreader_output_format" value="[CARD]:%s" />
+							</div>
 						</div>
 					</div>
 				</div>

@@ -420,6 +420,14 @@ function setSerialPort(type, cfg) {
 	}
 }
 
+function setCardReader(cfg) {
+	showLayerByID('layerComms_cardreader')
+	scb('cardreader_enabled', cfg.enabled);
+	scb('cardreader_foreign_connect', cfg.foreignConnect);
+	sv('cardreader_server_port', cfg.serverPort)
+	sv('cardreader_output_format', cfg.outputFormat)
+}
+
 //HTML Link
 function resetCommsCfg () {
 
@@ -437,6 +445,7 @@ function setCommsCfgCB(data) {
 	showMenuLayer('layerComms');
 	hideLayerByID('layerComms_wired')
 	hideLayerByID('layerComms_wireless')
+	hideLayerByID('layerComms_cardreader')
 	
 	if(data.status=="OK") {
 		if("commsConfig" in data) {
@@ -446,9 +455,9 @@ function setCommsCfgCB(data) {
 				ncf.forEach((n) => setNetwork(n.type, n));
 			}
 				
-			if("serialConfig" in cfc) {
-				const sca = cfc["serialConfig"]; // this is an array	
-				sca.forEach((p) => setSerialPort(p.type, p));				
+			if("cardreaderConfig" in cfc) {
+				const crc = cfc["cardreaderConfig"]; // this is an array	
+				crc.forEach((c) => setCardReader(c));				
 			}
 		}
 	}
