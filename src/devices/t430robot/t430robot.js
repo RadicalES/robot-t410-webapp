@@ -155,7 +155,6 @@ class T430Device {
   getSerialConfig() {
     return [
         this.rs232port0.getConfig(),
-        this.rs232port1.getConfig(),
         this.usbport.getConfig()
       ];
   }

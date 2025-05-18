@@ -1,6 +1,6 @@
 /*
-(C) 2022 Radical Electronic Systems, info@radicalsystems.co.za
-11/12/2022 V1.0 First Release
+(C) 2025 Radical Electronic Systems, info@radicalsystems.co.za
+11/12/2025 V1.0 First Release
 */
 body {
 	margin: 0;
@@ -218,9 +218,10 @@ legend {
 
 /* select formatting */
 .select-short {
-	padding: 4px 0;
-	width: 50%;
-	height: 2.3em;
+	display: block;
+	width: 20em;
+	border: 1px solid #ccc;
+	padding: 4px;
 }
 
 /* select label */
