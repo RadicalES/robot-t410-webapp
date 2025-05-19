@@ -3,26 +3,35 @@ class CardReader {
 	constructor(index, enabled, foreignConnect, serverPort, outputFormat) {
 		this.index = index;
 		this.enabled = enabled;
+		this.enabledReset = enabled;
 		this.foreignConnect = foreignConnect;
+		this.foreignConnectReset = foreignConnect;
 		this.serverPort = serverPort;
+		this.serverPortReset = serverPort;
 		this.outputFormat = outputFormat;
+		this.outputFormatReset = outputFormat;
 	}
 
 	  // cfg : JSON object
 	setConfig(cfg) {
-	    this.enabled = cfg.enabled;
-		this.foreignConnect = cfg.foreignConnect;
-		this.serverPort = cfg.serverPort;
-		this.outputFormat = cfg.outputFormat;
+		const cfgs = cfg.split("&") 
+    	let cfgObj = {}
+    	for(let c in cfgs) {
+      		const s = cfgs[c].split("=")
+      		cfgObj[s[0]] = s[1]
+    	}
+		console.log("CARDREADER CFG = ", cfgObj)
+	    this.enabled = cfgObj.enabled;
+		this.foreignConnect = cfgObj.foreignConnect;
+		this.serverPort = cfgObj.serverPort;
+		this.outputFormat = cfgObj.outputFormat;
 	}
 	
 	resetConfig() {
-		this.DHCP = true;
-		this.IpAddress = "192.168.1.20";
-		this.SubNet = "255.255.255.0";
-		this.Gateway = "192.168.1.1";
-		this.DnsServer = "192.168.1.1";
-		this.NtpServer = "192.168.1.1";
+		this.enabled = this.enabledReset;
+		this.foreignConnect = this.foreignConnectReset;
+		this.serverPort = this.serverPortReset;
+		this.outputFormat = this.outputFormatReset;
 	}
   	
   	getConfig() {

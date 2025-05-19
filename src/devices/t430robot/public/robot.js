@@ -395,31 +395,6 @@ function setNetwork(label, cfg) {
 	
 }
 
-function setSerialPort(type, cfg) {
-	let brs = docGetElById(type + '_baudSelect_port' + cfg.index);	
-
-	if(brs) {
-		while(brs.options.length) {                
-			brs.remove(0);
-		}
-		const bra = cfg.baudrateOptions.split(',');
-		const bros = bra.map((br) => {
-			const bro = docCreateEl("option");
-			bro.text = br;
-			bro.value = br;
-			return bro;
-		})
-		bros.forEach((o) => brs.add(o));
-		brs.value = cfg.baudrate;
-	}
-
-	const el = docGetElById(type + '_name_port' + cfg.index);
-	if(el) {
-		el.innerHTML = "Port: " + cfg.name;
-		scb(type + '_enable_port' + cfg.index, cfg.enabled);
-	}
-}
-
 function setCardReader(cfg) {
 	showLayerByID('layerComms_cardreader')
 	scb('cardreader_enabled', cfg.enabled);
@@ -432,7 +407,7 @@ function setCardReader(cfg) {
 function resetCommsCfg () {
 
 	layer = 'layerComms'
-	getData('resetcommscfg.sh', () => {
+	getData('resetcomms.sh', () => {
 			alertInfo('Success: Communications settings reset to default values');
 			loadComms();
 		}
@@ -489,54 +464,30 @@ function getWirelessSettings() {
 		'&passkey=' + ov('wireless_passkey')
 }
 
-function getSerialSettings() {
-	const brs0 = docGetElById('RS232_baudSelect_port0').value;
-	const brs1 = docGetElById('RS232_baudSelect_port1').value;
-	const en0 = ov('RS232_enable_port0');
-	const en1 = ov('RS232_enable_port1');
-	
-	return `serial_enabled_0=${en0}&serial_enabled_1=${en1}&serial_baudrate_0=${brs0}&serial_baudrate_1=${brs1}`;		
+function getCardReaderSettings() {
+	return 'enabled=' + ov('cardreader_enabled') +
+	'&foreignConnect=' + ov('cardreader_foreign_connect') +
+	'&serverPort=' + ov('cardreader_server_port') +
+	'&outputFormat=' + ov('cardreader_output_format');
 }
 
 function saveCommsCfg() {
 
 	const wiredCfg = getWiredSettings();
-	const wiredlessCfg = getWirelessSettings();
-	const serialCfg = getSerialSettings();
+	const cardreaderCfg = getCardReaderSettings();
 
-	setData('setethernet.sh', wiredCfg, (data) => {
-
+	setData('setcardreader.sh', cardreaderCfg, (data) => {
+		
 		if(data.status === 'OK') {
-			
-			setData('setwifi.sh', wiredlessCfg, (data) => {
-
-					if(data.status === 'OK') {
-
-						setData('setserial.sh', serialCfg, (data) => {
-							
-							if(data.status === 'OK') {
-								alertInfo('Success: Communications Settings Saved!');
-							}
-							else {
-								log(0,'Error while saving serial settings!<br/>Result: ' + ((typeof data.message !== 'undefined') ? data.message : "Unknown error occured!"));			
-							}
-						
-						});
-
-						
-					}
-					else {
-						log(0,'Error while saving wireless settings!<br/>Result: ' + ((typeof data.message !== 'undefined') ? data.message : "Unknown error occured!"));			
-					}
-
-				});
+			alertInfo('Success: Communications Settings Saved!');
 		}
 		else {
-			log(0,'Error while saving ethernet settings!<br/>Result: ' + ((typeof data.message !== 'undefined') ? data.message : "Unknown error occured!"));
+			log(0,'Error while saving serial settings!<br/>Result: ' + ((typeof data.message !== 'undefined') ? data.message : "Unknown error occured!"));			
 		}
-
-	})
 	
+	});
+
+						
 	return false;
 }
 

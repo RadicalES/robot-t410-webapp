@@ -145,9 +145,11 @@ class T430Device {
 	  this.network.resetConfig();
   }
 
-  getCardReaderConfig() {
 
+  resetCardReaderConfig() {
+	  this.cardReader.resetConfig();
   }
+
   
   setPassword(oldPassword, newPassword) {
 	  if(this.password === oldPassword) {
@@ -191,6 +193,10 @@ class T430Device {
 
     });
 
+  }
+
+  setCardReaderConfig(cfg) {
+    this.cardReader.setConfig(cfg)
   }
 
 }

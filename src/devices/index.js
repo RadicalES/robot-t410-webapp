@@ -28,7 +28,8 @@ module.exports = (app) => {
   app.get('/getstats.cgi', t430.getstats);
   
   app.get('/cgi/getcomms.sh', t430.getcommscfg);
-  app.get('/resetcommscfg.cgi', t430.resetcommscfg);
+  app.post('/cgi/setcardreader.sh', t430.setcardreadercfg);
+  app.get('/cgi/resetcomms.sh', t430.resetcommscfg);
 
   app.post('/scale.cgi', t430.scale);
   app.post('/cgi/setapp.sh', t430.setappcfg);

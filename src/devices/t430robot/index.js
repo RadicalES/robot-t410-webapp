@@ -97,7 +97,7 @@ module.exports = {
   resetcommscfg(req, res) {
 	  if(t430.isAuthenticated(req.query.uid)) {
 		    t430.resetNetworkConfig();
-		    t430.resetSerialConfig();
+		    t430.resetCardReaderConfig();
 	      res.status(200).json({status: "OK"});
 	    }
 	    else {
@@ -112,6 +112,17 @@ module.exports = {
         appConfig: t430.getAppConfig(),
       };
       res.status(200).json(cfg);
+    }
+    else {
+      res.status(401).json({status:"NOTAUTH"});
+    }
+  },
+
+  setcardreadercfg(req, res) {
+    if(t430.isAuthenticated(req.query.uid)) {
+      const cfg = req.body
+      t430.setCardReaderConfig(cfg),
+      res.status(200).json({status: "OK"});
     }
     else {
       res.status(401).json({status:"NOTAUTH"});
