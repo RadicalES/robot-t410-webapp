@@ -168,7 +168,7 @@ class T430Device {
   }
 
   getCardConfg() {
-    return [this.cardReader.getConfig()];
+    return this.cardReader.getConfig();
   }
   
   resetSerialConfig() {

@@ -432,7 +432,7 @@ function setCommsCfgCB(data) {
 				
 			if("cardreaderConfig" in cfc) {
 				const crc = cfc["cardreaderConfig"]; // this is an array	
-				crc.forEach((c) => setCardReader(c));				
+				setCardReader(crc);				
 			}
 		}
 	}

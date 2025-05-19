@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <!--
 (C) 2025 Radical Electronic Systems, info@radicalsystems.co.za
-Robot-T430 Web Application
+Robot-T430 Web Application 1.0.1
 -->
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
@@ -305,33 +305,30 @@ Robot-T430 Web Application
 				</div>
 
 				<div class="w3-card" style="padding: 1em; margin-bottom: 2em;">
-					<legend>Serial Port Configuration</legend>
-					<h3 id="RS232_name_port0">Port 0</h3>
-					<div class="w3-row">
-						<div class="w3-col l6 m6 irow">
-							<input class="w3-check small-check" type="checkbox" id="RS232_enable_port0"/>
-							<label>Enabled</label> 
+					<legend>Websocket Servers</legend>
+					<div id="layerComms_cardreader" style="margin-top: 1em;">
+						<h3 >Card Reader</h3>
+						<div class="w3-row">
+							<div class="w3-col l6 m6 irow">
+								<input class="w3-check small-check" type="checkbox" id="cardreader_enabled"/>
+								<label>Enabled</label> 
+							</div>
+							<div class="w3-col l6 m6 irow">
+								<input class="w3-check small-check" type="checkbox" id="cardreader_foreign_connect"/>
+								<label>Allow Foreign Connections</label> 
+							</div>
 						</div>
-						<div class="w3-col l6 m6 irow">
-							<label>Baudrate</label> 
-							<select class="w3-select w3-border select-short" id="RS232_baudSelect_port0">
-							</select>
-						</div>
-					</div>
-					
-					<h3 id="RS232_name_port1">Port 1</h3>
-					<div class="w3-row">
-						<div class="w3-col l6 m6 irow">
-							<input class="w3-check small-check" type="checkbox" id="RS232_enable_port1"/>
-							<label>Enabled</label> 
-						</div>
-						<div class="w3-col l6 m6 irow">
-							<label>Baudrate</label> 
-							<select class="w3-select w3-border select-short" id="RS232_baudSelect_port1">
-							</select>					
+						<div class="w3-row">
+							<div class="w3-col l6 m6 irow">
+								<label>Websocket Port</label> 
+								<input class="w3-input input-short" id="cardreader_server_port" value="8100" />
+							</div>
+							<div class="w3-col l6 m6 irow">
+								<label>Output Format:</label> 
+								<input class="w3-input input-short" id="cardreader_output_format" value="[CARD]:%s" />
+							</div>
 						</div>
 					</div>
-
 				</div>
 							
 				<input class="w3-button w3-round w3-red" type="button" value="Reset Settings" onclick="resetCommsCfg()" />
@@ -416,7 +413,7 @@ Robot-T430 Web Application
 	<div class="w3-right">
 		<a href="http://radicalsystems.co.za/index.php/products-robot-t430">Robot-T430</a>&nbsp;|&nbsp;be in control
 		<div class="smallText" id="guiversion">
-				release: 1.0.0
+				release: 1.0.1
 		</div>
 	</div>
 	<div>
