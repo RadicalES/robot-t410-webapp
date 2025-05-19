@@ -13,27 +13,28 @@ SERVER_CONFIG_URL="http://www.radicalsystems.co.za"
 API_PROTOCOL='ROBOT-API'
 APP_ENGINE='TERMINAL'
 SCALE_TYPE='RICHTER'
-TAG_NAME='NOT-SET'
+HOSTNAME=$(cat /etc/hostname)
 
 if [ -e $CFGFILE ]; then
   . $CFGFILE
 fi
 
 
-
 APP_CFG="{
-  \"tagName\":\"$TAG_NAME\",
+  \"tagName\":\"$HOSTNAME\",
   \"serverURL\":\"$SERVER_CONFIG_URL\",
   \"engines\":\"TERMINAL,FORKLIFT\",
   \"engine\":\"$APP_ENGINE\",
   \"protocols\":\"ROBOT-API,FARSOFT-API\",
   \"protocol\":\"$API_PROTOCOL\",
   \"scales\":\"RICHTER\",
-  \"scale\":\"$SCALE_TYPE\"
+  \"scale\":\"$SCALE_TYPE\",
+  \"startapps\":\"DESKTOP,BROWSER\",
+  \"startapp\":\"$START_APP\"
   
   }"
 
 JSON="\"status\":\"OK\",\"appConfig\":$APP_CFG";
 
-echo -e "Access-Control-Allow-Origin: *\r\nContent-Type: application/json\r\n\r\n"
-echo -e "{$JSON}"
+echo "Access-Control-Allow-Origin: *\r\nContent-Type: application/json\r\n\r\n"
+echo "{$JSON}"

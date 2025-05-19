@@ -6,36 +6,26 @@
 # (C) 2016 - 2022, Radical Electronic Systems - www.radicalsystems.co.za
 # Written by Jan Zwiegers, jan@radicalsystems.co.za
 
-#IFACECFGFILE=/etc/network/interfaces
-#DNSCFGFILE=/etc/resolve.conf
+IFACECFGFILE=/etc/network/interfaces
+DNSCFGFILE=/etc/resolve.conf
 
-#GDNS=$(cat /etc/network/resolv.static.conf |grep -i '^nameserver'|head -n1|cut -d ' ' -f2)
-#GNTP=$(cat /etc/ntp.conf |grep -i '^server'|head -n1|cut -d ' ' -f2)
-
-# All active connections
-CONNECTIONS=$(nmcli -t -f name connection show --active)
-# gives eth0, SSID of WLAN
+GDNS=$(cat /etc/network/resolv.static.conf |grep -i '^nameserver'|head -n1|cut -d ' ' -f2)
+GNTP=$(cat /etc/ntp.conf |grep -i '^server'|head -n1|cut -d ' ' -f2)
 
 LANIFDEV=eth0
 # source LAN settings
-# LANCFGFILE=/etc/systemd/network/eth0.network
+LANCFGFILE=/etc/systemd/network/eth0.network
 LANMAC=$(cat /sys/class/net/eth0/address)
-LANDHCP=$(nmcli con show eth0 | grep ipv4.method | awk '{print $2}')
-LANIP=$(nmcli con show eth0 | grep ipv4.addresses | awk '{print $2}')
-LANGW=$(nmcli con show eth0 | grep ipv4.gateway | awk '{print $2}')
-LNDNS=$(nmcli con show eth0 | grep 'ipv4.dns:' | awk '{print $2}')
-
 # LANIFCFG=$(awk -f readInterfaces.awk $IFACECFGFILE device=$LANIFDEV)
 # RES=$?
-#if [ ! -f $LANCFGFILE ]; then
+if [ ! -f $LANCFGFILE ]; then
 	# network interface not available
-#	LANIFCFG="{\"name\":\"$LANIFCFG\",\"status\":\"NOTAVAIL\",\"macAddress\":\"Not installed\"}"
-#else
+	LANIFCFG="{\"name\":\"$LANIFCFG\",\"status\":\"NOTAVAIL\",\"macAddress\":\"Not installed\"}"
+else
+	. $LANCFGFILE
+	if [ -n "$Name"  ]; then
 
-#	. $LANCFGFILE
-	if [ -n "$LANIP"  ]; then
-
-		if [ -n "$LANDHCP" ] && [ $LANDHCP == "auto" ]; then
+		if [ -n "$DHCP" ] && [ $DHCP == "ipv4" ]; then
 
 			# DHCP address
 			IFDATA=$(ifconfig $LANIFDEV | grep 'inet addr')
@@ -56,31 +46,25 @@ LNDNS=$(nmcli con show eth0 | grep 'ipv4.dns:' | awk '{print $2}')
 		
 	else
 		# not configured
-		LANCFG="{\"name\":\"$LANIFDEV\",\"status\":\"DISABLED\",\"macAddress\":\"$LANMAC\"}"
+		LANCFG="{\"name\":\"$LANIFCFG\",\"status\":\"DISABLED\",\"macAddress\":\"$LANMAC\"}"
 	fi
-#fi
+fi
 
 WIFIIFDEV=wlan0
-WIFIMAC=$(nmcli dev show wlan0 | grep GENERAL.HWADDR | awk '{print $2}')
-WIFIIP=$(nmcli dev show wlan0 | grep IP4.ADDRESS | awk '{print $2}')
-WIFIGW=$(nmcli dev show wlan0 | grep IP4.GATEWAY | awk '{print $2}')
-WIFIDNS=$(nmcli dev show wlan0 | grep IP4.DNS | awk '{print $2}')
+# source WIFI settings
+WIFICFGFILE=/etc/systemd/network/wlan0.network
+WIFIMAC=$(cat /sys/class/net/wlan0/address)
+# WIFIIFCFG=$(awk -f readInterfaces.awk $IFACECFGFILE device=$WIFIIFDEV)
+# RES=$?
 
-WIFISSID='hellow' #$(nmcli con show --active | grep wifi | awk '{print $1}')
-# WIFISSID1=$(nmcli con | grep wlan0 | awk '{print $1}')
-# WIFISSID2=$(iw dev wlan0 info | grep ssid | awk '{print $2}')
-WIFIUUID=$(nmcli con show --active | grep wifi | awk '{print $2}')
-WIFICON=$(nmcli con show --active | grep wifi | awk '{print $4}')
+if [ ! -f $WIFICFGFILE ]; then
+	# network interface not available
+	WIFICFG="{\"name\":\"$WIFIIFDEV\",\"status\":\"NOTAVAIL\",\"macAddress\":\"Not installed\"}"
+else
+	. $WIFICFGFILE
+	if [ -n "$Name"  ]; then
 
-WIFIDHCP=$(nmcli con show $WIFISSID | grep ipv4.method | awk '{print $2}')
-# WIFIACTIVE=$(nmcli con show --active | grep wlan0)
-WIFICHECK=$(nmcli -t -f active,ssid dev wifi | egrep '^yes' | cut -d\' -f2)
-#-> yes:RobotTest
-
-
-
-
-		if [ -n "$WIFIDHCP" ] && [ $WIFIDHCP == "ipv4" ]; then
+		if [ -n "$DHCP" ] && [ $DHCP == "ipv4" ]; then
 
 			# DHCP address
 			WIFDATA=$(ifconfig $WIFIIFDEV | grep 'inet addr')
@@ -100,14 +84,14 @@ WIFICHECK=$(nmcli -t -f active,ssid dev wifi | egrep '^yes' | cut -d\' -f2)
 			WIFICFG="{\"macAddress\":\"$WIFIMAC\",\"status\":\"ENABLED\",\"name\":\"$Name\",\"ipAddress\":\"$Address\",\"gateway\":\"$Gateway\",\"dhcp\":\"FALSE\"}"
 
 		fi
-	#else
+	else
 		# not configured
-	#	WIFICFG="{\"name\":\"$WIFIIFDEV\",\"status\":\"DISABLED\",\"macAddress\":\"$WIFIMAC\"}"
-	#fi
-#fi
+		WIFICFG="{\"name\":\"$WIFIIFDEV\",\"status\":\"DISABLED\",\"macAddress\":\"$WIFIMAC\"}"
+	fi
+fi
 
-#WIFISSID=$(cat /etc/wpa_supplicant/wpa_supplicant-wlan0.conf | grep ssid)
-#WIFIPASSW=$(cat /etc/wpa_supplicant/wpa_supplicant-wlan0.conf | grep "#psk")
+WIFISSID=$(cat /etc/wpa_supplicant/wpa_supplicant-wlan0.conf | grep ssid)
+WIFIPASSW=$(cat /etc/wpa_supplicant/wpa_supplicant-wlan0.conf | grep "#psk")
 
 WIFISSID=${WIFISSID#*ssid=\"}
 WIFISSID=${WIFISSID%\"*}

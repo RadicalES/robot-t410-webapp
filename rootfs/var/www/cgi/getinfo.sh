@@ -9,7 +9,8 @@
 
 KERNEL=$(uname -r)
 HOST=$(cat /etc/hostname)
-DISTRO=$(cat /etc/issue)
+# DISTRO=$(cat /etc/issue)
+DISTRO=Raspbian
 IFACE=eth0
 APP="RobotBrowser"
 
@@ -20,15 +21,15 @@ else
     read MAC </sys/class/net/$IFACE/address
 
     DEVICEINFO="{
-        \"model\":\"ROBOT-T420\",
+        \"model\":\"ROBOT-T430\",
         \"serialno\":\"10001\",
         \"mandate\": \"2020-01-01\",
         \"etherports\": \"1\",
-        \"serial232ports\": \"2\",
+        \"serial232ports\": \"0\",
         \"serial485ports\": \"0\",
         \"usbslaveports\": \"0\",
-        \"usbhostports\": \"1\",
-        \"wlanports\": \"1\",
+        \"usbhostports\": \"2\",
+        \"wlanports\": \"0\",
         \"uptime\": \"1000\",
         \"hwrev\": \"1A\",
         \"firmware\":\"$DISTRO\",
@@ -37,7 +38,7 @@ else
         \"startapp\":\"$APP\"
     }"
 
-    echo -e "Access-Control-Allow-Origin: *\r\nContent-Type: application/json\r\n\r\n"
-    echo -e "{\"status\":\"OK\",\"deviceInfo\":$DEVICEINFO}"
+    echo "Access-Control-Allow-Origin: *\r\nContent-Type: application/json\r\n\r\n"
+    echo "{\"status\":\"OK\",\"deviceInfo\":$DEVICEINFO}"
 
 fi
