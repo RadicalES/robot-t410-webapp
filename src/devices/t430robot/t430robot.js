@@ -4,6 +4,7 @@ const Network = require('./network');
 const Serial = require('./serialport');
 const USB = require('./usbport');
 const CardReader = require('./cardreader');
+const PalPi = require('./palpi')
 const EventEmitter = require('events');
 
 class T430Device {
@@ -20,6 +21,7 @@ class T430Device {
     this.rs232port0 = new Serial("RS232", "Scale", 115200, "1", "EVEN", 0);
     this.rs232port1 = new Serial("RS232", "Scanner", 115200, "1", "EVEN", 1);
     this.cardReader = new CardReader(0, true, true, 8100, "[CARD}%s")
+    this.palPi = new PalPi(0, true, 5000, "http://palpi:8010", "0")
     this.usbport = new USB("USB");    
     this.scale = "RICHTER";
     this.scales = "MICRO-A12E,RICHTER";
@@ -169,6 +171,10 @@ class T430Device {
 
   getCardConfg() {
     return this.cardReader.getConfig();
+  }
+
+  getPalPiConfg() {
+    return this.palPi.getConfig();
   }
   
   resetSerialConfig() {

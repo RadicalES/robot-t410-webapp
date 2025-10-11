@@ -9,7 +9,7 @@ var uuid = "loading...";
 var statsInterval = null;
 var rebootTime;
 var rebootTimer
-const lib_version = "1.0.5";
+const lib_version = "1.0.6";
 const PROXY = "http://10.0.0.1"
 const USE_PROXY = false
 
@@ -296,6 +296,38 @@ function hidmenu() {
 	}
 }
 
+function loadLayerHTML(layerName, callback) {
+	const layerContainer = docGetElById('layerContainer');
+
+	// Check if layer already exists
+	if (docGetElById(layerName)) {
+		if (callback) callback();
+		return;
+	}
+
+	// Load the layer HTML file
+	fetch('layers/' + layerName + '.html')
+		.then(response => {
+			if (!response.ok) {
+				throw new Error(`Failed to load ${layerName}.html`);
+			}
+			return response.text();
+		})
+		.then(html => {
+			// Create a temporary container
+			const temp = document.createElement('div');
+			temp.innerHTML = html;
+
+			// Append to layer container
+			layerContainer.appendChild(temp.firstElementChild);
+
+			if (callback) callback();
+		})
+		.catch(error => {
+			log(0, 'Error loading layer: ' + error.message);
+		});
+}
+
 function hidMnuLyrs() {
 	const lrs = docGetElsByClsName('layer');
 	for(var lr of lrs) {
@@ -362,7 +394,9 @@ function loadLoading(evt) {
 function loadComms(evt) {
 	layer = 'layerComms';
 	loadLoading();
-	getData('getcomms.sh', this.setCommsCfgCB);
+	loadLayerHTML('layerComms', () => {
+		getData('getcomms.sh', this.setCommsCfgCB);
+	});
 }
 
 function setNetState (label, s) {
@@ -403,6 +437,14 @@ function setCardReader(cfg) {
 	sv('cardreader_output_format', cfg.outputFormat)
 }
 
+function setPalPi(cfg) {
+	showLayerByID('layerComms_palpi')
+	scb('palpi_enabled', cfg.enabled);
+	sv('palpi_local_port', cfg.localPort);
+	sv('palpi_remote_url', cfg.remoteURL)
+	sv('palpi_print_mode', cfg.printMode)
+}
+
 //HTML Link
 function resetCommsCfg () {
 
@@ -421,6 +463,7 @@ function setCommsCfgCB(data) {
 	hideLayerByID('layerComms_wired')
 	hideLayerByID('layerComms_wireless')
 	hideLayerByID('layerComms_cardreader')
+	hideLayerByID('layerComms_palpi')
 	
 	if(data.status=="OK") {
 		if("commsConfig" in data) {
@@ -433,6 +476,11 @@ function setCommsCfgCB(data) {
 			if("cardreaderConfig" in cfc) {
 				const crc = cfc["cardreaderConfig"]; // this is an array	
 				setCardReader(crc);				
+			}
+
+			if("palpiConfig" in cfc) {
+				const crc = cfc["palpiConfig"]; // this is an array	
+				setPalPi(crc);				
 			}
 		}
 	}
@@ -471,18 +519,40 @@ function getCardReaderSettings() {
 	'&outputFormat=' + ov('cardreader_output_format');
 }
 
+function getPalPiSettings() {
+	return 'enabled=' + ov('palpi_enabled') +
+	'&localPort=' + ov('palpi_local_port') +
+	'&remoteUrl=' + ov('palpi_remote_url') +
+	'&printMode=' + ov('palpi_print_mode');
+}
+
 function saveCommsCfg() {
 
 	const wiredCfg = getWiredSettings();
 	const cardreaderCfg = getCardReaderSettings();
+    const palpiCfg = getPalPiSettings();
 
 	setData('setcardreader.sh', cardreaderCfg, (data) => {
 		
 		if(data.status === 'OK') {
-			alertInfo('Success: Communications Settings Saved!');
+
+			setData('setpalpi.sh', palpiCfg, (data) => {
+
+				if(data.status === 'OK') {
+					alertInfo('Success: Communications Settings Saved!');
+				}
+				else {
+					log(0,'Error while saving serial settings!<br/>Result: ' + 
+						((typeof data.message !== 'undefined') ? 
+						data.message : "Unknown error occured!"));			
+				}
+
+			});
 		}
 		else {
-			log(0,'Error while saving serial settings!<br/>Result: ' + ((typeof data.message !== 'undefined') ? data.message : "Unknown error occured!"));			
+			log(0,'Error while saving serial settings!<br/>Result: ' + 
+				((typeof data.message !== 'undefined') ? 
+				data.message : "Unknown error occured!"));			
 		}
 	
 	});
@@ -504,7 +574,9 @@ function loadContact(evt) {
 //-----------------------------------------------------------------------------
 function loadHome(evt) {
 	loadLoading();
-	getData('getinfo.sh', this.setFormHomeCB);
+	loadLayerHTML('layerHome', () => {
+		getData('getinfo.sh', this.setFormHomeCB);
+	});
 }
 
 // Update UI with fetched data
@@ -588,7 +660,9 @@ function saveAdmin() {
 function loadApp(evt) {
 	layer = 'layerApp';
 	loadLoading();
-	getData('getapp.sh', this.setFormAppCB);
+	loadLayerHTML('layerApp', () => {
+		getData('getapp.sh', this.setFormAppCB);
+	});
 }
 
 function resetAppCfg() {

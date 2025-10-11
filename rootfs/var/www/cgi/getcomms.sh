@@ -1,20 +1,31 @@
 #!/bin/bash
 #
-# getapp.sh
+# getcomms.sh
 # CGI Script to retrieve the device environment data
 #
-# (C) 2017-2022, Radical Electronic Systems - www.radicalsystems.co.za
+# (C) 2017-2025, Radical Electronic Systems - www.radicalsystems.co.za
 # Written by Jan Zwiegers, jan@radicalsystems.co.za
 
 
-CFGFILE=/etc/formfactor/cardreader.config
+CARDCFGFILE=/etc/formfactor/cardreader.conf
+PALPICFGFILE=/etc/formfactor/palpi.conf
+PALPISETUPFILE=/etc/formfactor/palpi_settings.py
 
 SERVER_CONFIG_URL="http://www.radicalsystems.co.za"
 TAG_NAME="NOT SET"
 
-if [ -e $CFGFILE ]; then
-  . $CFGFILE
+if [ -e $CARDCFGFILE ]; then
+  . $CARDCFGFILE
 fi
+
+if [ -e $PALPICFGFILE ]; then
+  . $PALPICFGFILE
+fi
+
+if [ -e $PALPISETUPFILE ]; then
+  . $PALPISETUPFILE
+fi
+
 
 CONNECTIONS=$(nmcli -g NAME,TYPE,ACTIVE,STATE,UUID,DEVICE con show)
 
@@ -85,7 +96,15 @@ CARDREADER_CFG="\"cardreaderConfig\":{
 
 NET_CFG="\"networkConfig\":[$LAN_CFG]"
 
-COMMS_CFG="{$CARDREADER_CFG,$NET_CFG}"
+PALPI_CFG="\"palpiConfig\":{
+ \"index\":\"0\",
+  \"enabled\":\"$PALPI_SERVICE_ENABLED\",
+  \"localPort\":\"$PALPI_SERVICE_PORT\",
+  \"remoteURL\":\"$PALPI_API_URL\",
+  \"printMode\":\"$PALPI_PRINT_MODE\"
+}"
+
+COMMS_CFG="{$CARDREADER_CFG,$NET_CFG,$PALPI_CFG}"
 JSON="\"status\":\"OK\",\"commsConfig\":$COMMS_CFG";
 
 echo -e "Access-Control-Allow-Origin: *\r\nContent-Type: application/json\r\n\r\n"

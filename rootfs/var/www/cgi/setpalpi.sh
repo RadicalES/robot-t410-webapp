@@ -1,23 +1,23 @@
 #!/bin/bash
 #
-# setcardreader.sh
-# CGI script to save all card reader related parameters
+# setpalpi.sh
+# CGI script to save PalPi service settings
 #
 # (C) 2017-2025, Radical Electronic Systems - www.radicalsystems.co.za
 # Written by Jan Zwiegers, jan@radicalsystems.co.za
 
-CARDREADER_DESC="
-# Robot-T430 Card Reader Settings\n# (C) 2025, Radical Electronic Systems\n
-# http://www.radicalsystems.co.za info@radicalsystems.co.za\n\n
+PALPI_DESC="
+# Robot-T430 PalPi Card Reader Settings\n# (C) 2025, Paltrack (PTY) LTD
+# http://www.paltrack.co.za info@paltrack.co.za\n
 "
 
 # CardReader Websocket Server Settings
-CARDWS_SVR_ENABLED=TRUE
-CARDWS_SVR_SPORT=ttyS0
-CARDWS_SVR_WPORT=8100
-CARDWS_SVR_FOREIGN=FALSE
-CARDWS_CARD_SHORT=TRUE
-CARDWS_OUTPUT_FORMAT="[CARD]:%s"
+PALPI_SERVICE_ENABLED=TRUE
+PALPI_SERIAL_PORT=ttyS0
+PALPI_SERIAL_BAUDATE=9600
+PALPI_PRINT_MODE='0'
+PALPI_API_URL="http://plapi:8010"
+PALPI_SERVICE_PORT=5000
 
 parse_params () {
   PARAM=$1
@@ -48,16 +48,16 @@ parse_params () {
       fi
 
       if [ $1 = "enabled" ]; then
-        CARDWS_SVR_ENABLED=$VAL;
+        PALPI_SERVICE_ENABLED=$VAL;
 
-      elif [ $1 = "foreignConnect" ]; then
-        CARDWS_SVR_FOREIGN=$VAL;
+      elif [ $1 = "localPort" ]; then
+        PALPI_SERVICE_PORT=$VAL;
 
-      elif [ $1 = "serverPort" ]; then
-        CARDWS_SVR_WPORT=$2;
+      elif [ $1 = "remoteUrl" ]; then
+        PALPI_API_URL=$2;
 
-      elif [ $1 = "outputFormat" ]; then
-        CARDWS_OUTPUT_FORMAT=$2;
+      elif [ $1 = "printMode" ]; then
+        PALPI_PRINT_MODE=$2;
 
       # else
   	  #   echo -en "Unknown tag=$1 value=$2\n" >> /etc/formfactor/appsetting.txt
@@ -67,17 +67,23 @@ parse_params () {
   IFS="$OIFS"
 }
 
-configure_cardreader () {
+configure_palpi () {
 
-CARDREADER_CFG="# Application Settings\n\n
-CARDWS_SVR_ENABLED=$CARDWS_SVR_ENABLED\n
-CARDWS_SVR_FOREIGN=$CARDWS_SVR_FOREIGN\n
-CARDWS_SVR_WPORT=$CARDWS_SVR_WPORT\n
-CARDWS_OUTPUT_FORMAT=$CARDWS_OUTPUT_FORMAT\n
-CARDWS_SVR_SPORT=ttyS0\n
-CARDWS_CARD_SHORT=TRUE\n"
-  echo -e "$CARDREADER_DESC" > /etc/formfactor/cardreader.conf
-  echo -e $CARDREADER_CFG >> /etc/formfactor/cardreader.conf
+PALPI_CFG="# PalPi Service Settings\n
+PALPI_SERVICE_ENABLED=$PALPI_SERVICE_ENABLED
+PALPI_SERVICE_PORT=$PALPI_SERVICE_PORT\n"
+
+  echo -e "$PALPI_DESC" > /etc/formfactor/palpi.conf
+  echo -e $PALPI_CFG >> /etc/formfactor/palpi.conf
+
+PALPI_SETUP="# # PalPi Python Service Settings\n
+PALPI_SERIAL_PORT=$PALPI_SERIAL_PORT\n
+PALPI_SERIAL_BAUDATE=$PALPI_SERIAL_BAUDATE\n
+PALPI_API_URL=$PALPI_API_URL\n
+PALPI_PRINT_MODE=$PALPI_PRINT_MODE\n"
+
+  echo -e "$PALPI_DESC" > /etc/formfactor/palpi_settings.py
+  echo -e $PALPI_SETUP >> /etc/formfactor/palpi_settings.py
 }
 
 
@@ -87,7 +93,7 @@ if [ $REQUEST_METHOD = "POST" ]; then
     if [ "$CONTENT_LENGTH" -gt 0 ]; then
       read -n $CONTENT_LENGTH POST_DATA
       parse_params $POST_DATA
-      configure_cardreader
+      configure_palpi
       echo "{\"status\":\"OK\", \"data\":\"$RESULT\"}"
     else 
         echo "{\"status\":\"FAILED\", \"message\":\"no data in body\"}"
