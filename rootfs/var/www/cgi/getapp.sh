@@ -3,11 +3,11 @@
 # getapp.sh
 # CGI Script to retrieve the device environment data
 #
-# (C) 2017-2022, Radical Electronic Systems - www.radicalsystems.co.za
+# (C) 2017-2025, Radical Electronic Systems - www.radicalsystems.co.za
 # Written by Jan Zwiegers, jan@radicalsystems.co.za
 
 
-CFGFILE=/etc/formfactor/appconfig
+CFGFILE=/etc/formfactor/app.conf
 
 SERVER_CONFIG_URL="http://www.radicalsystems.co.za"
 API_PROTOCOL='ROBOT-API'
@@ -31,7 +31,6 @@ APP_CFG="{
   \"scale\":\"$SCALE_TYPE\",
   \"startapps\":\"DESKTOP,BROWSER\",
   \"startapp\":\"$START_APP\"
-  
   }"
 
 JSON="\"status\":\"OK\",\"appConfig\":$APP_CFG";

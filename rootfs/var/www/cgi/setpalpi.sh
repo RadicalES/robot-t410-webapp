@@ -13,7 +13,7 @@ PALPI_DESC="
 
 # CardReader Websocket Server Settings
 PALPI_SERVICE_ENABLED=TRUE
-PALPI_SERIAL_PORT=ttyS0
+PALPI_SERIAL_PORT="\"ttyS0\""
 PALPI_SERIAL_BAUDATE=9600
 PALPI_PRINT_MODE='0'
 PALPI_API_URL="http://plapi:8010"
@@ -33,12 +33,6 @@ parse_params () {
       IFS='=';
       set -- $i;
 
-      if [ $2 = "1" ]; then
-        VAL="yes";
-      else
-        VAL="no";
-      fi
-
       if [ $2 = "true" ]; then
         VAL="TRUE";
       fi
@@ -51,10 +45,13 @@ parse_params () {
         PALPI_SERVICE_ENABLED=$VAL;
 
       elif [ $1 = "localPort" ]; then
-        PALPI_SERVICE_PORT=$VAL;
+        PALPI_SERVICE_PORT=$2;
 
-      elif [ $1 = "remoteUrl" ]; then
-        PALPI_API_URL=$2;
+      elif [ $1 = "podServerUrl" ]; then
+        PALPI_POD_SERVER_URL=$2;
+
+      elif [ $1 = "syncServerUrl" ]; then
+        PALPI_SYNC_SERVER_URL=$2;
 
       elif [ $1 = "printMode" ]; then
         PALPI_PRINT_MODE=$2;
@@ -69,21 +66,22 @@ parse_params () {
 
 configure_palpi () {
 
-PALPI_CFG="# PalPi Service Settings\n
+PALPI_CFG="# PalPi Service Settings
 PALPI_SERVICE_ENABLED=$PALPI_SERVICE_ENABLED
 PALPI_SERVICE_PORT=$PALPI_SERVICE_PORT\n"
 
   echo -e "$PALPI_DESC" > /etc/formfactor/palpi.conf
-  echo -e $PALPI_CFG >> /etc/formfactor/palpi.conf
+  echo -e "$PALPI_CFG" >> /etc/formfactor/palpi.conf
 
-PALPI_SETUP="# # PalPi Python Service Settings\n
-PALPI_SERIAL_PORT=$PALPI_SERIAL_PORT\n
-PALPI_SERIAL_BAUDATE=$PALPI_SERIAL_BAUDATE\n
-PALPI_API_URL=$PALPI_API_URL\n
-PALPI_PRINT_MODE=$PALPI_PRINT_MODE\n"
+PALPI_SETUP="# PalPi Python Service Settings
+PALPI_SERIAL_PORT=$PALPI_SERIAL_PORT
+PALPI_SERIAL_BAUDATE=$PALPI_SERIAL_BAUDATE
+PALPI_POD_SERVER_URL=\"$PALPI_POD_SERVER_URL\"
+PALPI_SYNC_SERVER_URL=\"$PALPI_SYNC_SERVER_URL\"
+PALPI_PRINT_MODE=\"$PALPI_PRINT_MODE\"\n"
 
   echo -e "$PALPI_DESC" > /etc/formfactor/palpi_settings.py
-  echo -e $PALPI_SETUP >> /etc/formfactor/palpi_settings.py
+  echo -e "$PALPI_SETUP" >> /etc/formfactor/palpi_settings.py
 }
 
 

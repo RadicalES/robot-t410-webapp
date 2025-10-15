@@ -100,7 +100,8 @@ PALPI_CFG="\"palpiConfig\":{
  \"index\":\"0\",
   \"enabled\":\"$PALPI_SERVICE_ENABLED\",
   \"localPort\":\"$PALPI_SERVICE_PORT\",
-  \"remoteURL\":\"$PALPI_API_URL\",
+  \"podServerUrl\":\"$PALPI_POD_SERVER_URL\",
+  \"syncServerUrl\":\"$PALPI_SYNC_SERVER_URL\",
   \"printMode\":\"$PALPI_PRINT_MODE\"
 }"
 

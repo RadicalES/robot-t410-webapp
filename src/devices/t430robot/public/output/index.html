@@ -40,7 +40,7 @@ Robot-T430 Web Application 1.0.1
 </header>
 
 <main class="w3-container">
-	
+
 	<div class="w3-light-grey w3-border page">
 
 		<div id="layerLoading" class="layer">
@@ -50,13 +50,16 @@ Robot-T430 Web Application 1.0.1
 				</div>
 			</div>
 		</div>
-	
+
+		<!-- Dynamic layer content will be loaded here -->
+		<div id="layerContainer"></div>
+
 		<div id="layerErrModal" class="w3-modal">
 			<div class="w3-modal-content w3-red w3-round" style="padding: 1em 0; width:400px;">
 				<div class="w3-container">
 					<span onclick="hideLayerByID('layerErrModal')" class="w3-button w3-display-topright">&times;</span>
 					<strong><p id="errorMsg" style="font-size: 1.4em;"></p></strong>
-					<button class="w3-button w3-orange w3-round w3-right" onclick="hideLayerByID('layerErrModal')">OK</button> 
+					<button class="w3-button w3-orange w3-round w3-right" onclick="hideLayerByID('layerErrModal')">OK</button>
 				</div>
 			</div>
 		</div>
@@ -66,11 +69,11 @@ Robot-T430 Web Application 1.0.1
 				<div class="w3-container">
 					<span onclick="hideLayerByID('layerInfoModal')" class="w3-button w3-display-topright">&times;</span>
 					<strong><p id="infoMsg" style="font-size: 1.4em;"></p></strong>
-					<button class="w3-button w3-teal w3-round w3-right" onclick="hideLayerByID('layerInfoModal')">OK</button> 
+					<button class="w3-button w3-teal w3-round w3-right" onclick="hideLayerByID('layerInfoModal')">OK</button>
 				</div>
 			</div>
 		</div>
-		
+
 		<div id="layerLogin" class="layer">
 			<form action="" method="get" onsubmit="return appLogin()">
 				<div class="w3-card" style="padding: 1em; margin-bottom: 2em;">
@@ -87,12 +90,12 @@ Robot-T430 Web Application 1.0.1
 						loginPW.add( Validate.Length, {minimum: 6, maximum: 12} );
 						loginPW.add( Validate.Presence );
 					</script>
-				
+
 				</div>
 			</form>
 		</div>
-		
-				
+
+
 		<div id="layerAdmin" class="layer">
 			<form action="" method="get" onsubmit="return saveAdmin()">
 				<div class="w3-card" style="padding: 1em; margin-bottom: 2em;">
@@ -110,7 +113,7 @@ Robot-T430 Web Application 1.0.1
 						<input class="w3-input input-short" type="password" id="confirm-password" value="" autocomplete="confirm-password"/><p></p>
 					</div>
 				</div>
-		
+
 				<input class="w3-button w3-round w3-red" type="button" value="Reboot Device" onclick="deviceReboot()" />
 				<input class="w3-button w3-round w3-dark-grey" type="submit" value="Save Password" />
 
@@ -137,273 +140,18 @@ Robot-T430 Web Application 1.0.1
 				<span>http://www.radicalsystems.co.za</span>
 			</div>
 			<div class="w3-row">
-				<label class="is-label">email:</label> 
+				<label class="is-label">email:</label>
 				<span>info@radicalsystems.co.za</span>
 			</div>
 			<div class="w3-row">
-				<label class="is-label">Telephone Voip:</label> 
+				<label class="is-label">Telephone Voip:</label>
 				<span>+27 (0)21 982 4929</span>
 			</div>
 			<div class="w3-row">
-				<label class="is-label">Telephone Cell:</label> 
+				<label class="is-label">Telephone Cell:</label>
 				<span>+27 (0)76 224 2224</span>
 			</div>
 		</div>
-
-		<div id="layerHome" class="layer">
-			<div class="w3-card" style="padding: 1em; margin-bottom: 2em;">
-			<legend>Device Information</legend>
-			<div class="w3-row irow">
-				<label class="i-label">Model:</label> <input class="roTextBox" id="model" value="" readonly="readonly" />
-			</div>
-			<div class="w3-row irow">
-				<label class="i-label">Serial Number:</label> <input class="roTextBox" id="serialno" value="" readonly="readonly" />
-			</div>
-			<div class="w3-row irow">
-				<label class="i-label">Manufacturing Date:</label> <input class="roTextBox"  id="mandate" value="" readonly="readonly" />
-			</div>
-			<div class="w3-row irow">
-				<label class="i-label">Revision:</label> <input class="roTextBox" id="hwrev" value="" readonly="readonly"  />
-			</div>
-			<div class="w3-row irow">
-				<label class="i-label">Firmware Version:</label> <input class="roTextBox" id="firmware" value="" readonly="readonly"  />
-			</div>
-			<div class="w3-row irow">
-				<label class="i-label">MAC Address:</label> <input class="roTextBox" id="macaddress" value="" readonly="readonly" />
-			</div>
-			<div class="w3-row irow">
-				<label class="i-label">Kernel Verion:</label> <input class="roTextBox" id="kernel" value="" readonly="readonly"  />
-			</div>
-			<div class="w3-row irow">
-				<label class="i-label">Wlan Ports:</label> <input class="roTextBox" id="wlanports" value="" readonly="readonly" />
-			</div>
-			<div class="w3-row irow">
-				<label class="i-label">Ethernet Ports:</label> <input class="roTextBox" id="etherports" value="" readonly="readonly" />
-			</div>
-			<div class="w3-row irow">
-				<label class="i-label">RS232 Serial Ports:</label> <input class="roTextBox" id="serial232ports" value="" readonly="readonly" />
-			</div>
-			<div class="w3-row irow">
-				<label class="i-label">RS485 Serial Ports:</label> <input class="roTextBox" id="serial485ports" value="" readonly="readonly" />
-			</div>
-			<div class="w3-row irow">
-				<label class="i-label">USB Host Ports:</label> <input class="roTextBox" id="usbhostports" value="" readonly="readonly" />
-			</div>
-			<div class="w3-row irow">
-				<label class="i-label">USB Slave Ports:</label> <input class="roTextBox" id="usbslaveports" value="" readonly="readonly" />
-			</div>
-			<div class="w3-row irow">
-				<label class="i-label">Up Time:</label> <input class="roTextBox" id="uptime" value="" readonly="readonly" />
-			</div>
-			</div>
-		</div>
-
-		<div id="layerComms" class="layer">
-			<form id="formComms" action="" method="post" onsubmit="return saveCommsCfg()">
-				<div class="w3-card" style="padding: 1em; margin-bottom: 2em;">
-					<legend>Network Interfaces</legend>
-					
-					<div id="layerComms_wired" style="margin-top: 1em;">
-						<h3 id="net_wired_name"></h3>
-						<div class="w3-row">
-							<div class="w3-col l6 m6 irow">
-								<input class="w3-check small-check" type="checkbox" id="wired_dhcp" value="1" onclick="setNetState('wired',this.checked);" />
-								<label>DHCP</label>
-							</div>
-						</div>
-						<div class="w3-row">
-							<div class="w3-col l6 m6 irow">
-								<label>MAC Address:</label> 
-								<input class="w3-input input-short" name="wired_mac" disabled id="wired_mac" value="" />
-							</div>
-							<div class="w3-col l6 m6 irow">
-								<label>IP Address:</label> 
-								<input class="w3-input input-short" id="wired_ipa" value="" />
-							</div>
-						</div>
-						<div class="w3-row">
-							<div class="w3-col l6 m6 irow">
-								<label>Subnet Mask:</label>
-								<input class="w3-input input-short"  id="wired_nm" value="" />
-							</div>
-							<div class="w3-col l6 m6 irow">
-								<label>Default Gateway:</label>
-								<input class="w3-input input-short" id="wired_gw" value="" />
-							</div>
-						</div>
-						<div class="w3-row">
-							<div class="w3-col l6 m6 irow">
-								<label>DNS Server:</label>
-								<input class="w3-input input-short" id="wired_dns" value="" />
-							</div>
-							<div class="w3-col l6 m6 irow">
-								<label>NTP Server:</label>
-								<input class="w3-input input-short" id="wired_ntp" value="" />
-							</div>
-						</div>
-					</div>
-
-					<div id="layerComms_wireless" style="margin-top: 1em;">
-						<h3 id="net_wireless_name"></h3>
-						<div class="w3-row">
-							<div class="w3-col l6 m6 irow">
-								<input class="w3-check small-check" type="checkbox" id="wireless_dhcp" value="1" onclick="setNetState('wireless',this.checked);" />
-								<label>DHCP</label>
-							</div>
-						</div>
-						<div class="w3-row">
-							<div class="w3-col l6 m6 irow">
-								<label>MAC Address:</label> 
-								<input class="w3-input input-short" name="wireless_mac" disabled id="wireless_mac" value="" />
-							</div>
-							<div class="w3-col l6 m6 irow">
-								<label>IP Address:</label> 
-								<input class="w3-input input-short" id="wireless_ipa" value="" />
-							</div>
-						</div>
-						<div class="w3-row">
-							<div class="w3-col l6 m6 irow">
-								<label>Subnet Mask:</label>
-								<input class="w3-input input-short"  id="wireless_nm" value="" />
-							</div>
-							<div class="w3-col l6 m6 irow">
-								<label>Default Gateway:</label>
-								<input class="w3-input input-short" id="wireless_gw" value="" />
-							</div>
-						</div>
-						<div class="w3-row">
-							<div class="w3-col l6 m6 irow">
-								<label>DNS Server:</label>
-								<input class="w3-input input-short" id="wireless_dns" value="" />
-							</div>
-							<div class="w3-col l6 m6 irow">
-								<label>NTP Server:</label>
-								<input class="w3-input input-short" id="wireless_ntp" value="" />
-							</div>
-						</div>
-						<div class="w3-row">
-							<div class="w3-col l6 m6 irow">
-								<label>AP SSID:</label>
-								<input class="w3-input input-short" id="wireless_ssid" value="" />
-							</div>
-							<div class="w3-col l6 m6 irow">
-								<label>Passkey:</label>
-								<input class="w3-input input-short" type="password" id="wireless_passkey" value="" />
-							</div>
-						</div>
-						<div class="w3-row">
-							<div class="w3-col l6 m6 irow">
-								<label>AP MAC:</label>
-								<input class="w3-input input-short" disabled id="wireless_ap_mac" value="" />
-							</div>
-							<div class="w3-col l6 m6 irow">
-								<label>Signal Strength:</label>
-								<input class="w3-input input-short" disabled id="wireless_ap_signal" value="" />
-							</div>
-						</div>
-					</div>
-				</div>
-
-				<div class="w3-card" style="padding: 1em; margin-bottom: 2em;">
-					<legend>Websocket Servers</legend>
-					<div id="layerComms_cardreader" style="margin-top: 1em;">
-						<h3 >Card Reader</h3>
-						<div class="w3-row">
-							<div class="w3-col l6 m6 irow">
-								<input class="w3-check small-check" type="checkbox" id="cardreader_enabled"/>
-								<label>Enabled</label> 
-							</div>
-							<div class="w3-col l6 m6 irow">
-								<input class="w3-check small-check" type="checkbox" id="cardreader_foreign_connect"/>
-								<label>Allow Foreign Connections</label> 
-							</div>
-						</div>
-						<div class="w3-row">
-							<div class="w3-col l6 m6 irow">
-								<label>Websocket Port</label> 
-								<input class="w3-input input-short" id="cardreader_server_port" value="8100" />
-							</div>
-							<div class="w3-col l6 m6 irow">
-								<label>Output Format:</label> 
-								<input class="w3-input input-short" id="cardreader_output_format" value="[CARD]:%s" />
-							</div>
-						</div>
-					</div>
-				</div>
-							
-				<input class="w3-button w3-round w3-red" type="button" value="Reset Settings" onclick="resetCommsCfg()" />
-				<input class="w3-button w3-round w3-dark-grey" type="submit" value="Save Settings" />
-
-				<script type="text/javascript">
-					const ipa = new LiveValidation( 'wired_ipa', {onlyOnSubmit: false, validMessage: 'OK' } );
-					ipa.add( Validate.IPAddress );
-					ipa.add( Validate.Presence );
-
-					const sn = new LiveValidation( 'wired_nm', {onlyOnSubmit: false, validMessage: 'OK' } );
-					sn.add( Validate.IPAddress );
-					sn.add( Validate.Presence );
-
-					const gw = new LiveValidation( 'wired_gw', {onlyOnSubmit: false, validMessage: 'OK' } );
-					gw.add( Validate.IPAddress );
-					gw.add( Validate.Presence );
-
-					const ntp = new LiveValidation( 'wired_ntp', {onlyOnSubmit: false, validMessage: 'OK' } );
-					ntp.add( Validate.IPAddress );
-					ntp.add( Validate.Presence );
-
-					const dns = new LiveValidation( 'wired_dns', {onlyOnSubmit: false, validMessage: 'OK' } );
-					ntp.add( Validate.IPAddress );
-					ntp.add( Validate.Presence );
-
-				</script>
-			</form>
-		</div>
-
-		<div id="layerApp" class="layer">
-			<form id="formApplication" action="" method="post" onsubmit="return saveAppCfg()">
-				<div class="w3-card" style="padding: 1em; margin-bottom: 2em;">
-					<h2>Application Configuration</h2> <p></p>
-					<h3>Startup</h3>		
-					<div class="w3-row">
-						<div class="w3-col l6 m6 irow">
-							<label class="s-label">Application</label> 
-							<select class="w3-select w3-border select-short" id="app_start">
-							</select>					
-						</div>
-					</div>
-
-					<h3>Application Engine</h3>		
-				
-					<div class="w3-row">
-						<div class="w3-col l6 m6 irow">
-							<label class="s-label">Tag Name</label> 
-							<input class="w3-input in-rest" id="app_tag"/>					
-						</div>						
-					</div>
-
-					<div class="w3-row">
-						<div class="w3-col irow">
-							<label class="s-label">Setup URL:</label>
-							<input class="w3-input input-long" id="app_url" />
-						</div>
-					</div>
-
-				</div>
-			
-				<input class="w3-button w3-round w3-red" type="button" value="Reset Settings" onclick="resetAppCfg()" />
-				<input class="w3-button w3-round w3-dark-grey" type="submit" value="Save Settings" />
-
-				<script type="text/javascript">
-					var app_url = new LiveValidation( 'app_url', {onlyOnSubmit: false, validMessage: 'OK' } );
-					app_url.add( Validate.Presence );			
-					app_url.add( Validate.Length, {maximum: 90} );
-
-				</script>
-
-			</form>
-			
-			
-		</div> <!-- layerApp -->
 
 	</div> <!-- page -->
 

@@ -9,7 +9,7 @@ var uuid = "loading...";
 var statsInterval = null;
 var rebootTime;
 var rebootTimer
-const lib_version = "1.0.6";
+const lib_version = "1.0.7";
 const PROXY = "http://10.0.0.1"
 const USE_PROXY = false
 
@@ -441,7 +441,8 @@ function setPalPi(cfg) {
 	showLayerByID('layerComms_palpi')
 	scb('palpi_enabled', cfg.enabled);
 	sv('palpi_local_port', cfg.localPort);
-	sv('palpi_remote_url', cfg.remoteURL)
+	sv('palpi_pod_server_url', cfg.podServerUrl)
+	sv('palpi_sync_server_url', cfg.syncServerUrl)
 	sv('palpi_print_mode', cfg.printMode)
 }
 
@@ -522,7 +523,8 @@ function getCardReaderSettings() {
 function getPalPiSettings() {
 	return 'enabled=' + ov('palpi_enabled') +
 	'&localPort=' + ov('palpi_local_port') +
-	'&remoteUrl=' + ov('palpi_remote_url') +
+	'&podServerUrl=' + ov('palpi_pod_server_url') +
+	'&syncServerUrl=' + ov('palpi_sync_server_url') +
 	'&printMode=' + ov('palpi_print_mode');
 }
 

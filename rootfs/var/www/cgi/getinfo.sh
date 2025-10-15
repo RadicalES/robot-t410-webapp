@@ -3,39 +3,45 @@
 # getinfo.sh
 # CGI Script to retrieve the device environment data
 #
-# (C) 2016-2020, Radical Electronic Systems - www.radicalsystems.co.za
-# 2020-04-19: Updated for Hiawatha HTTP Server
+# (C) 2016-2025, Radical Electronic Systems - www.radicalsystems.co.za
 # Written by Jan Zwiegers, jan@radicalsystems.co.za
 
 KERNEL=$(uname -r)
 HOST=$(cat /etc/hostname)
-# DISTRO=$(cat /etc/issue)
-DISTRO=Raspbian
+DISTRO="RPI "$(cat /etc/issue | tr -cd '[:print:]' | tr -d '\\' | sed 's/ n l\[9;0\]//g')
+UPTIME=$(cat /proc/uptime | awk '{ print $1 }')
+PISERIAL=$(cat /proc/cpuinfo | grep Serial | cut -d ' ' -f 2 | cut -c 9-16 | tr '[:lower:]' '[:upper:]')
 IFACE=eth0
-APP="RobotBrowser"
+SERIAL=1000000000
+DATE=1999-01-01
+RELEASE=NOT-SET
+# cat  /etc/issue | jq -Rs '{issue: .}'
+
+# Manufacturing Information
+. /etc/formfactor/maninfo
+. /etc/robot-issue
 
 if [ "$REQUEST_METHOD" = "OPTIONS" ]; then
     echo -e "Access-Control-Allow-Origin: *\r\n\r\n"
 else
 
-    read MAC </sys/class/net/$IFACE/address
+    MAC=$(cat /sys/class/net/${IFACE}/address | tr '[:lower:]' '[:upper:]')
 
     DEVICEINFO="{
         \"model\":\"ROBOT-T430\",
-        \"serialno\":\"10001\",
-        \"mandate\": \"2020-01-01\",
+        \"serialno\":\"$SERIAL ($PISERIAL)\",
+        \"mandate\": \"$DATE\",
         \"etherports\": \"1\",
         \"serial232ports\": \"0\",
         \"serial485ports\": \"0\",
         \"usbslaveports\": \"0\",
         \"usbhostports\": \"2\",
         \"wlanports\": \"0\",
-        \"uptime\": \"1000\",
+        \"uptime\": \"$UPTIME\",
         \"hwrev\": \"1A\",
-        \"firmware\":\"$DISTRO\",
+        \"firmware\":\"$DISTRO ($RELEASE)\",
         \"kernel\":\"$KERNEL\",
-        \"macaddress\":\"$MAC\",
-        \"startapp\":\"$APP\"
+        \"macaddress\":\"$MAC\"
     }"
 
     echo "Access-Control-Allow-Origin: *\r\nContent-Type: application/json\r\n\r\n"

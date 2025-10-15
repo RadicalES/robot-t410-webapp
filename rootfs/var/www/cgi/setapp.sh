@@ -81,8 +81,8 @@ APP_ENGINE=$APP_ENGINE\n
 SCALE_TYPE=$SCALE_TYPE\n
 TAG_NAME=$TAG_NAME\n
 START_APP=$START_APP\n"
-  echo -e "$APP_DESC" > /etc/formfactor/appconfig
-  echo -e $APP_CFG >> /etc/formfactor/appconfig
+  echo -e "$APP_DESC" > /etc/formfactor/app.conf
+  echo -e $APP_CFG >> /etc/formfactor/app.conf
 }
 
 configure_hostname () {

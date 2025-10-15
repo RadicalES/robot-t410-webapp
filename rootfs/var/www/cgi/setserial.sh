@@ -56,8 +56,8 @@ if [ "$REQUEST_METHOD" = "POST" ]; then
         parse_params $POST_DATA
 
         CONFIG="SERIAL_ENABLED_0=$SERIAL_ENABLED_0\nSERIAL_BAUDRATE_0=$SERIAL_BAUDRATE_0\nSERIAL_ENABLED_1=$SERIAL_ENABLED_1\nSERIAL_BAUDRATE_1=$SERIAL_BAUDRATE_1\n\n"
-        echo -e $APP_DESC > /etc/formfactor/serialconfig
-        echo -e $CONFIG >> /etc/formfactor/serialconfig
+        echo -e $APP_DESC > /etc/formfactor/serial.conf
+        echo -e $CONFIG >> /etc/formfactor/serial.conf
 
 
         echo -e "{\"status\":\"OK\"}"
