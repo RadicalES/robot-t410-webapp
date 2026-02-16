@@ -1,0 +1,12 @@
+[Unit]
+Description=Network Failsafe - Reset to DHCP on button press
+After=NetworkManager.service
+Wants=NetworkManager.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/network-failsafe.sh
+RemainAfterExit=no
+
+[Install]
+WantedBy=multi-user.target

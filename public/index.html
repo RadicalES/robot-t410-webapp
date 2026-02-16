@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<!--
+(C) 2025 Radical Electronic Systems, info@radicalsystems.co.za
+Robot-T430 Web Application 1.0.1
+-->
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>Robot-T430</title>
+	<link rel="icon" href="favicon.png" type="image/png" />
+	<link rel="stylesheet" href="w3.css" type="text/css">
+	<link href="site.css" rel="stylesheet" type="text/css" />
+	<script type="text/javascript" src="robot.js"></script>
+	<script type="text/javascript" src="validation.js"></script>
+</head>
+
+<body>
+
+<header>
+	<div class="brand-bar w3-hide-small">
+		<img src="robot.png" alt="Robot" class="head-logo"/>
+		<span class="head-text">Device Administration</span>
+	</div>
+	<nav id="navhdr" class="w3-bar">
+		<button id="menuHome" class="w3-bar-item w3-button" onclick="loadHome()">Device</button>
+		<button id="menuApp" class="w3-bar-item w3-button w3-hide-small" onclick="loadApp()">Application</button>
+		<button id="menuComms" class="w3-bar-item w3-button w3-hide-small" onclick="loadComms()">Communications</button>
+		<button id="menuAdmin" class="w3-bar-item w3-button w3-hide-small" onclick="loadAdmin()">Administration</button>
+		<button id="menuContact" class="w3-bar-item w3-button w3-right w3-hide-small" onclick="loadContact()">Contact Us</button>
+		<button id="menuBurger" class="w3-bar-item w3-button w3-right w3-hide-large w3-hide-medium" onclick="hidmenu()">&#9776;</button>
+	</nav>
+
+	<nav id="navhid" class="w3-bar-block w3-hide w3-hide-large w3-hide-medium">
+		<button class="w3-bar-item w3-button" onclick="loadApp()">Application</button>
+		<button class="w3-bar-item w3-button" onclick="loadComms()">Communications</button>
+		<button class="w3-bar-item w3-button" onclick="loadAdmin()">Administration</button>
+		<button class="w3-bar-item w3-button" onclick="loadContact()">Contact Us</button>
+	</nav>
+</header>
+
+<main>
+
+	<div class="page">
+
+		<div id="layerLoading" class="layer">
+			<div class="w3-container" style="text-align:center; padding:3em 1em;">
+				<p style="font-size: 1.1em; color: #6b7280;">Loading...</p>
+			</div>
+		</div>
+
+		<!-- Dynamic layer content will be loaded here -->
+		<div id="layerContainer"></div>
+
+		<div id="layerErrModal" class="w3-modal">
+			<div class="w3-modal-content w3-round" style="padding: 1.5em; width:420px; background: #dc3545; color: #fff;">
+				<span onclick="hideLayerByID('layerErrModal')" class="w3-button w3-display-topright" style="color:#fff;">&times;</span>
+				<p id="errorMsg" style="font-size: 1em; font-weight: 500;"></p>
+				<button class="btn btn-secondary w3-right" onclick="hideLayerByID('layerErrModal')" style="margin-top:0.5em;">OK</button>
+			</div>
+		</div>
+
+		<div id="layerInfoModal" class="w3-modal">
+			<div class="w3-modal-content w3-round" style="padding: 1.5em; width:420px; background: #16a34a; color: #fff;">
+				<span onclick="hideLayerByID('layerInfoModal')" class="w3-button w3-display-topright" style="color:#fff;">&times;</span>
+				<p id="infoMsg" style="font-size: 1em; font-weight: 500;"></p>
+				<button class="btn btn-secondary w3-right" onclick="hideLayerByID('layerInfoModal')" style="margin-top:0.5em;">OK</button>
+			</div>
+		</div>
+
+		<div id="layerAdmin" class="layer">
+			<form action="" method="get" onsubmit="return saveAdmin()">
+				<div class="card">
+					<legend>Change Password</legend>
+					<div class="w3-row irow">
+						<label>Old Password:</label>
+						<input class="w3-input input-short" type="password" id="current-password" value="" autocomplete="current-password"/>
+					</div>
+					<div class="w3-row irow">
+						<label>New Password:</label>
+						<input class="w3-input input-short" type="password" id="new-password" value="" autocomplete="new-password"/>
+					</div>
+					<div class="w3-row irow">
+						<label>Confirm Password:</label>
+						<input class="w3-input input-short" type="password" id="confirm-password" value="" autocomplete="confirm-password"/>
+					</div>
+				</div>
+
+				<div style="display:flex; gap:0.8em; flex-wrap:wrap;">
+					<button class="btn btn-danger" type="button" onclick="deviceReboot()">Reboot Device</button>
+					<button class="btn btn-primary" type="submit">Save Password</button>
+				</div>
+
+				<script type="text/javascript">
+					var oldAdminPW = new LiveValidation('current-password', {validMessage: 'OK'});
+					oldAdminPW.add( Validate.Presence );
+					oldAdminPW.add( Validate.Length, {minimum: 4, maximum: 24} );
+					var newAdminPW = new LiveValidation('new-password', {validMessage: 'OK'});
+					newAdminPW.add( Validate.Presence );
+					newAdminPW.add( Validate.Length, {minimum: 4, maximum: 24} );
+					var confirmAdminPW = new LiveValidation('confirm-password', {validMessage: 'Match'});
+					confirmAdminPW.add( Validate.Presence );
+					confirmAdminPW.add( Validate.Confirmation, { match: 'new-password'} );
+				</script>
+			</form>
+		</div>
+
+		<div id="layerContact" class="layer">
+			<div class="card contact-hero">
+				<div class="contact-brand">
+					<img src="robot.png" alt="Robot" class="contact-logo" />
+					<div>
+						<h1 class="contact-company">Radical Electronic Systems CC</h1>
+						<p class="contact-tagline">Industrial IoT &amp; Embedded Solutions</p>
+					</div>
+				</div>
+				<p class="contact-intro">Have a question about your device? We'd love to hear from you.</p>
+			</div>
+
+			<div class="contact-grid">
+				<a href="http://www.radicalsystems.co.za" class="contact-card" target="_blank">
+					<div class="contact-icon">
+						<svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+					</div>
+					<div class="contact-detail">
+						<span class="contact-label">Website</span>
+						<span class="contact-value">www.radicalsystems.co.za</span>
+					</div>
+				</a>
+
+				<a href="mailto:info@radicalsystems.co.za" class="contact-card">
+					<div class="contact-icon">
+						<svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+					</div>
+					<div class="contact-detail">
+						<span class="contact-label">Email</span>
+						<span class="contact-value">info@radicalsystems.co.za</span>
+					</div>
+				</a>
+
+				<div class="contact-card">
+					<div class="contact-icon">
+						<svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+					</div>
+					<div class="contact-detail">
+						<span class="contact-label">VoIP</span>
+						<span class="contact-value">+27 (0)21 982 4929</span>
+					</div>
+				</div>
+
+				<div class="contact-card">
+					<div class="contact-icon">
+						<svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><path d="M12 18h.01"/></svg>
+					</div>
+					<div class="contact-detail">
+						<span class="contact-label">Mobile</span>
+						<span class="contact-value">+27 (0)76 224 2224</span>
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</div> <!-- page -->
+
+</main> <!--content-->
+
+<footer>
+	<div>
+		<a href="http://www.radicalsystems.co.za">www.radicalsystems.co.za</a> | <a href="mailto:info@radicalsystems.co.za">info@radicalsystems.co.za</a>
+		<div class="smallText">
+			&copy; 2012-2025 Radical Electronic Systems CC. All rights reserved.
+		</div>
+	</div>
+	<div style="text-align:right;">
+		<a href="http://radicalsystems.co.za/index.php/products-robot-t430">Robot-T430</a> | be in control
+		<div class="smallText" id="guiversion">
+			release: 1.0.1
+		</div>
+	</div>
+</footer>
+</body>
+</html>

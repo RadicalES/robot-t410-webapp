@@ -1,0 +1,42 @@
+<div id="layerApp" class="layer">
+	<form id="formApplication" action="" method="post" onsubmit="return saveAppCfg()">
+		<div class="card">
+			<h2>Application Configuration</h2>
+
+			<h3>Startup</h3>
+			<div class="w3-row">
+				<div class="w3-col l6 m6 irow">
+					<label class="s-label">Application</label>
+					<select class="w3-select w3-border select-short" id="app_start">
+					</select>
+				</div>
+			</div>
+
+			<h3>Application Engine</h3>
+			<div class="w3-row">
+				<div class="w3-col l6 m6 irow">
+					<label class="s-label">Tag Name</label>
+					<input class="w3-input in-rest" id="app_tag"/>
+				</div>
+			</div>
+			<div class="w3-row">
+				<div class="w3-col irow">
+					<label class="s-label">Setup URL:</label>
+					<input class="w3-input input-long" id="app_url" />
+				</div>
+			</div>
+		</div>
+
+		<div style="display:flex; gap:0.8em; flex-wrap:wrap;">
+			<button class="btn btn-danger" type="button" onclick="resetAppCfg()">Reset Settings</button>
+			<button class="btn btn-primary" type="submit">Save Settings</button>
+		</div>
+
+		<script type="text/javascript">
+			var app_url = new LiveValidation( 'app_url', {onlyOnSubmit: false, validMessage: 'OK' } );
+			app_url.add( Validate.Presence );
+			app_url.add( Validate.Length, {maximum: 90} );
+		</script>
+
+	</form>
+</div>

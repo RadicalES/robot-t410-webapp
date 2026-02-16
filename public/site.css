@@ -1,0 +1,644 @@
+/*
+(C) 2025 Radical Electronic Systems, info@radicalsystems.co.za
+Site Stylesheet v2.0
+*/
+
+/* ── Reset & Base ──────────────────────────────────────────── */
+*, *::before, *::after {
+	box-sizing: border-box;
+}
+
+:root {
+	--accent: #e8710a;
+	--accent-hover: #cf6400;
+	--accent-light: #fff3e6;
+	--bg: #f0f2f5;
+	--surface: #ffffff;
+	--surface-alt: #f8f9fa;
+	--text: #1a1a2e;
+	--text-muted: #6b7280;
+	--border: #e2e5e9;
+	--danger: #dc3545;
+	--danger-bg: #fef2f2;
+	--success: #16a34a;
+	--success-bg: #f0fdf4;
+	--nav-bg: #1e293b;
+	--nav-active: #334155;
+	--radius: 8px;
+	--radius-lg: 12px;
+	--shadow-sm: 0 1px 2px rgba(0,0,0,0.06);
+	--shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+	--shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.06);
+	--transition: 150ms ease;
+}
+
+body {
+	margin: 0;
+	padding: 0;
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+	font-size: 14px;
+	line-height: 1.5;
+	color: var(--text);
+	background-color: var(--bg);
+	-webkit-font-smoothing: antialiased;
+}
+
+/* ── Layout ────────────────────────────────────────────────── */
+header, main, footer {
+	margin-left: auto;
+	margin-right: auto;
+	max-width: 860px;
+}
+
+.page {
+	padding: 1.5em;
+	min-height: 65vh;
+	background: var(--surface);
+	border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+	border: 1px solid var(--border);
+	border-top: none;
+}
+
+/* ── Typography ────────────────────────────────────────────── */
+h1, h2, h3, h4 {
+	margin: 0 0 0.5em 0;
+	padding: 0;
+	color: var(--text);
+	font-weight: 600;
+}
+
+h1 { font-size: 1.5em; }
+
+h2 {
+	font-size: 1.1em;
+	font-weight: 600;
+	color: var(--text);
+	padding-bottom: 0.4em;
+	border-bottom: 2px solid var(--accent);
+	margin-bottom: 1em;
+}
+
+h3 {
+	font-size: 0.95em;
+	font-weight: 600;
+	color: var(--text-muted);
+	text-transform: uppercase;
+	letter-spacing: 0.03em;
+	padding-bottom: 0.3em;
+	border-bottom: 1px solid var(--border);
+	margin-bottom: 0.8em;
+	margin-top: 1.2em;
+}
+
+h4 {
+	font-size: 0.9em;
+	font-weight: 600;
+}
+
+p { margin: 0 0 1em 0; }
+
+a {
+	color: var(--accent);
+	text-decoration: none;
+}
+a:hover {
+	color: var(--accent-hover);
+	text-decoration: underline;
+}
+
+/* ── Header / Branding ─────────────────────────────────────── */
+.brand-bar {
+	display: flex;
+	align-items: center;
+	padding: 0.8em 1.2em;
+	background: var(--nav-bg);
+	border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+	border-bottom: 3px solid var(--accent);
+}
+
+.head-logo {
+	height: 44px;
+	margin-right: 1em;
+}
+
+.head-text {
+	font-weight: 700;
+	font-size: 1.3em;
+	color: #fff;
+	letter-spacing: -0.01em;
+}
+
+/* ── Navigation ────────────────────────────────────────────── */
+#navhdr {
+	display: flex;
+	background: var(--nav-bg);
+	padding: 0;
+	gap: 2px;
+}
+
+#navhdr .w3-bar-item {
+	background: none;
+	border: none;
+	color: #cbd5e1;
+	padding: 0.7em 1.2em;
+	font-size: 0.85em;
+	font-weight: 500;
+	cursor: pointer;
+	transition: background var(--transition), color var(--transition);
+	border-bottom: 2px solid transparent;
+}
+
+#navhdr .w3-bar-item:hover {
+	background: var(--nav-active);
+	color: #fff;
+}
+
+#navhdr .w3-bar-item.active {
+	color: #fff;
+	border-bottom-color: var(--accent);
+	background: var(--nav-active);
+}
+
+/* Mobile nav */
+#navhid {
+	background: var(--nav-bg);
+	border-top: 1px solid #334155;
+}
+#navhid .w3-bar-item {
+	background: none;
+	border: none;
+	color: #cbd5e1;
+	padding: 0.8em 1.2em;
+	font-size: 0.9em;
+	cursor: pointer;
+	width: 100%;
+	text-align: left;
+}
+#navhid .w3-bar-item:hover {
+	background: var(--nav-active);
+	color: #fff;
+}
+
+/* ── Cards ─────────────────────────────────────────────────── */
+.card {
+	background: var(--surface);
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	padding: 1.5em;
+	margin-bottom: 1.5em;
+	box-shadow: var(--shadow-sm);
+}
+
+/* Keep w3-card working too */
+.w3-card {
+	background: var(--surface);
+	border: 1px solid var(--border) !important;
+	border-radius: var(--radius) !important;
+	box-shadow: var(--shadow-sm) !important;
+}
+
+/* ── Section Titles (legend) ───────────────────────────────── */
+legend {
+	font-size: 1.1em;
+	font-weight: 700;
+	color: var(--text);
+	width: 100%;
+	padding-bottom: 0.5em;
+	border-bottom: 2px solid var(--accent);
+	margin-bottom: 1em;
+	text-shadow: none;
+}
+
+/* ── Form Rows ─────────────────────────────────────────────── */
+.irow {
+	padding-bottom: 0.6em;
+}
+
+.form-group {
+	margin-bottom: 0.8em;
+}
+
+/* ── Labels ────────────────────────────────────────────────── */
+.i-label {
+	display: inline-block;
+	padding: 0.4em 0.8em 0.4em 0;
+	width: 14em;
+	text-align: right;
+	font-weight: 500;
+	font-size: 0.9em;
+	color: var(--text-muted);
+}
+
+.is-label {
+	display: inline-block;
+	padding: 0.4em 0.8em 0.4em 0;
+	width: 10rem;
+	text-align: right;
+	font-weight: 500;
+	color: var(--text-muted);
+}
+
+.s-label {
+	display: inline-block;
+	width: 8em;
+	font-weight: 500;
+	font-size: 0.9em;
+	color: var(--text-muted);
+}
+
+label {
+	font-weight: 500;
+	font-size: 0.9em;
+	color: var(--text-muted);
+}
+
+/* ── Inputs ────────────────────────────────────────────────── */
+input[type="text"],
+input[type="password"],
+input[type="number"],
+input[type="url"],
+input[type="email"],
+.w3-input,
+.w3-select,
+select {
+	border: 1px solid var(--border);
+	border-radius: 6px;
+	padding: 0.5em 0.75em;
+	font-size: 0.9em;
+	color: var(--text);
+	background: var(--surface);
+	transition: border-color var(--transition), box-shadow var(--transition);
+	outline: none;
+}
+
+input:focus,
+.w3-input:focus,
+.w3-select:focus,
+select:focus {
+	border-color: var(--accent);
+	box-shadow: 0 0 0 3px rgba(232, 113, 10, 0.15);
+}
+
+.input-short {
+	width: 100%;
+	max-width: 20em;
+}
+
+.in-rest {
+	display: inline-block;
+	width: 50%;
+}
+
+.input-long {
+	display: inline-block;
+	width: 80%;
+}
+
+.select-short {
+	display: block;
+	width: 100%;
+	max-width: 20em;
+}
+
+/* Read-only fields */
+.roTextBox {
+	width: 100%;
+	max-width: 280px;
+	border: 1px solid var(--border);
+	border-radius: 6px;
+	color: var(--text);
+	background-color: var(--surface-alt);
+	pointer-events: none;
+	padding: 0.5em 0.75em;
+	font-size: 0.9em;
+}
+
+.textBox {
+	border: 1px solid var(--border);
+	border-radius: 6px;
+	color: var(--text);
+	padding: 0.5em 0.75em;
+}
+
+/* Checkboxes */
+.small-check {
+	width: 1.2em;
+	height: 1.2em;
+	accent-color: var(--accent);
+	vertical-align: middle;
+	margin-right: 0.3em;
+}
+
+.check-bottom {
+	margin-top: 1em;
+}
+
+/* ── Buttons ───────────────────────────────────────────────── */
+.btn {
+	display: inline-block;
+	padding: 0.6em 1.5em;
+	border: none;
+	border-radius: 6px;
+	font-size: 0.9em;
+	font-weight: 600;
+	cursor: pointer;
+	transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
+}
+.btn:hover {
+	transform: translateY(-1px);
+	box-shadow: var(--shadow-md);
+}
+.btn:active {
+	transform: translateY(0);
+}
+
+.btn-primary {
+	background: var(--accent);
+	color: #fff;
+}
+.btn-primary:hover {
+	background: var(--accent-hover);
+}
+
+.btn-danger {
+	background: #fff;
+	color: var(--danger);
+	border: 1px solid var(--danger);
+}
+.btn-danger:hover {
+	background: var(--danger);
+	color: #fff;
+}
+
+.btn-secondary {
+	background: var(--nav-bg);
+	color: #fff;
+}
+.btn-secondary:hover {
+	background: #334155;
+}
+
+/* Keep w3-button styles working */
+.w3-button {
+	border-radius: 6px !important;
+	font-weight: 500;
+	transition: background var(--transition), transform var(--transition);
+}
+.w3-button:hover {
+	transform: translateY(-1px);
+}
+
+/* ── Layers ────────────────────────────────────────────────── */
+.layer {
+	padding-bottom: 1em;
+	animation: fadeIn 200ms ease;
+}
+
+@keyframes fadeIn {
+	from { opacity: 0; transform: translateY(4px); }
+	to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Loading State ─────────────────────────────────────────── */
+#layerLoading .w3-container {
+	text-align: center;
+	padding: 3em 1em;
+}
+
+#layerLoading p {
+	color: var(--text-muted);
+	font-size: 1em !important;
+}
+
+/* ── Modals ────────────────────────────────────────────────── */
+.w3-modal-content {
+	border-radius: var(--radius) !important;
+	box-shadow: var(--shadow-md);
+	overflow: hidden;
+}
+
+#layerErrModal .w3-modal-content {
+	background: var(--danger) !important;
+}
+
+#layerInfoModal .w3-modal-content {
+	background: var(--success) !important;
+}
+
+.w3-modal-content p {
+	font-size: 1em !important;
+	font-weight: 500;
+}
+
+/* ── Footer ────────────────────────────────────────────────── */
+footer {
+	padding: 1.2em 1em;
+	margin-top: 0.5em;
+	color: var(--text-muted);
+	font-size: 0.8em;
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-end;
+}
+
+footer a {
+	color: var(--accent);
+}
+
+.smallText {
+	font-size: 0.75em;
+	color: var(--text-muted);
+}
+
+/* ── Validation ────────────────────────────────────────────── */
+.LV_validation_message {
+	font-weight: 500;
+	font-size: 0.8em;
+	margin: 0 0 0 5px;
+}
+
+.LV_valid {
+	color: var(--success);
+}
+
+.LV_invalid {
+	color: var(--danger);
+}
+
+.LV_valid_field,
+input.LV_valid_field:hover,
+input.LV_valid_field:active,
+textarea.LV_valid_field:hover,
+textarea.LV_valid_field:active {
+	border-color: var(--success) !important;
+}
+
+.LV_invalid_field,
+input.LV_invalid_field:hover,
+input.LV_invalid_field:active,
+textarea.LV_invalid_field:hover,
+textarea.LV_invalid_field:active {
+	border-color: var(--danger) !important;
+}
+
+/* ── Utility ───────────────────────────────────────────────── */
+.darkGrey { color: #444; }
+.warning { color: var(--danger); }
+
+.infoTextBox {
+	border: none;
+	color: var(--text);
+	background: var(--surface-alt);
+	height: auto;
+	padding: 0.5em 0.75em;
+	border-radius: 6px;
+}
+
+fieldset {
+	border: 0;
+	width: auto;
+	padding: 0;
+	margin: 0;
+}
+
+/* ── Contact Page ──────────────────────────────────────────── */
+.contact-hero {
+	text-align: center;
+	padding: 2em 1.5em !important;
+	border-bottom: 3px solid var(--accent);
+}
+
+.contact-brand {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 1em;
+	margin-bottom: 1em;
+}
+
+.contact-logo {
+	height: 52px;
+	filter: none;
+}
+
+.contact-company {
+	font-size: 1.3em;
+	font-weight: 700;
+	color: var(--text);
+	margin: 0;
+	text-align: left;
+}
+
+.contact-tagline {
+	margin: 0.15em 0 0 0;
+	font-size: 0.85em;
+	color: var(--text-muted);
+	text-align: left;
+}
+
+.contact-intro {
+	color: var(--text-muted);
+	font-size: 0.95em;
+	margin: 0;
+}
+
+.contact-grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 1em;
+	margin-top: 1em;
+}
+
+.contact-card {
+	display: flex;
+	align-items: center;
+	gap: 1em;
+	padding: 1.2em;
+	background: var(--surface);
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	text-decoration: none;
+	color: var(--text);
+	transition: border-color var(--transition), box-shadow var(--transition), transform var(--transition);
+}
+
+a.contact-card:hover {
+	border-color: var(--accent);
+	box-shadow: var(--shadow-md);
+	transform: translateY(-2px);
+	text-decoration: none;
+	color: var(--text);
+}
+
+.contact-icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 44px;
+	height: 44px;
+	border-radius: 10px;
+	background: var(--accent-light);
+	color: var(--accent);
+	flex-shrink: 0;
+}
+
+.contact-detail {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+}
+
+.contact-label {
+	font-size: 0.75em;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: var(--text-muted);
+}
+
+.contact-value {
+	font-size: 0.95em;
+	font-weight: 500;
+	color: var(--text);
+	word-break: break-word;
+}
+
+/* ── Responsive ────────────────────────────────────────────── */
+@media (max-width: 600px) {
+	.brand-bar {
+		padding: 0.6em 1em;
+	}
+	.head-logo {
+		height: 32px;
+	}
+	.head-text {
+		font-size: 1.1em;
+	}
+	.i-label, .is-label {
+		display: block;
+		text-align: left;
+		width: auto;
+		padding-bottom: 0.2em;
+	}
+	.roTextBox, .input-short {
+		max-width: 100%;
+	}
+	.page {
+		padding: 1em;
+	}
+	footer {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 0.5em;
+	}
+	.contact-grid {
+		grid-template-columns: 1fr;
+	}
+	.contact-brand {
+		flex-direction: column;
+		text-align: center;
+	}
+	.contact-company, .contact-tagline {
+		text-align: center;
+	}
+}
