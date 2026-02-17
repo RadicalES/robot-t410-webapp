@@ -10,7 +10,7 @@ var layer = '';
 var statsInterval = null;
 var rebootTime;
 var rebootTimer
-const lib_version = "1.0.7";
+const lib_version = "2.0.0";
 
 // Element selectors short hand
 // short hand for getting element by Id in the DOM
