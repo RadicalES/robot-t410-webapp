@@ -1,15 +1,38 @@
 #!/bin/sh
 #
 # resetcommscfg.sh
-# CGI Script to reset application configuration
+# CGI Script to reset communications configuration to defaults
 #
-# (C) 2017-2022, Radical Electronic Systems - www.radicalsystems.co.za
+# (C) 2017-2026, Radical Electronic Systems - www.radicalsystems.co.za
 # Written by Jan Zwiegers, jan@radicalsystems.co.za
 
-cp /etc/formfactor/app-orig.conf /etc/formfactor/app.conf
-cp /etc/formfactor/wifi-orig.conf /etc/formfactor/wifi.conf
-cp /etc/formfactor/serial-orig.conf /etc/formfactor/serial.conf
+echo "Access-Control-Allow-Origin: *"
+echo "Content-Type: application/json"
+echo ""
 
-echo -e "Access-Control-Allow-Origin: *\r\nContent-Type: application/json\r\n\r\n"
-echo -e "{\"status\":\"OK\"}"
+cat > /etc/formfactor/cardreader.conf <<'EOF'
+# Robot-T430 Card Reader Settings
+# (C) 2025, Radical Electronic Systems
 
+CARDWS_SVR_ENABLED=TRUE
+CARDWS_SVR_FOREIGN=TRUE
+CARDWS_SVR_WPORT=8100
+CARDWS_OUTPUT_FORMAT=[CARD]:%s
+CARDWS_SVR_SPORT=ttyS0
+CARDWS_CARD_SHORT=TRUE
+EOF
+
+cat > /etc/formfactor/palpi.conf <<'EOF'
+# PalPi Service Settings
+PALPI_SERVICE_ENABLED=FALSE
+PALPI_SERVICE_PORT=5000
+EOF
+
+cat > /etc/formfactor/serial.conf <<'EOF'
+SERIAL_ENABLED_0=false
+nSERIAL_BAUDRATE_0=9600
+SERIAL_ENABLED_1=false
+nSERIAL_BAUDRATE_1=9600
+EOF
+
+echo '{"status":"OK","message":"Communications settings reset to defaults"}'

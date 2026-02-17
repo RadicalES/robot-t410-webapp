@@ -44,14 +44,12 @@ function getData(cgi, callback) {
 		}
 	}
 	fetch('/cgi/' + cgi).then(response => {
-		console.log("get response: ", response)
 		if (!response.ok) {
 			throw new Error(`HTTP error, status = ${response.status}`);
 		}
 		
 		return response.json();
 	}).then(data => {
-		console.log("data: ", data)
 		if("status" in data) {
 			if(data.status == "OK") {
 				callback(data);
@@ -80,10 +78,7 @@ function setData(cgi, data, callback) {
 		headers: headers
 	}
 
-	console.log("DATA: " + data)
-
 	fetch('/cgi/' + cgi, params).then(response => {
-		console.log("post response: ", response)
 		if (!response.ok) {
 			throw new Error(`HTTP error, status = ${response.status}`);
 		}
@@ -96,7 +91,6 @@ function setData(cgi, data, callback) {
 		
 		return response.json();
 	}).then(data => {
-		console.log("data: ", data)
 		if("status" in data) {
 			if(data.status == "OK") {
 				callback(data);
@@ -136,19 +130,19 @@ function log(l,m) {
 		alertError(m);
 	}
 	else if(l == 1) {
-		console.info(m); //Blue color text with icon
+		console.info(m);
 	}
 	else if(l == 2) {
-		console.log(m); //Black color text with no icon
+		console.log(m);
 	}
 	else if(l == 3) {
-		console.debug(m); //Pure black color text
+		//console.debug(m);
 	}
 	else if(l == 4) {
-		console.warn(m); //Yellow color text with icon
+		console.warn(m);
 	}
 	else if(l == 5) {
-		console.error(m); //Red Color text with icon
+		console.error(m);
 	}
 }
 
@@ -428,6 +422,7 @@ function setCardReader(cfg) {
 	scb('cardreader_foreign_connect', cfg.foreignConnect);
 	sv('cardreader_server_port', cfg.serverPort)
 	sv('cardreader_output_format', cfg.outputFormat)
+	updateSerialServiceState();
 }
 
 function setPalPi(cfg) {
@@ -437,6 +432,26 @@ function setPalPi(cfg) {
 	sv('palpi_pod_server_url', cfg.podServerUrl)
 	sv('palpi_sync_server_url', cfg.syncServerUrl)
 	sv('palpi_print_mode', cfg.printMode)
+	updateSerialServiceState();
+}
+
+function toggleSerialService(source) {
+	var palpi = docGetElById('palpi_enabled');
+	var cardreader = docGetElById('cardreader_enabled');
+	if (source === 'palpi' && palpi.checked) {
+		cardreader.checked = false;
+	} else if (source === 'cardreader' && cardreader.checked) {
+		palpi.checked = false;
+	}
+}
+
+function updateSerialServiceState() {
+	var palpi = docGetElById('palpi_enabled');
+	var cardreader = docGetElById('cardreader_enabled');
+	if (!palpi || !cardreader) return;
+	if (palpi.checked && cardreader.checked) {
+		cardreader.checked = false;
+	}
 }
 
 //HTML Link

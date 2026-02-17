@@ -1,13 +1,31 @@
 #!/bin/sh
 #
 # resetappcfg.sh
-# CGI Script to reset communications configuration
+# CGI Script to reset application configuration to defaults
 #
-# (C) 2017-2022, Radical Electronic Systems - www.radicalsystems.co.za
+# (C) 2017-2026, Radical Electronic Systems - www.radicalsystems.co.za
 # Written by Jan Zwiegers, jan@radicalsystems.co.za
 
-cp /etc/formfactor/app-orig.conf /etc/formfactor/app.conf
+echo "Access-Control-Allow-Origin: *"
+echo "Content-Type: application/json"
+echo ""
 
-echo -e "Access-Control-Allow-Origin: *\r\nContent-Type: application/json\r\n\r\n"
-echo -e "{\"status\":\"OK\"}"
+CFGFILE=/etc/formfactor/app.conf
 
+cat > "$CFGFILE" <<'EOF'
+# Robot-T430 Application Settings
+# (C) 2017-2026, Radical Electronic Systems
+
+SERVER_CONFIG_URL=http://www.radicalsystems.co.za
+API_PROTOCOL=ROBOT-API
+APP_ENGINE=TERMINAL
+SCALE_TYPE=RICHTER
+TAG_NAME=T430
+START_APP=DESKTOP
+EOF
+
+if [ $? -eq 0 ]; then
+    echo '{"status":"OK","message":"Application settings reset to defaults"}'
+else
+    echo '{"status":"ERROR","message":"Failed to reset application settings"}'
+fi
