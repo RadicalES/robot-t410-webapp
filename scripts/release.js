@@ -85,6 +85,8 @@ fs.copyFileSync('deploy/network-failsafe.sh', path.join(distDir, 'network-failsa
 fs.chmodSync(path.join(distDir, 'network-failsafe.sh'), 0o755);
 fs.copyFileSync('deploy/network-failsafe.service', path.join(distDir, 'network-failsafe.service'));
 fs.copyFileSync('deploy/www-nmcli', path.join(distDir, 'www-nmcli'));
+fs.copyFileSync('deploy/batch-deploy.sh', path.join(distDir, 'batch-deploy.sh'));
+fs.chmodSync(path.join(distDir, 'batch-deploy.sh'), 0o755);
 fs.copyFileSync('deploy/INSTALL.md', path.join(distDir, 'README.md'));
 
 // Create tarball

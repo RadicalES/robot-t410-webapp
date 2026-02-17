@@ -4,7 +4,7 @@
 
 ## Prerequisites
 
-The target device (Raspberry Pi CM4) must have:
+The target device (Robot-T430) must have:
 - NGINX with fcgiwrap installed
 - NetworkManager
 - apache2-utils (for htpasswd)
@@ -46,13 +46,47 @@ sudo chown root:www-data /etc/nginx/.htpasswd
 sudo systemctl reload nginx
 ```
 
+## Batch Deploy (Multiple Devices)
+
+To deploy to multiple devices at once, create a text file with one IP per line:
+
+```
+# devices.txt
+10.224.40.1
+10.224.40.2
+10.224.41.50
+192.168.1.100
+```
+
+Then run:
+```bash
+DEVICE_PASS=t430 ./batch-deploy.sh devices.txt 10
+```
+
+The second argument is the number of parallel deployments (default: 5).
+
+Each device gets its own log file in `deploy-logs/`. A summary report is generated at the end:
+
+```
+deploy-logs/
+  report-20260217-091603.txt       Summary report
+  20260217-091603_10.224.40.1.log  Per-device log
+  20260217-091603_10.224.40.2.log
+  ...
+```
+
+Environment variables:
+- `DEVICE_USER` — SSH user (default: robot)
+- `DEVICE_PASS` — SSH password (required for sshpass)
+
 ## Release Contents
 
 ```
 html/                   Web interface files (minified)
 cgi/                    CGI bash scripts
 nginx.conf              NGINX site configuration
-sync.sh                 Deployment script
+sync.sh                 Single device deployment script
+batch-deploy.sh         Multi-device batch deployment script
 network-failsafe.sh     Boot-time DHCP reset script
 network-failsafe.service  Systemd service for failsafe
 www-nmcli               Sudoers file for network management

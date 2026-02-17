@@ -65,20 +65,26 @@ echo "=== Robot-T430 Deployment ==="
 echo "Target: ${DEVICE_USER}@${DEVICE_HOST}"
 echo ""
 
+# Install prerequisites if missing
+echo "[1/5] Checking prerequisites..."
+$SSH_CMD "${DEVICE_USER}@${DEVICE_HOST}" "\
+    dpkg -s apache2-utils >/dev/null 2>&1 || \
+    (echo 'Installing apache2-utils...' && sudo apt-get update -qq && sudo apt-get install -y -qq apache2-utils)"
+
 # Deploy static files
-echo "[1/4] Deploying web files..."
+echo "[2/5] Deploying web files..."
 rsync -avz --delete --rsync-path="sudo rsync" \
     "$HTML_DIR/" \
     "${DEVICE_USER}@${DEVICE_HOST}:${REMOTE_WWW}/"
 
 # Deploy CGI scripts
-echo "[2/4] Deploying CGI scripts..."
+echo "[3/5] Deploying CGI scripts..."
 rsync -avz --delete --rsync-path="sudo rsync" --chmod=755 \
     "$CGI_DIR/" \
     "${DEVICE_USER}@${DEVICE_HOST}:${REMOTE_CGI}/"
 
 # Deploy NGINX config
-echo "[3/4] Deploying NGINX config..."
+echo "[4/5] Deploying NGINX config..."
 $SCP_CMD "$NGINX_CONF" "${DEVICE_USER}@${DEVICE_HOST}:/tmp/robot-t430.conf"
 $SSH_CMD "${DEVICE_USER}@${DEVICE_HOST}" "\
     sudo cp /tmp/robot-t430.conf /etc/nginx/sites-available/robot-t430 && \
@@ -88,7 +94,7 @@ $SSH_CMD "${DEVICE_USER}@${DEVICE_HOST}" "\
     sudo systemctl reload nginx"
 
 # Deploy failsafe service
-echo "[4/4] Deploying network failsafe..."
+echo "[5/5] Deploying network failsafe..."
 $SCP_CMD "$FAILSAFE_SH" "${DEVICE_USER}@${DEVICE_HOST}:/tmp/network-failsafe.sh"
 $SCP_CMD "$FAILSAFE_SVC" "${DEVICE_USER}@${DEVICE_HOST}:/tmp/network-failsafe.service"
 $SCP_CMD "$SUDOERS_FILE" "${DEVICE_USER}@${DEVICE_HOST}:/tmp/www-nmcli"
@@ -105,5 +111,5 @@ echo ""
 echo "=== Deployment complete ==="
 echo "Access at http://${DEVICE_HOST}"
 echo ""
-echo "If this is a first-time install, run:"
-echo "  $SSH_CMD ${DEVICE_USER}@${DEVICE_HOST} 'sudo apt-get install -y apache2-utils && sudo htpasswd -c /etc/nginx/.htpasswd admin'"
+echo "If this is a first-time install, create the web UI password:"
+echo "  $SSH_CMD ${DEVICE_USER}@${DEVICE_HOST} 'sudo htpasswd -c /etc/nginx/.htpasswd robot && sudo chmod 660 /etc/nginx/.htpasswd && sudo chown root:www-data /etc/nginx/.htpasswd && sudo systemctl reload nginx'"
