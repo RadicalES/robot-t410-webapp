@@ -6,6 +6,7 @@
 // General HTML DOM Functions
 //-----------------------------------------------------------------------------
 var uuid = "loading...";
+var layer = '';
 var statsInterval = null;
 var rebootTime;
 var rebootTimer
@@ -387,7 +388,7 @@ function loadComms(evt) {
 	layer = 'layerComms';
 	loadLoading();
 	loadLayerHTML('layerComms', () => {
-		getData('getcomms.sh', this.setCommsCfgCB);
+		getData('getcomms.sh', setCommsCfgCB);
 	});
 }
 
@@ -554,7 +555,7 @@ function loadContact(evt) {
 function loadHome(evt) {
 	loadLoading();
 	loadLayerHTML('layerHome', () => {
-		getData('getinfo.sh', this.setFormHomeCB);
+		getData('getinfo.sh', setFormHomeCB);
 	});
 }
 
@@ -612,7 +613,7 @@ function loadApp(evt) {
 	layer = 'layerApp';
 	loadLoading();
 	loadLayerHTML('layerApp', () => {
-		getData('getapp.sh', this.setFormAppCB);
+		getData('getapp.sh', setFormAppCB);
 	});
 }
 
