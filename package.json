@@ -1,6 +1,6 @@
 {
   "name": "robot-t4x0-webapp",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "private": true,
   "type": "module",
   "description": "Robot-T430 User Interface",

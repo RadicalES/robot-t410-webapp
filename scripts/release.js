@@ -77,6 +77,14 @@ for (const file of cgiFiles) {
     fs.chmodSync(path.join(cgiDir, file), 0o755);
 }
 
+// Copy test pages
+const testDir = path.join(distDir, 'test');
+ensureDir(testDir);
+const testFiles = fs.readdirSync('test');
+for (const file of testFiles) {
+    fs.copyFileSync(path.join('test', file), path.join(testDir, file));
+}
+
 // Copy deploy files
 fs.copyFileSync('deploy/nginx.conf', path.join(distDir, 'nginx.conf'));
 fs.copyFileSync('deploy/sync.sh', path.join(distDir, 'sync.sh'));

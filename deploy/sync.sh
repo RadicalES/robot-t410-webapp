@@ -56,6 +56,7 @@ if [ -d "$SCRIPT_DIR/html" ]; then
     FAILSAFE_SH="$SCRIPT_DIR/network-failsafe.sh"
     FAILSAFE_SVC="$SCRIPT_DIR/network-failsafe.service"
     SUDOERS_FILE="$SCRIPT_DIR/www-nmcli"
+    TEST_DIR="$SCRIPT_DIR/test"
 else
     echo "No release build found. Run 'npm run release' first."
     exit 1
@@ -66,25 +67,33 @@ echo "Target: ${DEVICE_USER}@${DEVICE_HOST}"
 echo ""
 
 # Install prerequisites if missing
-echo "[1/5] Checking prerequisites..."
+echo "[1/6] Checking prerequisites..."
 $SSH_CMD "${DEVICE_USER}@${DEVICE_HOST}" "\
     dpkg -s apache2-utils >/dev/null 2>&1 || \
     (echo 'Installing apache2-utils...' && sudo apt-get update -qq && sudo apt-get install -y -qq apache2-utils)"
 
 # Deploy static files
-echo "[2/5] Deploying web files..."
+echo "[2/6] Deploying web files..."
 rsync -avz --delete --rsync-path="sudo rsync" \
     "$HTML_DIR/" \
     "${DEVICE_USER}@${DEVICE_HOST}:${REMOTE_WWW}/"
 
 # Deploy CGI scripts
-echo "[3/5] Deploying CGI scripts..."
+echo "[3/6] Deploying CGI scripts..."
 rsync -avz --delete --rsync-path="sudo rsync" --chmod=755 \
     "$CGI_DIR/" \
     "${DEVICE_USER}@${DEVICE_HOST}:${REMOTE_CGI}/"
 
+# Deploy test pages
+echo "[4/6] Deploying test pages..."
+if [ -d "$TEST_DIR" ]; then
+    rsync -avz --delete --rsync-path="sudo rsync" \
+        "$TEST_DIR/" \
+        "${DEVICE_USER}@${DEVICE_HOST}:/var/www/test/"
+fi
+
 # Deploy NGINX config
-echo "[4/5] Deploying NGINX config..."
+echo "[5/6] Deploying NGINX config..."
 $SCP_CMD "$NGINX_CONF" "${DEVICE_USER}@${DEVICE_HOST}:/tmp/robot-t430.conf"
 $SSH_CMD "${DEVICE_USER}@${DEVICE_HOST}" "\
     sudo cp /tmp/robot-t430.conf /etc/nginx/sites-available/robot-t430 && \
@@ -94,7 +103,7 @@ $SSH_CMD "${DEVICE_USER}@${DEVICE_HOST}" "\
     sudo systemctl reload nginx"
 
 # Deploy failsafe service
-echo "[5/5] Deploying network failsafe..."
+echo "[6/6] Deploying network failsafe..."
 $SCP_CMD "$FAILSAFE_SH" "${DEVICE_USER}@${DEVICE_HOST}:/tmp/network-failsafe.sh"
 $SCP_CMD "$FAILSAFE_SVC" "${DEVICE_USER}@${DEVICE_HOST}:/tmp/network-failsafe.service"
 $SCP_CMD "$SUDOERS_FILE" "${DEVICE_USER}@${DEVICE_HOST}:/tmp/www-nmcli"
