@@ -22,12 +22,6 @@ CARDWS_SVR_SPORT=ttyS0
 CARDWS_CARD_SHORT=TRUE
 EOF
 
-cat > /etc/formfactor/palpi.conf <<'EOF'
-# PalPi Service Settings
-PALPI_SERVICE_ENABLED=FALSE
-PALPI_SERVICE_PORT=5000
-EOF
-
 cat > /etc/formfactor/serial.conf <<'EOF'
 SERIAL_ENABLED_0=false
 nSERIAL_BAUDRATE_0=9600

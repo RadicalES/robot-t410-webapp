@@ -422,37 +422,8 @@ function setCardReader(cfg) {
 	scb('cardreader_foreign_connect', cfg.foreignConnect);
 	sv('cardreader_server_port', cfg.serverPort)
 	sv('cardreader_output_format', cfg.outputFormat)
-	updateSerialServiceState();
 }
 
-function setPalPi(cfg) {
-	showLayerByID('layerComms_palpi')
-	scb('palpi_enabled', cfg.enabled);
-	sv('palpi_local_port', cfg.localPort);
-	sv('palpi_pod_server_url', cfg.podServerUrl)
-	sv('palpi_sync_server_url', cfg.syncServerUrl)
-	sv('palpi_print_mode', cfg.printMode)
-	updateSerialServiceState();
-}
-
-function toggleSerialService(source) {
-	var palpi = docGetElById('palpi_enabled');
-	var cardreader = docGetElById('cardreader_enabled');
-	if (source === 'palpi' && palpi.checked) {
-		cardreader.checked = false;
-	} else if (source === 'cardreader' && cardreader.checked) {
-		palpi.checked = false;
-	}
-}
-
-function updateSerialServiceState() {
-	var palpi = docGetElById('palpi_enabled');
-	var cardreader = docGetElById('cardreader_enabled');
-	if (!palpi || !cardreader) return;
-	if (palpi.checked && cardreader.checked) {
-		cardreader.checked = false;
-	}
-}
 
 //HTML Link
 function resetCommsCfg () {
@@ -472,8 +443,6 @@ function setCommsCfgCB(data) {
 	hideLayerByID('layerComms_wired')
 	hideLayerByID('layerComms_wireless')
 	hideLayerByID('layerComms_cardreader')
-	hideLayerByID('layerComms_palpi')
-	
 	if(data.status=="OK") {
 		if("commsConfig" in data) {
 			const cfc = data["commsConfig"];			
@@ -487,10 +456,7 @@ function setCommsCfgCB(data) {
 				setCardReader(crc);				
 			}
 
-			if("palpiConfig" in cfc) {
-				const crc = cfc["palpiConfig"]; // this is an array	
-				setPalPi(crc);				
-			}
+
 		}
 	}
 	else {
@@ -528,28 +494,16 @@ function getCardReaderSettings() {
 	'&outputFormat=' + ov('cardreader_output_format');
 }
 
-function getPalPiSettings() {
-	return 'enabled=' + ov('palpi_enabled') +
-	'&localPort=' + ov('palpi_local_port') +
-	'&podServerUrl=' + ov('palpi_pod_server_url') +
-	'&syncServerUrl=' + ov('palpi_sync_server_url') +
-	'&printMode=' + ov('palpi_print_mode');
-}
-
 function saveCommsCfg() {
 
 	const wiredCfg = getWiredSettings();
 	const cardreaderCfg = getCardReaderSettings();
-	const palpiCfg = getPalPiSettings();
 
-	// Save all configs in sequence: network -> cardreader -> palpi
+	// Save all configs in sequence: network -> cardreader
 	setData('setnwk.sh', wiredCfg, (data) => {
 
 		setData('setcardreader.sh', cardreaderCfg, (data) => {
-
-			setData('setpalpi.sh', palpiCfg, (data) => {
-				alertInfo('Success: Communications Settings Saved!');
-			});
+			alertInfo('Success: Communications Settings Saved!');
 		});
 	});
 

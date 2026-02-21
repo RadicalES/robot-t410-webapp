@@ -8,22 +8,11 @@
 
 
 CARDCFGFILE=/etc/formfactor/cardreader.conf
-PALPICFGFILE=/etc/formfactor/palpi.conf
-PALPISETUPFILE=/etc/formfactor/palpi_settings.py
-
 SERVER_CONFIG_URL="http://www.radicalsystems.co.za"
 TAG_NAME="NOT SET"
 
 if [ -e $CARDCFGFILE ]; then
   . $CARDCFGFILE
-fi
-
-if [ -e $PALPICFGFILE ]; then
-  . $PALPICFGFILE
-fi
-
-if [ -e $PALPISETUPFILE ]; then
-  . $PALPISETUPFILE
 fi
 
 
@@ -96,16 +85,7 @@ CARDREADER_CFG="\"cardreaderConfig\":{
 
 NET_CFG="\"networkConfig\":[$LAN_CFG]"
 
-PALPI_CFG="\"palpiConfig\":{
- \"index\":\"0\",
-  \"enabled\":\"$PALPI_SERVICE_ENABLED\",
-  \"localPort\":\"$PALPI_SERVICE_PORT\",
-  \"podServerUrl\":\"$PALPI_POD_SERVER_URL\",
-  \"syncServerUrl\":\"$PALPI_SYNC_SERVER_URL\",
-  \"printMode\":\"$PALPI_PRINT_MODE\"
-}"
-
-COMMS_CFG="{$CARDREADER_CFG,$NET_CFG,$PALPI_CFG}"
+COMMS_CFG="{$CARDREADER_CFG,$NET_CFG}"
 JSON="\"status\":\"OK\",\"commsConfig\":$COMMS_CFG";
 
 echo -e "Access-Control-Allow-Origin: *\r\nContent-Type: application/json\r\n\r\n"

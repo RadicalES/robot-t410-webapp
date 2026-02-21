@@ -106,44 +106,12 @@
 		</div>
 
 		<div class="card">
-			<legend>Paltrack PalPi Services</legend>
-			<div id="layerComms_palpi" style="margin-top: 0.5em;">
-				<div class="w3-row">
-					<div class="w3-col l6 m6 irow">
-						<input class="w3-check small-check" type="checkbox" id="palpi_enabled" onclick="toggleSerialService('palpi')"/>
-						<label>Enabled</label>
-					</div>
-				</div>
-				<div class="w3-row">
-					<div class="w3-col l6 m6 irow">
-						<label>Print Mode</label>
-						<input class="w3-input input-short" id="palpi_print_mode" value="Simple" />
-					</div>
-					<div class="w3-col l6 m6 irow">
-						<label>Local Server Port</label>
-						<input class="w3-input input-short" id="palpi_local_port" value="5000" />
-					</div>
-				</div>
-				<div class="w3-row">
-					<div class="w3-col l6 m6 irow">
-						<label>POD Server URL</label>
-						<input class="w3-input input-short" id="palpi_pod_server_url" value="http://palpi:8010" />
-					</div>
-					<div class="w3-col l6 m6 irow">
-						<label>SYNC Server URL</label>
-						<input class="w3-input input-short" id="palpi_sync_server_url" value="http://palpi:8089" />
-					</div>
-				</div>
-			</div>
-		</div>
-
-		<div class="card">
 			<legend>Websocket Servers</legend>
 			<div id="layerComms_cardreader" style="margin-top: 0.5em;">
 				<h3>Card Reader</h3>
 				<div class="w3-row">
 					<div class="w3-col l6 m6 irow">
-						<input class="w3-check small-check" type="checkbox" id="cardreader_enabled" onclick="toggleSerialService('cardreader')"/>
+						<input class="w3-check small-check" type="checkbox" id="cardreader_enabled" />
 						<label>Enabled</label>
 					</div>
 					<div class="w3-col l6 m6 irow">
