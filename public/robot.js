@@ -305,8 +305,10 @@ function loadLayerHTML(layerName, callback) {
 			const temp = document.createElement('div');
 			temp.innerHTML = html;
 
-			// Append to layer container
-			layerContainer.appendChild(temp.firstElementChild);
+			// Append hidden to layer container (shown after data loads)
+			var el = temp.firstElementChild;
+			el.style.display = 'none';
+			layerContainer.appendChild(el);
 
 			if (callback) callback();
 		})
