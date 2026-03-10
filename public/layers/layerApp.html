@@ -1,0 +1,68 @@
+<div id="layerApp" class="layer">
+	<form id="formApplication" action="" method="post" onsubmit="return saveAppCfg()">
+		<div class="card">
+			<h2>Application Configuration</h2>
+
+			<h3>Window Manager</h3>
+			<div class="w3-row irow">
+				<label>Load URL:</label>
+				<input class="w3-input input-long" id="app_url" />
+			</div>
+			<div class="w3-row irow">
+				<label>Layout:</label>
+				<select class="w3-select w3-border select-short" id="app_layout">
+					<option value="portrait">Portrait</option>
+					<option value="landscape">Landscape</option>
+				</select>
+			</div>
+		</div>
+
+		<div class="card">
+			<h2>TTY WebSocket Server</h2>
+			<div class="w3-row">
+				<div class="w3-col s6 m6 l6 irow">
+					<input class="w3-check small-check" type="checkbox" id="serws_enabled" />
+					<label>Enabled</label>
+				</div>
+				<div class="w3-col s6 m6 l6 irow">
+					<input class="w3-check small-check" type="checkbox" id="serws_foreign" />
+					<label>Allow Foreign Connections</label>
+				</div>
+			</div>
+			<div class="w3-row">
+				<div class="w3-col s6 m6 l6 irow">
+					<label>Serial Port:</label>
+					<input class="w3-input input-short" id="serws_sport" value="" />
+				</div>
+				<div class="w3-col s6 m6 l6 irow">
+					<label>WebSocket Port:</label>
+					<input class="w3-input input-short" type="number" id="serws_wport" value="" />
+				</div>
+			</div>
+			<div class="w3-row irow">
+				<div class="w3-col s6 m6 l6">
+					<label>Baud Rate:</label>
+					<select class="w3-select w3-border select-short" id="serws_baud">
+						<option value="9600">9600</option>
+						<option value="19200">19200</option>
+						<option value="38400">38400</option>
+						<option value="57600">57600</option>
+						<option value="115200">115200</option>
+					</select>
+				</div>
+			</div>
+		</div>
+
+		<div style="display:flex; gap:0.8em; flex-wrap:wrap;">
+			<button class="btn btn-danger" type="button" onclick="resetAppCfg()">Reset Settings</button>
+			<button class="btn btn-primary" type="submit">Save Settings</button>
+		</div>
+
+		<script type="text/javascript">
+			var app_url = new LiveValidation( 'app_url', {onlyOnSubmit: false, validMessage: 'OK' } );
+			app_url.add( Validate.Presence );
+			app_url.add( Validate.Length, {maximum: 200} );
+
+		</script>
+	</form>
+</div>

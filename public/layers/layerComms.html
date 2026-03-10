@@ -1,0 +1,159 @@
+<div id="layerComms" class="layer">
+	<form id="formComms" action="" method="post" onsubmit="return saveCommsCfg()">
+
+		<div class="comms-tabs">
+			<button type="button" class="comms-tab active" id="tabLAN" onclick="switchCommsTab('wired')">LAN</button>
+			<button type="button" class="comms-tab" id="tabWiFi" onclick="switchCommsTab('wireless')">WiFi</button>
+		</div>
+
+		<div class="card comms-card">
+
+			<div id="layerComms_wired" class="comms-panel">
+				<div class="w3-row">
+					<div class="w3-col s6 m6 l6 irow">
+						<input class="w3-check small-check" type="checkbox" id="wired_dhcp" value="1" onclick="setNetState('wired',this.checked);" />
+						<label>DHCP</label>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col s6 m6 l6 irow">
+						<label>MAC Address:</label>
+						<input class="w3-input input-short" name="wired_mac" disabled id="wired_mac" value="" />
+					</div>
+					<div class="w3-col s6 m6 l6 irow">
+						<label>IP Address:</label>
+						<input class="w3-input input-short" id="wired_ipa" value="" />
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col s6 m6 l6 irow">
+						<label>Subnet Mask:</label>
+						<input class="w3-input input-short" id="wired_nm" value="" />
+					</div>
+					<div class="w3-col s6 m6 l6 irow">
+						<label>Default Gateway:</label>
+						<input class="w3-input input-short" id="wired_gw" value="" />
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col s6 m6 l6 irow">
+						<label>DNS Server:</label>
+						<input class="w3-input input-short" id="wired_dns" value="" />
+					</div>
+					<div class="w3-col s6 m6 l6 irow">
+						<label>NTP Server:</label>
+						<input class="w3-input input-short" id="wired_ntp" value="" />
+					</div>
+				</div>
+			</div>
+
+			<div id="layerComms_wireless" class="comms-panel" style="display:none">
+				<div class="w3-row">
+					<div class="w3-col s6 m6 l6 irow">
+						<input class="w3-check small-check" type="checkbox" id="wireless_dhcp" value="1" onclick="setNetState('wireless',this.checked);" />
+						<label>DHCP</label>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col s6 m6 l6 irow">
+						<label>MAC Address:</label>
+						<input class="w3-input input-short" name="wireless_mac" disabled id="wireless_mac" value="" />
+					</div>
+					<div class="w3-col s6 m6 l6 irow">
+						<label>IP Address:</label>
+						<input class="w3-input input-short" id="wireless_ipa" value="" />
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col s6 m6 l6 irow">
+						<label>Subnet Mask:</label>
+						<input class="w3-input input-short" id="wireless_nm" value="" />
+					</div>
+					<div class="w3-col s6 m6 l6 irow">
+						<label>Default Gateway:</label>
+						<input class="w3-input input-short" id="wireless_gw" value="" />
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col s6 m6 l6 irow">
+						<label>DNS Server:</label>
+						<input class="w3-input input-short" id="wireless_dns" value="" />
+					</div>
+					<div class="w3-col s6 m6 l6 irow">
+						<label>NTP Server:</label>
+						<input class="w3-input input-short" id="wireless_ntp" value="" />
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col s6 m6 l6 irow">
+						<label>AP SSID:</label>
+						<div style="display:flex; gap:0.5em; align-items:flex-start; max-width:20em;">
+							<input class="w3-input" style="flex:1;" id="wireless_ssid" value="" />
+							<button class="btn btn-secondary" type="button" id="btnScanWifi" onclick="scanWifi()" style="padding:0.5em 0.8em; white-space:nowrap;">Scan</button>
+						</div>
+						<div id="wifiScanResults" style="display:none; max-width:20em; margin-top:0.3em;"></div>
+					</div>
+					<div class="w3-col s6 m6 l6 irow">
+						<label>Passkey:</label>
+						<input class="w3-input input-short" type="password" id="wireless_passkey" value="" />
+					</div>
+				</div>
+
+				<h3 style="margin-top:1em;">WiFi Status</h3>
+
+				<div id="wifiNotConnected" style="padding:0.3em 0; color:var(--text-muted); font-size:0.9em;">
+					Not connected to any access point.
+				</div>
+
+				<div id="wifiSignalSection" style="display:none;">
+					<div class="w3-row">
+						<div class="w3-col s6 m6 l6 irow">
+							<label>AP MAC:</label>
+							<input class="w3-input input-short" disabled id="wireless_ap_mac" value="" />
+						</div>
+						<div class="w3-col s6 m6 l6 irow">
+							<label>Frequency:</label>
+							<input class="w3-input input-short" disabled id="wireless_frequency" value="" />
+						</div>
+					</div>
+					<div class="w3-row">
+						<div class="w3-col s6 m6 l6 irow">
+							<label>Signal Level:</label>
+							<input class="w3-input input-short" disabled id="wireless_signal" value="" />
+						</div>
+						<div class="w3-col s6 m6 l6 irow">
+							<label>Link Quality:</label>
+							<input class="w3-input input-short" disabled id="wireless_quality" value="" />
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div style="display:flex; gap:0.8em; flex-wrap:wrap;">
+			<button class="btn btn-danger" type="button" onclick="resetCommsCfg()">Reset Settings</button>
+			<button class="btn btn-primary" type="submit">Save Settings</button>
+		</div>
+
+		<script type="text/javascript">
+			var ipa = new LiveValidation( 'wired_ipa', {onlyOnSubmit: false, validMessage: 'OK' } );
+			ipa.add( Validate.IPAddress );
+			ipa.add( Validate.Presence );
+
+			var sn = new LiveValidation( 'wired_nm', {onlyOnSubmit: false, validMessage: 'OK' } );
+			sn.add( Validate.IPAddress );
+			sn.add( Validate.Presence );
+
+			var gw = new LiveValidation( 'wired_gw', {onlyOnSubmit: false, validMessage: 'OK' } );
+			gw.add( Validate.IPAddress );
+			gw.add( Validate.Presence );
+
+			var dns = new LiveValidation( 'wired_dns', {onlyOnSubmit: false, validMessage: 'OK' } );
+			dns.add( Validate.IPAddress );
+			dns.add( Validate.Presence );
+
+			var ntp = new LiveValidation( 'wired_ntp', {onlyOnSubmit: false, validMessage: 'OK' } );
+			ntp.add( Validate.IPAddress );
+		</script>
+	</form>
+</div>
