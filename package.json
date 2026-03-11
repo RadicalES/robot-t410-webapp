@@ -6,10 +6,9 @@
   "description": "Robot-T420QT User Interface",
   "scripts": {
     "dev": "vite",
-    "build": "babel public/robot.js public/validation.js --out-dir build --compact=true --no-comments",
-    "preview": "vite preview",
-    "release": "node scripts/release.js",
-    "deploy": "./dist/sync.sh"
+    "build": "bash scripts/build.sh",
+    "deploy": "bash scripts/deploy.sh",
+    "preview": "vite preview"
   },
   "browserslist": {
     "production": [
