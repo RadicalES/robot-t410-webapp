@@ -4,6 +4,9 @@ set -e
 PROJ="$(cd "$(dirname "$0")/.." && pwd)"
 SRC="$PROJ/public"
 OUT="$PROJ/build"
+VERSION=$(cat "$PROJ/VERSION" | tr -d '[:space:]')
+
+echo "==> Building v${VERSION}..."
 
 echo "==> Cleaning build directory..."
 rm -rf "$OUT"
@@ -22,7 +25,10 @@ for f in "$SRC"/layers/*.html; do
 	npx html-minifier-terser $HTML_OPTS -o "$OUT/layers/$(basename "$f")" "$f"
 done
 
+echo "==> Injecting version ${VERSION}..."
+sed -i "s/%%VERSION%%/${VERSION}/g" "$OUT/robot.js" "$OUT/index.html"
+
 echo "==> Copying assets..."
 cp "$SRC/w3.css" "$SRC/favicon.png" "$SRC/robot.png" "$OUT/"
 
-echo "==> Build complete: $OUT"
+echo "==> Build complete: v${VERSION} -> $OUT"

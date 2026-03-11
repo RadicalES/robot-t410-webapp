@@ -10,7 +10,7 @@ var uuid = "loading...";
 var layer = '';
 var rebootTime;
 var rebootTimer;
-const lib_version = "1.0.0";
+const lib_version = "%%VERSION%%";
 
 function docGetElById(id) {
 	return document.getElementById(id);
