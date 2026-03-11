@@ -1,13 +1,14 @@
-# Robot-T420QT Web Application
+# Robot-T4x0 Web Application
 
-Device administration interface for the Robot-T420QT, built as a vanilla JavaScript single-page application targeting the device's Qt5WebKit browser.
+Device administration web interface for the Robot-T4x0 series devices.
 
-## Overview
+## Branches
 
-- **Device**: Robot-T420QT (800x480 resistive touchscreen)
-- **Browser**: RBrowser (Qt5WebKit, ~Safari 6-8 level JS engine)
-- **Web Server**: Hiawatha with CGI wrapper
-- **Transpiler**: Babel (ES5 output, safari 9 target)
+| Branch | Device | Description |
+|--------|--------|-------------|
+| T430 | Robot-T430 (RPi CM4) | Standard build, NGINX, NetworkManager |
+| t430-palpi | Robot-T430 (RPi CM4) | Includes PalPi (Paltrack) service support |
+| T420QT | Robot-T420 (Qt5WebKit) | Vanilla JS SPA for 800x480 resistive touchscreen |
 
 ## Pages
 
@@ -19,7 +20,7 @@ Device administration interface for the Robot-T420QT, built as a vanilla JavaScr
 | Administration | Password change, device reboot |
 | Contact | Company contact details |
 
-## Project Structure
+## Project Structure (T420QT)
 
 ```
 public/
@@ -57,12 +58,12 @@ npm run deploy
 
 ## Configuration
 
-Copy `.env.example` or create `.env`:
+Create `.env` in the project root:
 ```
-DEVICE_IP=http://10.224.40.178
+DEVICE_IP=http://<device-ip>
 DEVICE_USER=root
-DEVICE_HOST=10.224.40.178
-DEVICE_PASS=temppw
+DEVICE_HOST=<device-ip>
+DEVICE_PASS=<password>
 ```
 
 See [WORKFLOW.md](WORKFLOW.md) for full build/deploy details and QtWebKit constraints.
