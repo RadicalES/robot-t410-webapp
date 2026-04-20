@@ -8,6 +8,12 @@ VERSION=$(cat "$PROJ/VERSION" | tr -d '[:space:]')
 
 echo "==> Building v${VERSION}..."
 
+# Ensure dependencies are installed
+if [ ! -d "$PROJ/node_modules" ]; then
+	echo "==> Installing dependencies..."
+	cd "$PROJ" && npm install
+fi
+
 echo "==> Cleaning build directory..."
 rm -rf "$OUT"
 mkdir -p "$OUT/layers"
