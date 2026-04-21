@@ -107,13 +107,47 @@ function setData(cgi, data, callback) {
 	})
 }
 
+// T431: set true when /cgi/getstate.sh reports mode=="provisioning"
+// (device broadcasting its setup hotspot, no STA profile yet).
+// saveCommsCfg() branches on this so the unified /cgi/setprovision.sh
+// endpoint is used for first-boot, steady-state saves stay unchanged.
+var provisioningMode = false;
+
+// T431: check whether this device is in provisioning mode, then
+// continue with the normal load flow. Calls `onDone` whether or not
+// the check succeeds.
+function loadProvisioningState(onDone) {
+	fetch('/cgi/getstate.sh', {cache: 'no-cache', credentials: 'same-origin'})
+		.then(r => r.ok ? r.json() : null)
+		.then(s => {
+			if (s && s.status === 'OK') {
+				provisioningMode = (s.mode === 'provisioning');
+				if (provisioningMode) {
+					const b = docGetElById('provisioningBanner');
+					if (b) b.style.display = 'block';
+					const h = docGetElById('provisioningHostname');
+					if (h) h.textContent = 'Device: ' + (s.hostname || '') +
+						' · Setup SSID: ' + (s.hotspot_ssid || '');
+				}
+			}
+		})
+		.catch(() => { /* non-fatal */ })
+		.finally(() => { if (onDone) onDone(); });
+}
+
 // Startup
 window.onload = function() {
 	uuid = uuidv4();
 	layer = '';
 	docGetElById("guiversion").innerHTML += "(lib:" + lib_version + ")";
 	loadLoading();
-	loadHome();
+	loadProvisioningState(() => {
+		// T431: if in setup mode, jump straight to Comms so IT can
+		// enter credentials. Otherwise normal Home load.
+		if (provisioningMode) { loadComms(); }
+		else                  { loadHome();  }
+	});
+	return;
 	//startStatsInterval();
 }
 
@@ -498,6 +532,15 @@ function getCardReaderSettings() {
 
 function saveCommsCfg() {
 
+	// T431: in provisioning mode (device is hosting its setup
+	// hotspot, phone is the UI), tearing down the hotspot + bringing
+	// up the STA + applying LAN must all happen atomically in a
+	// single CGI call — use /cgi/setprovision.sh, which re-raises
+	// the hotspot on failure so the user can retry.
+	if (provisioningMode) {
+		return saveProvisioning();
+	}
+
 	const wiredCfg = getWiredSettings();
 	const cardreaderCfg = getCardReaderSettings();
 
@@ -507,6 +550,52 @@ function saveCommsCfg() {
 		setData('setcardreader.sh', cardreaderCfg, (data) => {
 			alertInfo('Success: Communications Settings Saved!');
 		});
+	});
+
+	return false;
+}
+
+// T431: unified first-boot save. Maps the Comms form's wireless
+// fields onto /cgi/setprovision.sh's parameter set. Uses fetch()
+// directly (not setData) so the failure-path JSON is surfaced to
+// the user instead of only console-logged.
+function saveProvisioning() {
+	const ssid    = ov('wireless_ssid');
+	const passkey = ov('wireless_passkey');
+	const dhcp    = ov('wireless_dhcp') === 'true' ? 'yes' : 'no';
+
+	if (!ssid) {
+		alertError('SSID is required.');
+		return false;
+	}
+
+	let body = 'ssid='  + encodeURIComponent(ssid) +
+	           '&psk=' + encodeURIComponent(passkey || '') +
+	           '&dhcp=' + dhcp;
+	if (dhcp === 'no') {
+		body += '&ip='      + encodeURIComponent(ov('wireless_ipa')) +
+		        '&netmask=' + encodeURIComponent(ov('wireless_nm'))  +
+		        '&gateway=' + encodeURIComponent(ov('wireless_gw'));
+	}
+	body += '&dns1=' + encodeURIComponent(ov('wireless_dns') || '');
+
+	fetch('/cgi/setprovision.sh', {
+		method: 'POST',
+		headers: {'Content-Type': 'text/plain'},
+		body: body,
+	})
+	.then(r => r.json().then(d => ({ok: r.ok, status: r.status, body: d})))
+	.then(result => {
+		if (result.ok && result.body.status === 'OK') {
+			alertInfo('Connected to ' + (result.body.ssid || ssid) +
+				'. This setup page is no longer reachable — reconnect your phone to normal WiFi.');
+		} else {
+			alertError(result.body.message ||
+				('Failed to join ' + ssid + '. Check password and try again.'));
+		}
+	})
+	.catch(err => {
+		alertError('Network error during provisioning: ' + (err.message || err));
 	});
 
 	return false;

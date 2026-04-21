@@ -17,6 +17,15 @@ Robot-T430 Web Application 2.0.1
 
 <body>
 
+<!-- T431 first-boot / post-reset provisioning banner.
+     Shown by robot.js when /cgi/getstate.sh reports mode=="provisioning".
+     Hidden in all other cases. -->
+<div id="provisioningBanner" style="display:none; background:#e84d2e; color:#fff; padding:0.7em 1em; font-weight:600; text-align:center;">
+	<span>⚠ Device in <b>setup mode</b>.
+		Configure WiFi below, then click <b>Save</b>.</span>
+	<span id="provisioningHostname" style="display:block; font-size:0.9em; font-weight:400; margin-top:0.2em; opacity:0.92;"></span>
+</div>
+
 <header>
 	<div class="brand-bar w3-hide-small">
 		<img src="robot.png" alt="Robot" class="head-logo"/>
