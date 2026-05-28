@@ -1,0 +1,44 @@
+<div id="layerMesScada" class="layer">
+	<form id="formMesScada" action="" method="post" onsubmit="return saveMesScadaCfg()">
+
+		<div class="card">
+			<legend>MesScada Settings</legend>
+
+			<div class="w3-row">
+				<div class="w3-col l6 m6 irow">
+					<label>Local IP Address:</label>
+					<input class="w3-input input-short" id="mes_local_ip" value="" />
+				</div>
+				<div class="w3-col l6 m6 irow">
+					<label>Server IP Address:</label>
+					<input class="w3-input input-short" id="mes_server_ip" value="" />
+				</div>
+			</div>
+
+			<div class="w3-row">
+				<div class="w3-col l6 m6 irow">
+					<label>Station Number:</label>
+					<input class="w3-input input-short" id="mes_station" value="" />
+				</div>
+			</div>
+
+			<p class="smallText">The station number is applied as the suffix on the PRN-xx and CLM-xx device names. Reboot to apply changes.</p>
+		</div>
+
+		<div style="display:flex; gap:.8em; flex-wrap:wrap;">
+			<button class="btn btn-primary" type="submit">Save MesScada Settings</button>
+		</div>
+
+		<script type="text/javascript">
+			var mesLocalIp = new LiveValidation("mes_local_ip", { validMessage: "OK" });
+			mesLocalIp.add(Validate.Presence);
+			mesLocalIp.add(Validate.Format, { pattern: /^(\d{1,3}\.){3}\d{1,3}$/, failureMessage: "Invalid IP" });
+			var mesServerIp = new LiveValidation("mes_server_ip", { validMessage: "OK" });
+			mesServerIp.add(Validate.Presence);
+			mesServerIp.add(Validate.Format, { pattern: /^(\d{1,3}\.){3}\d{1,3}$/, failureMessage: "Invalid IP" });
+			var mesStation = new LiveValidation("mes_station", { validMessage: "OK" });
+			mesStation.add(Validate.Presence);
+			mesStation.add(Validate.Format, { pattern: /^\d{1,3}$/, failureMessage: "Number only" });
+		</script>
+	</form>
+</div>

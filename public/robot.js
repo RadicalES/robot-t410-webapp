@@ -259,6 +259,7 @@ const LAYER_MENUS = {
 	layerContact : 'menuContact',
 	layerAdmin : 'menuAdmin',
 	layerComms : 'menuComms',
+	layerMesScada : 'menuMesScada',
 }
 
 const LAYER_LOADER = {
@@ -267,6 +268,7 @@ const LAYER_LOADER = {
 	layerContact : loadContact,
 	layerAdmin : loadAdmin,
 	layerComms : loadComms,
+	layerMesScada : loadMesScada,
 	layerLoading : loadLoading,
 }
 
@@ -386,6 +388,40 @@ function loadComms(evt) {
 	loadLayerHTML('layerComms', () => {
 		getData('getcomms.sh', setCommsCfgCB);
 	});
+}
+
+function loadMesScada(evt) {
+	layer = 'layerMesScada';
+	loadLoading();
+	loadLayerHTML('layerMesScada', () => {
+		getData('getmesscada.sh', setMesScadaCfgCB);
+	});
+}
+
+function setMesScadaCfgCB(data) {
+	showMenuLayer('layerMesScada');
+	if (data.status == "OK" && "messcadaConfig" in data) {
+		const cfg = data["messcadaConfig"];
+		sv('mes_local_ip', cfg.localIp);
+		sv('mes_server_ip', cfg.serverIp);
+		sv('mes_station', cfg.station);
+	} else {
+		log(0, "Failed to read MesScada configuration!<br/>Result: " + (data.message || data.status));
+	}
+}
+
+function saveMesScadaCfg() {
+	const payload = "localIp=" + ov('mes_local_ip')
+		+ "&serverIp=" + ov('mes_server_ip')
+		+ "&station=" + ov('mes_station');
+	setData('setmesscada.sh', payload, data => {
+		if (data.status === "OK") {
+			alertInfo(data.message || "Success: MesScada Settings Saved!");
+		} else {
+			log(0, "Error saving MesScada configuration!<br/>Result: " + (data.message || data.status));
+		}
+	});
+	return false;
 }
 
 function setNetState (label, s) {

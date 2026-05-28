@@ -313,6 +313,11 @@ select:focus {
 	font-size: 0.9em;
 }
 
+/* Long read-only values (OS + release, kernel) need a wider box */
+#firmware, #kernel {
+	max-width: 480px;
+}
+
 .textBox {
 	border: 1px solid var(--border);
 	border-radius: 6px;

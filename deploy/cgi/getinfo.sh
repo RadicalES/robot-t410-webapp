@@ -8,7 +8,7 @@
 
 KERNEL=$(uname -r)
 HOST=$(cat /etc/hostname)
-DISTRO="RPI "$(cat /etc/issue | tr -cd '[:print:]' | tr -d '\\' | sed 's/ n l\[9;0\]//g')
+DISTRO="RPI "$(. /etc/os-release 2>/dev/null; echo "$PRETTY_NAME")
 UPTIME=$(cat /proc/uptime | awk '{ print $1 }')
 PISERIAL=$(cat /proc/cpuinfo | grep Serial | cut -d ' ' -f 2 | cut -c 9-16 | tr '[:lower:]' '[:upper:]')
 IFACE=eth0
