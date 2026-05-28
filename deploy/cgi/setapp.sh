@@ -95,10 +95,30 @@ configure_hostname () {
 
 configure_ligthdm () {
 
-  if [ $START_APP = "DESKTOP" ]; then
-    sudo ln -sf /etc/lightdm/lightdm.desktop.conf /etc/lightdm/lightdm.conf.d/lightdm.conf
+  case "$START_APP" in
+    DESKTOP)
+      sudo ln -sf /etc/lightdm/lightdm.desktop.conf /etc/lightdm/lightdm.conf.d/lightdm.conf
+      ;;
+    MESSCADA)
+      sudo ln -sf /etc/lightdm/lightdm.messcada.conf /etc/lightdm/lightdm.conf.d/lightdm.conf
+      ;;
+    *)
+      sudo ln -sf /etc/lightdm/lightdm.robot.conf /etc/lightdm/lightdm.conf.d/lightdm.conf
+      ;;
+  esac
+
+}
+
+# MesScada needs /dev/ttyS0, which the card reader websocket holds. Enable the
+# service for every mode except MESSCADA, where it must be stopped/disabled.
+configure_services () {
+
+  if [ "$START_APP" = "MESSCADA" ]; then
+    sudo /usr/bin/systemctl stop cardreaderws.service
+    sudo /usr/bin/systemctl disable cardreaderws.service
   else
-    sudo ln -sf /etc/lightdm/lightdm.robot.conf /etc/lightdm/lightdm.conf.d/lightdm.conf
+    sudo /usr/bin/systemctl enable cardreaderws.service
+    sudo /usr/bin/systemctl start cardreaderws.service
   fi
 
 }
@@ -113,6 +133,7 @@ if [ $REQUEST_METHOD = "POST" ]; then
       configure_app
       configure_hostname
       configure_ligthdm
+      configure_services
       echo "{\"status\":\"OK\", \"data\":\"$RESULT\"}"
     else 
         echo "{\"status\":\"FAILED\", \"message\":\"no data in body\"}"

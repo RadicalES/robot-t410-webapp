@@ -29,7 +29,7 @@ APP_CFG="{
   \"protocol\":\"$API_PROTOCOL\",
   \"scales\":\"RICHTER\",
   \"scale\":\"$SCALE_TYPE\",
-  \"startapps\":\"DESKTOP,BROWSER\",
+  \"startapps\":\"DESKTOP,BROWSER,MESSCADA\",
   \"startapp\":\"$START_APP\"
   }"
 
