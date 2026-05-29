@@ -46,7 +46,7 @@ fi
 
 if [ "$DHCP" = "auto" ]; then
     # Set to DHCP
-    sudo nmcli con mod "$CON_NAME" ipv4.method auto ipv4.addresses "" ipv4.gateway "" ipv4.dns "" 2>&1
+    sudo nmcli con mod "$CON_NAME" ipv4.method auto ipv4.addresses "" ipv4.gateway "" ipv4.dns "" >/dev/null 2>&1
     RESULT=$?
 else
     # Set static IP
@@ -80,7 +80,7 @@ else
         ipv4.method manual \
         ipv4.addresses "${IPADDR}/${PREFIX}" \
         ipv4.gateway "$GATEWAY" \
-        ipv4.dns "${DNS:-$GATEWAY}" 2>&1
+        ipv4.dns "${DNS:-$GATEWAY}" >/dev/null 2>&1
     RESULT=$?
 fi
 
@@ -90,7 +90,7 @@ if [ $RESULT -ne 0 ]; then
 fi
 
 # Apply changes
-sudo nmcli con up "$CON_NAME" 2>&1
+sudo nmcli con up "$CON_NAME" >/dev/null 2>&1
 RESULT=$?
 
 if [ $RESULT -eq 0 ]; then
