@@ -36,23 +36,31 @@ LANUUID=$(echo $LANINFO | awk -F ':' '{print $5}')
 LANIF="eth0"
 # LANIF=$(echo $LANINFO | awk -F ':' '{print $6}')
 LANMAC=$(cat /sys/class/net/$LANIF/address)
-LANDHCP=$(nmcli -g IPV4.METHOD con show "$LANNAME")
+LANDHCP=$(nmcli -g ipv4.method con show "$LANNAME")
 
-if [ -n "$LANDHCP" ] && [ $LANDHCP == "auto" ]; then
-	LANCFG=$(ifconfig $LANIF | grep 'inet')
-	LANIP=$(echo $LANCFG | awk '/inet / {print $2}')
-	LANGW=$(ip route | grep $LANIF | awk '/default/ { print $3 }')
-	LANDNS=$(nmcli -g IP4.DNS dev show $LANIF)
-	LANMASK=$(echo $LANCFG | awk '/inet addr/ {gsub("Mask:", "", $4); print $4}')
+prefix_to_netmask() {
+	local p="$1"
+	case "$p" in ''|*[!0-9]*) echo "255.255.255.0"; return;; esac
+	local m=$(( 0xffffffff ^ ((1 << (32 - p)) - 1) ))
+	printf '%d.%d.%d.%d' $(( (m>>24)&255 )) $(( (m>>16)&255 )) $(( (m>>8)&255 )) $(( m&255 ))
+}
 
-else 
-	LANCFG=$(nmcli -g ipv4 con show $LANNAME)
-	LANIP=$(echo $LANCFG | sed 's/::/\n/g' | awk -F ':' 'NR==2 {print $3}')
-	LANGW=$(echo $LANCFG | sed 's/::/\n/g' | awk -F ':' 'NR==2 {print $4}')
-	LANDNS=$(echo $LANCFG | sed 's/::/\n/g' | awk -F ':' 'NR==1 {print $3}')
-	# LANDNS=$(nmcli -g IPV4.DNS con show $LANNAME)
-	LANMASK=$(ifconfig $LANNAME | awk '/inet addr/ {gsub("Mask:", "", $4); print $4}')
+if [ "$LANDHCP" = "manual" ]; then
+	# Static: read the configured values from the connection profile
+	LANADDR=$(nmcli -g ipv4.addresses con show "$LANNAME" | head -1 | cut -d',' -f1)
+	LANGW=$(nmcli -g ipv4.gateway con show "$LANNAME")
+	LANDNS=$(nmcli -g ipv4.dns con show "$LANNAME" | tr ',' ' ')
+else
+	# DHCP/auto: read the live values from the device
+	LANDHCP="auto"
+	LANADDR=$(nmcli -g IP4.ADDRESS dev show "$LANIF" | head -1)
+	LANGW=$(nmcli -g IP4.GATEWAY dev show "$LANIF")
+	LANDNS=$(nmcli -g IP4.DNS dev show "$LANIF" | tr '\n' ' ')
 fi
+LANIP="${LANADDR%%/*}"
+LANPREFIX="${LANADDR##*/}"
+[ "$LANPREFIX" = "$LANADDR" ] && LANPREFIX=""
+LANMASK=$(prefix_to_netmask "$LANPREFIX")
 
 if [ -n "$LANIP"  ]; then	
   LAN_CFG="{
@@ -62,7 +70,7 @@ if [ -n "$LANIP"  ]; then
     \"dhcp\":\"$LANDHCP\",
     \"macAddress\":\"$LANMAC\",
     \"ipAddress\":\"$LANIP\",
-    \"netmask\":\"255.255.255.0\",
+    \"netmask\":\"$LANMASK\",
     \"gateway\":\"$LANGW\",
     \"dns\":\"$LANDNS\",
     \"ntp\":\"192.168.1.1\"
