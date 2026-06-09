@@ -14,6 +14,7 @@ PISERIAL=$(cat /proc/cpuinfo | grep Serial | cut -d ' ' -f 2 | cut -c 9-16 | tr 
 IFACE=eth0
 SERIAL=1000000000
 DATE=1999-01-01
+MODEL=ROBOT-T430
 RELEASE=NOT-SET
 # cat  /etc/issue | jq -Rs '{issue: .}'
 
@@ -28,7 +29,7 @@ else
     MAC=$(cat /sys/class/net/${IFACE}/address | tr '[:lower:]' '[:upper:]')
 
     DEVICEINFO="{
-        \"model\":\"ROBOT-T430\",
+        \"model\":\"$MODEL\",
         \"serialno\":\"$SERIAL ($PISERIAL)\",
         \"mandate\": \"$DATE\",
         \"etherports\": \"1\",
