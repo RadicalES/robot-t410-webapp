@@ -2,11 +2,11 @@
 #
 # getscada.sh
 # CGI Script: report the SCADA server connection + health, as maintained by the
-# robot-config daemon in /run/robot. Read-only and fast (no network), so the UI
+# robot-scada-client service in /run/robot. Read-only and fast (no network), so the UI
 # can poll it. JSON: {"status":"OK","scada":{state,healthy,running,serverURL,lastContact}}
 #   state       ONLINE (provisioned) | UNPROVISIONED (reachable, not provisioned) | OFFLINE
 #   healthy     true when ONLINE and a ping succeeded within ~3x the ping interval
-#   running     is the robot-config service active
+#   running     is the robot-scada-client service active
 #   lastContact seconds since the last successful server contact (-1 if never)
 #
 # (C) 2017-2026, Radical Electronic Systems - www.radicalsystems.co.za
@@ -30,7 +30,7 @@ NOW=$(date +%s)
 if [ "$LASTOK" -gt 0 ]; then AGE=$((NOW - LASTOK)); else AGE=-1; fi
 
 RUNNING=false
-systemctl is-active --quiet robot-config 2>/dev/null && RUNNING=true
+systemctl is-active --quiet robot-scada-client 2>/dev/null && RUNNING=true
 
 HEALTHY=false
 if [ "$STATE" = "ONLINE" ] && [ "$AGE" -ge 0 ] && [ "$AGE" -le "$THRESH" ]; then HEALTHY=true; fi
