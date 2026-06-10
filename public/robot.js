@@ -380,12 +380,44 @@ function loadLoading(evt) {
 //-----------------------------------------------------------------------------
 // Communications TAB/Layer Functions
 //-----------------------------------------------------------------------------
+let scadaTimer = null;
 function loadComms(evt) {
 	layer = 'layerComms';
 	loadLoading();
 	loadLayerHTML('layerComms', () => {
 		getData('getcomms.sh', setCommsCfgCB);
+		refreshScada();
+		if (scadaTimer) clearInterval(scadaTimer);
+		scadaTimer = setInterval(() => {
+			if (layer !== 'layerComms') { clearInterval(scadaTimer); scadaTimer = null; return; }
+			refreshScada();
+		}, 5000);
 	});
+}
+
+function refreshScada() {
+	getData('getscada.sh', setScadaCB);
+}
+
+// SCADA connection status callback (from getscada.sh)
+function setScadaCB(data) {
+	if (!data || data.status != "OK" || !("scada" in data)) return;
+	const s = data.scada;
+	let color, text;
+	if (!s.running) { color = '#9e9e9e'; text = 'Service not running'; }
+	else if (s.state == 'ONLINE' && s.healthy) { color = '#4CAF50'; text = 'Connected'; }
+	else if (s.state == 'ONLINE') { color = '#ff9800'; text = 'Connection lost'; }
+	else if (s.state == 'UNPROVISIONED') { color = '#ff9800'; text = 'Reachable - not provisioned'; }
+	else { color = '#f44336'; text = 'Offline'; }
+	const dot = docGetElById('scada_dot');
+	if (dot) dot.style.backgroundColor = color;
+	const st = docGetElById('scada_state');
+	if (st) st.innerHTML = text;
+	sv('scada_url', s.serverURL || '');
+	const stn = docGetElById('scada_station');
+	if (stn) stn.innerHTML = s.station || '&mdash;';
+	const lc = docGetElById('scada_last');
+	if (lc) lc.innerHTML = (s.lastContact >= 0) ? (s.lastContact + 's ago') : 'never';
 }
 
 function setNetState (label, s) {
