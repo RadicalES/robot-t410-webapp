@@ -292,8 +292,10 @@ function loadLayerHTML(layerName, callback) {
 		return;
 	}
 
-	// Load the layer HTML file
-	fetch('layers/' + layerName + '.html')
+	// Load the layer HTML file. Force no-cache so fragment edits take effect on
+	// the next load - otherwise the browser serves a stale layer and UI changes
+	// appear to "not deploy" even after the device file is updated.
+	fetch('layers/' + layerName + '.html', { cache: 'no-cache' })
 		.then(response => {
 			if (!response.ok) {
 				throw new Error(`Failed to load ${layerName}.html`);
