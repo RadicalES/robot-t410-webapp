@@ -59,6 +59,20 @@ console.log('[3/5] Minifying HTML...');
 const htmlMinOpts = '--collapse-whitespace --remove-comments --remove-redundant-attributes --minify-css true --minify-js true';
 run(`npx html-minifier-terser ${htmlMinOpts} -o ${htmlDir}/index.html public/index.html`);
 
+// Stamp package.json's version into the footer (#guiversion) so the UI always
+// reflects the release - the hand-edited placeholder is otherwise easy to forget.
+const idxPath = path.join(htmlDir, 'index.html');
+const idxHtml = fs.readFileSync(idxPath, 'utf-8');
+let stamped = false;
+const stampedHtml = idxHtml.replace(/(id="guiversion"[^>]*>)\s*release:[^<]*/i, (_m, p1) => {
+    stamped = true;
+    return `${p1}release: ${version}`;
+});
+if (!stamped) {
+    console.warn('  ! WARNING: #guiversion placeholder not found - footer version not stamped');
+}
+fs.writeFileSync(idxPath, stampedHtml);
+
 // Minify layer HTML fragments
 const layerFiles = fs.readdirSync('public/layers').filter(f => f.endsWith('.html'));
 for (const file of layerFiles) {

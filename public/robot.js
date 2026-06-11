@@ -10,7 +10,7 @@ var layer = '';
 var statsInterval = null;
 var rebootTime;
 var rebootTimer
-const lib_version = "2.0.0";
+const lib_version = "2.0.2";
 
 // Element selectors short hand
 // short hand for getting element by Id in the DOM
@@ -413,7 +413,8 @@ function setScadaCB(data) {
 	if (dot) dot.style.backgroundColor = color;
 	const st = docGetElById('scada_state');
 	if (st) st.innerHTML = text;
-	sv('scada_url', s.serverURL || '');
+	const su = docGetElById('scada_url');
+	if (su) su.textContent = s.serverURL || '—';
 	const stn = docGetElById('scada_station');
 	if (stn) stn.innerHTML = s.station || '&mdash;';
 	const lc = docGetElById('scada_last');
