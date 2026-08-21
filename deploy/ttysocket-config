@@ -48,11 +48,14 @@ case "$ENABLED" in
     *) die "enabled must be TRUE or FALSE" ;;
 esac
 
-# Keep the deployment-level settings.
+# Keep the deployment-level settings. The values written below are quoted,
+# because /usr/local/lib/ttysocket/launch.sh sources this file under `set -e`:
+# an unquoted "-c SHORT" makes the shell run SHORT as a command, and the bridge
+# exits 127 without ever opening the port.
 TTYSOCKET_TTY=/dev/ttyS0
 TTYSOCKET_BAUD=9600
 TTYSOCKET_MODE=rdm6300
-TTYSOCKET_OPTS=-c SHORT
+TTYSOCKET_OPTS="-c SHORT"
 [ -r "$CONF" ] && . "$CONF"
 
 mkdir -p /etc/ttysocket
@@ -63,9 +66,9 @@ TTYSOCKET_PORT=${PORT}
 TTYSOCKET_TTY=${TTYSOCKET_TTY}
 TTYSOCKET_BAUD=${TTYSOCKET_BAUD}
 TTYSOCKET_HOST=${HOST}
-TTYSOCKET_FORMAT=${FORMAT}
+TTYSOCKET_FORMAT="${FORMAT}"
 TTYSOCKET_MODE=${TTYSOCKET_MODE}
-TTYSOCKET_OPTS=${TTYSOCKET_OPTS}
+TTYSOCKET_OPTS="${TTYSOCKET_OPTS}"
 CONFEOF
 chmod 644 "$CONF"
 
