@@ -78,16 +78,28 @@ LAN_CFG="{
 # SERIAL SECTION
 BAUDRATES="1200,2400,4800,9600,19200,38400,57600,115200"
 
-# Reported from the ttysocket config the service actually reads. "enabled" is
-# whether the service is running, not a key in the file.
+# Reported from the ttysocket config the service actually reads. Enabled is not
+# a key in that file — it is systemd's own answer.
+#
+# It used to be read from is-active, which is a different question: a service
+# that is running right now but disabled comes back as enabled here and then
+# does not survive a reboot, and one that is enabled but has crashed reads as
+# disabled. The checkbox means "start this on boot", so is-enabled is what
+# answers it, and whether it is running goes alongside rather than standing in
+# for it.
 CARD_ENABLED=FALSE
-systemctl is-active --quiet wsrobot 2>/dev/null && CARD_ENABLED=TRUE
+case "$(systemctl is-enabled wsrobot 2>/dev/null)" in
+    enabled|enabled-runtime) CARD_ENABLED=TRUE ;;
+esac
+CARD_RUNNING=FALSE
+systemctl is-active --quiet wsrobot 2>/dev/null && CARD_RUNNING=TRUE
 CARD_FOREIGN=FALSE
 [ "${TTYSOCKET_HOST:-foreign}" = "foreign" ] && CARD_FOREIGN=TRUE
 
 CARDREADER_CFG="\"cardreaderConfig\":{
   \"index\":\"0\",
   \"enabled\":\"${CARD_ENABLED}\",
+  \"running\":\"${CARD_RUNNING}\",
   \"foreignConnect\":\"${CARD_FOREIGN}\",
   \"serverPort\":\"${TTYSOCKET_PORT:-8100}\",
   \"outputFormat\":\"${TTYSOCKET_FORMAT:-%s}\"

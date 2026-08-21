@@ -89,6 +89,11 @@
 					<div class="w3-col l6 m6 irow">
 						<input class="w3-check small-check" type="checkbox" id="cardreader_enabled" />
 						<label>Enabled</label>
+						<!-- Enabled is "starts on boot"; this is whether it is
+						     running now. They can differ, and hiding that is
+						     how a terminal ends up with a card reader that
+						     works until the next reboot. -->
+						<span id="cardreader_state" class="svc-state">&mdash;</span>
 					</div>
 					<div class="w3-col l6 m6 irow">
 						<input class="w3-check small-check" type="checkbox" id="cardreader_foreign_connect"/>

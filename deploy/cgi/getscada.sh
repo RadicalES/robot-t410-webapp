@@ -32,6 +32,15 @@ if [ "$LASTOK" -gt 0 ]; then AGE=$((NOW - LASTOK)); else AGE=-1; fi
 RUNNING=false
 systemctl is-active --quiet robot-scada-client 2>/dev/null && RUNNING=true
 
+# Whether it starts on boot is a separate question from whether it is running,
+# and the difference is the one worth telling an operator about: a service that
+# was switched off reads identically to one that crashed if all you report is
+# "not running".
+ENABLED=false
+case "$(systemctl is-enabled robot-scada-client 2>/dev/null)" in
+    enabled|enabled-runtime) ENABLED=true ;;
+esac
+
 HEALTHY=false
 if [ "$STATE" = "ONLINE" ] && [ "$AGE" -ge 0 ] && [ "$AGE" -le "$THRESH" ]; then HEALTHY=true; fi
 
@@ -39,5 +48,5 @@ if [ "$REQUEST_METHOD" = "OPTIONS" ]; then
     echo -e "Access-Control-Allow-Origin: *\r\n\r\n"
 else
     echo -e "Access-Control-Allow-Origin: *\r\nContent-Type: application/json\r\n\r\n"
-    echo -e "{\"status\":\"OK\",\"scada\":{\"state\":\"$STATE\",\"healthy\":$HEALTHY,\"running\":$RUNNING,\"station\":\"$STATION\",\"serverURL\":\"$SURL\",\"lastContact\":$AGE}}"
+    echo -e "{\"status\":\"OK\",\"scada\":{\"state\":\"$STATE\",\"healthy\":$HEALTHY,\"running\":$RUNNING,\"enabled\":$ENABLED,\"station\":\"$STATION\",\"serverURL\":\"$SURL\",\"lastContact\":$AGE}}"
 fi

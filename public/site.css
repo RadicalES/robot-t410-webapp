@@ -642,3 +642,8 @@ a.contact-card:hover {
 		text-align: center;
 	}
 }
+
+/* Service running state beside an Enabled checkbox. */
+.svc-state { margin-left: .6em; font-size: .85em; color: #5b616b; }
+.svc-state.running { color: #2e7d32; }
+.svc-state.stopped { color: #c62828; }

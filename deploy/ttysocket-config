@@ -72,10 +72,16 @@ TTYSOCKET_OPTS="${TTYSOCKET_OPTS}"
 CONFEOF
 chmod 644 "$CONF"
 
+# systemd owns whether this starts on boot, and the page reads it back from
+# systemd — so both halves have to actually happen. `|| true` on the enable was
+# how a terminal ended up running a disabled service: the save reported success,
+# the restart took effect, and the unit came back after a reboot switched off.
+#
+# --now pairs the boot setting with the running state in one step, so the two
+# cannot be left disagreeing.
 if [ "$ENABLED" = "TRUE" ]; then
-    systemctl enable wsrobot >/dev/null 2>&1 || true
+    systemctl enable wsrobot
     systemctl restart wsrobot
 else
-    systemctl stop wsrobot >/dev/null 2>&1 || true
-    systemctl disable wsrobot >/dev/null 2>&1 || true
+    systemctl disable --now wsrobot
 fi

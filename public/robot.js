@@ -409,7 +409,9 @@ function setScadaCB(data) {
 	if (!data || data.status != "OK" || !("scada" in data)) return;
 	const s = data.scada;
 	let color, text;
-	if (!s.running) { color = '#9e9e9e'; text = 'Service not running'; }
+	// Switched off and crashed are different things to be told.
+	if (!s.running && s.enabled === false) { color = '#9e9e9e'; text = 'Service disabled'; }
+	else if (!s.running) { color = '#9e9e9e'; text = 'Service not running'; }
 	else if (s.state == 'ONLINE' && s.healthy) { color = '#4CAF50'; text = 'Connected'; }
 	else if (s.state == 'ONLINE') { color = '#ff9800'; text = 'Connection lost'; }
 	else if (s.state == 'UNPROVISIONED') { color = '#ff9800'; text = 'Reachable - not provisioned'; }
@@ -461,6 +463,17 @@ function setCardReader(cfg) {
 	scb('cardreader_foreign_connect', cfg.foreignConnect);
 	sv('cardreader_server_port', cfg.serverPort)
 	sv('cardreader_output_format', cfg.outputFormat)
+
+	// "Enabled" is systemd's is-enabled — whether it starts on boot. Whether
+	// it is running right now is a separate answer, and worth showing: a
+	// reader that is enabled but stopped, or running but disabled, is exactly
+	// the state that looks fine until the terminal is power-cycled.
+	const state = docGetElById('cardreader_state');
+	if (state) {
+		const running = String(cfg.running) === 'TRUE' || cfg.running === true;
+		state.textContent = running ? 'running' : 'stopped';
+		state.className = 'svc-state ' + (running ? 'running' : 'stopped');
+	}
 }
 
 
