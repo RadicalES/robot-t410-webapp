@@ -7,7 +7,7 @@
 # Written by Jan Zwiegers, jan@radicalsystems.co.za
 
 
-CARDCFGFILE=/etc/formfactor/cardreader.conf
+CARDCFGFILE=/etc/ttysocket/ttysocket.conf
 SERVER_CONFIG_URL="http://www.radicalsystems.co.za"
 TAG_NAME="NOT SET"
 
@@ -82,6 +82,13 @@ fi
 
 # SERIAL SECTION
 BAUDRATES="1200,2400,4800,9600,19200,38400,57600,115200"
+
+# Reported from the ttysocket config the service actually reads. "enabled" is
+# whether the service is running, not a key in the file.
+CARD_ENABLED=FALSE
+systemctl is-active --quiet wsrobot 2>/dev/null && CARD_ENABLED=TRUE
+CARD_FOREIGN=FALSE
+[ "${TTYSOCKET_HOST:-foreign}" = "foreign" ] && CARD_FOREIGN=TRUE
 
 CARDREADER_CFG="\"cardreaderConfig\":{
   \"index\":\"0\",

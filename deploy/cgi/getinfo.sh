@@ -19,7 +19,7 @@ RELEASE=NOT-SET
 # cat  /etc/issue | jq -Rs '{issue: .}'
 
 # Manufacturing Information
-. /etc/formfactor/maninfo
+. /etc/robot/maninfo
 . /etc/robot-issue
 
 if [ "$REQUEST_METHOD" = "OPTIONS" ]; then

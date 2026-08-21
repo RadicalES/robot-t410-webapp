@@ -65,7 +65,7 @@ parse_params () {
         START_APP=$2;
 
       # else
-  	  #   echo -en "Unknown tag=$1 value=$2\n" >> /etc/formfactor/appsetting.txt
+  	  #   echo -en "Unknown tag=$1 value=$2\n" >> /etc/robot/appsetting.txt
       fi
   done
 
@@ -81,8 +81,8 @@ APP_ENGINE=$APP_ENGINE\n
 SCALE_TYPE=$SCALE_TYPE\n
 TAG_NAME=$TAG_NAME\n
 START_APP=$START_APP\n"
-  echo -e "$APP_DESC" > /etc/formfactor/app.conf
-  echo -e $APP_CFG >> /etc/formfactor/app.conf
+  echo -e "$APP_DESC" > /etc/robot/app.conf
+  echo -e $APP_CFG >> /etc/robot/app.conf
 }
 
 configure_hostname () {

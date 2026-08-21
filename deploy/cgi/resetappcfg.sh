@@ -10,7 +10,7 @@ echo "Access-Control-Allow-Origin: *"
 echo "Content-Type: application/json"
 echo ""
 
-CFGFILE=/etc/formfactor/app.conf
+CFGFILE=/etc/robot/app.conf
 
 cat > "$CFGFILE" <<'EOF'
 # Robot-T430 Application Settings

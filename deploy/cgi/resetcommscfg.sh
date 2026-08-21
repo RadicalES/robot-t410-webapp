@@ -10,23 +10,12 @@ echo "Access-Control-Allow-Origin: *"
 echo "Content-Type: application/json"
 echo ""
 
-cat > /etc/formfactor/cardreader.conf <<'EOF'
-# Robot-T430 Card Reader Settings
-# (C) 2025, Radical Electronic Systems
-
-CARDWS_SVR_ENABLED=TRUE
-CARDWS_SVR_FOREIGN=TRUE
-CARDWS_SVR_WPORT=8100
-CARDWS_OUTPUT_FORMAT=[CARD]:%s
-CARDWS_SVR_SPORT=ttyS0
-CARDWS_CARD_SHORT=TRUE
-EOF
-
-cat > /etc/formfactor/serial.conf <<'EOF'
-SERIAL_ENABLED_0=false
-nSERIAL_BAUDRATE_0=9600
-SERIAL_ENABLED_1=false
-nSERIAL_BAUDRATE_1=9600
-EOF
+# One config for the bridge now — /etc/ttysocket/ttysocket.conf, read by the
+# packaged service — so this goes through the same helper the Card Reader page
+# uses, which preserves the deployment-level settings (tty, baud, mode, card
+# type) and restarts the service.
+if [ -x /usr/local/sbin/ttysocket-config ]; then
+    /usr/bin/sudo -n /usr/local/sbin/ttysocket-config 8100 foreign '[CARD]:%s' TRUE >/dev/null 2>&1 || true
+fi
 
 echo '{"status":"OK","message":"Communications settings reset to defaults"}'

@@ -21,7 +21,7 @@ STATION=$(readf "$RUN/station" "")
 LASTOK=$(readf "$RUN/last_ok" 0)
 
 PING_INTERVAL=30
-[ -r /etc/formfactor/app.conf ] && . /etc/formfactor/app.conf
+[ -r /etc/robot/app.conf ] && . /etc/robot/app.conf
 PING_INTERVAL=${PING_INTERVAL:-30}
 THRESH=$((PING_INTERVAL * 3))
 

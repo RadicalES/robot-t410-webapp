@@ -7,7 +7,7 @@
 # Written by Jan Zwiegers, jan@radicalsystems.co.za
 
 
-CFGFILE=/etc/formfactor/app.conf
+CFGFILE=/etc/robot/app.conf
 
 SERVER_CONFIG_URL="http://www.radicalsystems.co.za"
 API_PROTOCOL='ROBOT-API'

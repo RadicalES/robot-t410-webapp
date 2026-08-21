@@ -60,7 +60,7 @@ parse_params () {
         CARDWS_OUTPUT_FORMAT=$2;
 
       # else
-  	  #   echo -en "Unknown tag=$1 value=$2\n" >> /etc/formfactor/appsetting.txt
+  	  #   echo -en "Unknown tag=$1 value=$2\n" >> /etc/robot/appsetting.txt
       fi
   done
 
@@ -68,16 +68,23 @@ parse_params () {
 }
 
 configure_cardreader () {
+  # The bridge is the packaged ttysocket service, configured through
+  # /etc/ttysocket/ttysocket.conf. Writing the old cardreader.conf changed
+  # nothing once the T430 moved to the package — no service reads it.
+  #
+  # The helper applies only the four settings this page owns and restarts the
+  # service; the tty, baud, read mode and card type are deployment-level and it
+  # preserves them.
+  HOSTMODE=local
+  [ "$CARDWS_SVR_FOREIGN" = "TRUE" ] && HOSTMODE=foreign
 
-CARDREADER_CFG="# Application Settings\n\n
-CARDWS_SVR_ENABLED=$CARDWS_SVR_ENABLED\n
-CARDWS_SVR_FOREIGN=$CARDWS_SVR_FOREIGN\n
-CARDWS_SVR_WPORT=$CARDWS_SVR_WPORT\n
-CARDWS_OUTPUT_FORMAT=$CARDWS_OUTPUT_FORMAT\n
-CARDWS_SVR_SPORT=ttyS0\n
-CARDWS_CARD_SHORT=TRUE\n"
-  echo -e "$CARDREADER_DESC" > /etc/formfactor/cardreader.conf
-  echo -e $CARDREADER_CFG >> /etc/formfactor/cardreader.conf
+  if RESULT=$(/usr/bin/sudo -n /usr/local/sbin/ttysocket-config \
+        "$CARDWS_SVR_WPORT" "$HOSTMODE" "$CARDWS_OUTPUT_FORMAT" \
+        "$CARDWS_SVR_ENABLED" 2>&1); then
+    RESULT="settings applied"
+  else
+    RESULT="failed: $RESULT"
+  fi
 }
 
 

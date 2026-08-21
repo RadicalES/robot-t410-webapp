@@ -119,8 +119,8 @@ if [ "$REQUEST_METHOD" = "POST" ]; then
         parse_params $POST_DATA
 
         CONFIG="# Ethernet Settings\nENABLED=$ENABLED\nINTERFACE=$INTERFACE\nDHCP=$DHCP\nIPADDR=$IPADDR\nNETMASK=$NETMASK\nGATEWAY=$GATEWAY\nDNS=$DNS\nMETRIC=$METRIC\n\n"
-        echo -e $APP_DESC > /etc/formfactor/etherconfig
-        echo -e $CONFIG >> /etc/formfactor/etherconfig
+        echo -e $APP_DESC > /etc/robot/etherconfig
+        echo -e $CONFIG >> /etc/robot/etherconfig
 
         # stop_lan
         # delete_lan

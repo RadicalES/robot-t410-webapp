@@ -1,0 +1,78 @@
+#!/bin/sh
+#
+# /usr/local/sbin/ttysocket-config
+#
+# Applies the Card Reader page's settings to /etc/ttysocket/ttysocket.conf and
+# restarts the bridge. Called from the web UI through a narrow sudoers rule —
+# the CGI runs as www-data and cannot write under /etc or drive systemd.
+#
+# Only the four settings the page owns are accepted. Everything else in the
+# file — the tty, the baud rate, the read mode, the card-reader options — is
+# deployment-level, set when the terminal is built, and is preserved verbatim.
+# A web request must not be able to repoint the bridge at another port or
+# switch a scanner into card-decoding mode.
+#
+# Usage: ttysocket-config <port> <local|foreign> <format> <TRUE|FALSE>
+#
+# (C) 2017-2026, Radical Electronic Systems - www.radicalsystems.co.za
+
+set -e
+
+CONF=/etc/ttysocket/ttysocket.conf
+PORT="$1"
+HOST="$2"
+FORMAT="$3"
+ENABLED="$4"
+
+die() { echo "$1" >&2; exit 1; }
+
+# Validate before writing: this input arrives from a web request, and a phone
+# on the setup hotspot reaches these endpoints without a password.
+case "$PORT" in
+    ''|*[!0-9]*) die "port must be numeric" ;;
+esac
+[ "$PORT" -ge 1 ] && [ "$PORT" -le 65535 ] || die "port out of range"
+
+case "$HOST" in
+    local|foreign) ;;
+    *) die "host must be local or foreign" ;;
+esac
+
+case "$FORMAT" in
+    *[!-A-Za-z0-9%:_.\[\]\ ]*) die "format has unexpected characters" ;;
+esac
+[ -n "$FORMAT" ] || FORMAT="%s"
+
+case "$ENABLED" in
+    TRUE|FALSE) ;;
+    *) die "enabled must be TRUE or FALSE" ;;
+esac
+
+# Keep the deployment-level settings.
+TTYSOCKET_TTY=/dev/ttyS0
+TTYSOCKET_BAUD=9600
+TTYSOCKET_MODE=rdm6300
+TTYSOCKET_OPTS=-c SHORT
+[ -r "$CONF" ] && . "$CONF"
+
+mkdir -p /etc/ttysocket
+cat > "$CONF" <<CONFEOF
+# Written by the web UI. See /usr/share/doc/wsrobot/ttysocket.conf for every
+# key and its default.
+TTYSOCKET_PORT=${PORT}
+TTYSOCKET_TTY=${TTYSOCKET_TTY}
+TTYSOCKET_BAUD=${TTYSOCKET_BAUD}
+TTYSOCKET_HOST=${HOST}
+TTYSOCKET_FORMAT=${FORMAT}
+TTYSOCKET_MODE=${TTYSOCKET_MODE}
+TTYSOCKET_OPTS=${TTYSOCKET_OPTS}
+CONFEOF
+chmod 644 "$CONF"
+
+if [ "$ENABLED" = "TRUE" ]; then
+    systemctl enable wsrobot >/dev/null 2>&1 || true
+    systemctl restart wsrobot
+else
+    systemctl stop wsrobot >/dev/null 2>&1 || true
+    systemctl disable wsrobot >/dev/null 2>&1 || true
+fi

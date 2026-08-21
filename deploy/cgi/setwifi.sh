@@ -143,8 +143,8 @@ if [ "$REQUEST_METHOD" = "POST" ]; then
         parse_params $POST_DATA
 
         CONFIG="# Wifi Settings\nENABLED=$ENABLED\nINTERFACE=$INTERFACE\nDHCP=$DHCP\nIPADDR=$IPADDR\nNETMASK=$NETMASK\nGATEWAY=$GATEWAY\nDNS=$DNS\nMETRIC=$METRIC\nSSID=$SSID\nPASSKEY=$PASSKEY\n\n"
-        echo -e $APP_DESC > /etc/formfactor/wificonfig
-        echo -e $CONFIG >> /etc/formfactor/wificonfig
+        echo -e $APP_DESC > /etc/robot/wificonfig
+        echo -e $CONFIG >> /etc/robot/wificonfig
 
         # stop_wifi
         # delete_wifis
