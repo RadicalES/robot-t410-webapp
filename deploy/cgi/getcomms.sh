@@ -38,46 +38,41 @@ if [ "$LANDHCP" = "manual" ]; then
 	# Static: read the configured values from the connection profile
 	LANADDR=$(nmcli -g ipv4.addresses con show "$LANNAME" | head -1 | cut -d',' -f1)
 	LANGW=$(nmcli -g ipv4.gateway con show "$LANNAME")
-	LANDNS=$(nmcli -g ipv4.dns con show "$LANNAME" | tr ',' ' ')
+	LANDNS=$(nmcli -g ipv4.dns con show "$LANNAME" | tr ',' ' ' | awk '{print $1}')
 else
 	# DHCP/auto: read the live values from the device
 	LANDHCP="auto"
 	LANADDR=$(nmcli -g IP4.ADDRESS dev show "$LANIF" | head -1)
 	LANGW=$(nmcli -g IP4.GATEWAY dev show "$LANIF")
-	LANDNS=$(nmcli -g IP4.DNS dev show "$LANIF" | tr '\n' ' ')
+	LANDNS=$(nmcli -g IP4.DNS dev show "$LANIF" | tr '\n' ' ' | awk '{print $1}')
 fi
 LANIP="${LANADDR%%/*}"
 LANPREFIX="${LANADDR##*/}"
 [ "$LANPREFIX" = "$LANADDR" ] && LANPREFIX=""
 LANMASK=$(prefix_to_netmask "$LANPREFIX")
 
-if [ -n "$LANIP"  ]; then	
-  LAN_CFG="{
+# An interface with no address is not evidence of a static configuration: an
+# unplugged LAN on DHCP has no lease. This used to answer that case by
+# inventing 192.168.0.10 and reporting dhcp=FALSE, so the page showed DHCP
+# switched off, and a save from that page would then write that invented
+# address to the terminal. ipv4.method says how the interface is configured;
+# the address says whether it currently has one.
+[ -z "$LANIP" ] && LANIP="0.0.0.0"
+[ -z "$LANGW" ] && LANGW="0.0.0.0"
+[ -z "$LANDNS" ] && LANDNS="0.0.0.0"
+
+LAN_CFG="{
     \"name\":\"$LANNAME\",
     \"type\":\"wired\",
+    \"iface\":\"$LANIF\",
     \"enabled\":\"TRUE\",
     \"dhcp\":\"$LANDHCP\",
     \"macAddress\":\"$LANMAC\",
     \"ipAddress\":\"$LANIP\",
     \"netmask\":\"$LANMASK\",
     \"gateway\":\"$LANGW\",
-    \"dns\":\"$LANDNS\",
-    \"ntp\":\"192.168.1.1\"
+    \"dns\":\"$LANDNS\"
   }"
-else
-  LAN_CFG="{
-    \"name\":\"$LANNAME\",
-    \"type\":\"wired\",
-    \"enabled\":\"FALSE\",
-    \"dhcp\":\"FALSE\",
-    \"macAddress\":\"$LANMAC\",
-    \"ipAddress\":\"192.168.0.10\",
-    \"netmask\":\"255.255.255.0\",
-    \"gateway\":\"192.168.0.1\",
-    \"dns\":\"192.168.0.1\",
-    \"ntp\":\"192.168.0.1\"
-  }"
-fi
 
 
 # SERIAL SECTION
@@ -92,15 +87,23 @@ CARD_FOREIGN=FALSE
 
 CARDREADER_CFG="\"cardreaderConfig\":{
   \"index\":\"0\",
-  \"enabled\":\"$CARDWS_SVR_ENABLED\",
-  \"foreignConnect\":\"$CARDWS_SVR_FOREIGN\",
-  \"serverPort\":\"$CARDWS_SVR_WPORT\",
-  \"outputFormat\":\"$CARDWS_OUTPUT_FORMAT\"
+  \"enabled\":\"${CARD_ENABLED}\",
+  \"foreignConnect\":\"${CARD_FOREIGN}\",
+  \"serverPort\":\"${TTYSOCKET_PORT:-8100}\",
+  \"outputFormat\":\"${TTYSOCKET_FORMAT:-%s}\"
   }"
 
 NET_CFG="\"networkConfig\":[$LAN_CFG]"
 
-COMMS_CFG="{$CARDREADER_CFG,$NET_CFG}"
+# systemd-timesyncd's own setting, not a per-interface one. The page used to
+# show an NTP box beside the interface settings, filled from a hardcoded
+# 192.168.1.1 in this script, and setnwk.sh parsed the value back and threw it
+# away. Now it is read from, and written to, the place that keeps it.
+NTP_SERVER=$(grep -hs '^NTP=' /etc/systemd/timesyncd.conf.d/*.conf /etc/systemd/timesyncd.conf \
+             2>/dev/null | head -1 | cut -d= -f2 | awk '{print $1}')
+TIME_CFG="\"timeConfig\":{\"ntp\":\"${NTP_SERVER}\"}"
+
+COMMS_CFG="{$CARDREADER_CFG,$NET_CFG,$TIME_CFG}"
 JSON="\"status\":\"OK\",\"commsConfig\":$COMMS_CFG";
 
 echo -e "Access-Control-Allow-Origin: *\r\nContent-Type: application/json\r\n\r\n"

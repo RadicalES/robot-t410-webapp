@@ -5,6 +5,7 @@
  * Creates dist/robot-t430-webapp-vX.X.X/ with:
  *   html/        Minified static web files
  *   cgi/         CGI scripts
+ *   ttysocket-config, ntp-config   Root helpers the web UI calls
  *   nginx.conf   NGINX config
  *   sync.sh      Deployment script
  *   network-failsafe.sh/.service  Boot failsafe
@@ -107,6 +108,14 @@ fs.copyFileSync('deploy/network-failsafe.sh', path.join(distDir, 'network-failsa
 fs.chmodSync(path.join(distDir, 'network-failsafe.sh'), 0o755);
 fs.copyFileSync('deploy/network-failsafe.service', path.join(distDir, 'network-failsafe.service'));
 fs.copyFileSync('deploy/www-nmcli', path.join(distDir, 'www-nmcli'));
+// Root helpers the CGI calls through sudoers. sync.sh expects both beside it
+// in the release directory; without them the sudoers rules name files that
+// were never installed, and the pages that use them report success and change
+// nothing.
+fs.copyFileSync('deploy/ttysocket-config', path.join(distDir, 'ttysocket-config'));
+fs.chmodSync(path.join(distDir, 'ttysocket-config'), 0o755);
+fs.copyFileSync('deploy/ntp-config', path.join(distDir, 'ntp-config'));
+fs.chmodSync(path.join(distDir, 'ntp-config'), 0o755);
 fs.copyFileSync('deploy/batch-deploy.sh', path.join(distDir, 'batch-deploy.sh'));
 fs.chmodSync(path.join(distDir, 'batch-deploy.sh'), 0o755);
 fs.copyFileSync('deploy/INSTALL.md', path.join(distDir, 'README.md'));

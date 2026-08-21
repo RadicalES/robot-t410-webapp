@@ -384,9 +384,12 @@ function loadLoading(evt) {
 //-----------------------------------------------------------------------------
 let scadaTimer = null;
 function loadComms(evt) {
-	layer = 'layerComms';
 	loadLoading();
 	loadLayerHTML('layerComms', () => {
+		// After loadLoading(), not before: it sets `layer` to 'layerLoading',
+		// so assigning first left the timer below cancelling itself five
+		// seconds later, and the card showing whatever was true at page load.
+		layer = 'layerComms';
 		getData('getcomms.sh', setCommsCfgCB);
 		refreshScada();
 		if (scadaTimer) clearInterval(scadaTimer);
@@ -423,11 +426,13 @@ function setScadaCB(data) {
 	if (lc) lc.innerHTML = (s.lastContact >= 0) ? (s.lastContact + 's ago') : 'never';
 }
 
+// Interface name per section, filled in from getcomms.sh.
+var netIface = {};
+
 function setNetState (label, s) {
 	docGetElById(label + '_ipa').disabled = s;
 	docGetElById(label + '_nm').disabled = s;
 	docGetElById(label + '_gw').disabled = s;
-	docGetElById(label + '_ntp').disabled = s;
 	docGetElById(label + '_dns').disabled = s;
 }
 
@@ -440,17 +445,14 @@ function setNetwork(label, cfg) {
 	sv(label + '_nm', cfg.netmask);
 	sv(label + '_gw', cfg.gateway);
 	sv(label + '_dns', cfg.dns);
-	sv(label + '_ntp', cfg.ntp);
 	sv('net_' + label + '_name', cfg.name);
 	
 	docGetElById('net_' + label + '_name').innerHTML = "Interface: " + cfg.name;
 
-	if(label == 'wireless') {
-		sv(label + '_ssid', cfg.ssid);
-		sv(label + '_ap_mac', cfg.apmac);
-		sv(label + '_ap_signal', cfg.apsignal + "%");
-	}
-	
+	// Which interface these settings belong to. The save posts this rather
+	// than assuming eth0, and it doubles as the record of which sections were
+	// rendered — a save must not post settings for a section nobody saw.
+	netIface[label] = cfg.iface || 'eth0';
 }
 
 function setCardReader(cfg) {
@@ -478,8 +480,8 @@ function resetCommsCfg () {
 function setCommsCfgCB(data) {
 	showMenuLayer('layerComms');
 	hideLayerByID('layerComms_wired')
-	hideLayerByID('layerComms_wireless')
 	hideLayerByID('layerComms_cardreader')
+	netIface = {};
 	if(data.status=="OK") {
 		if("commsConfig" in data) {
 			const cfc = data["commsConfig"];			
@@ -488,6 +490,10 @@ function setCommsCfgCB(data) {
 				ncf.forEach((n) => setNetwork(n.type, n));
 			}
 				
+			if("timeConfig" in cfc) {
+				sv('system_ntp', cfc["timeConfig"].ntp);
+			}
+
 			if("cardreaderConfig" in cfc) {
 				const crc = cfc["cardreaderConfig"]; // this is an array	
 				setCardReader(crc);				
@@ -502,26 +508,14 @@ function setCommsCfgCB(data) {
 }
 
 
-function getWiredSettings() {
-	return 'iface=eth0' +
-		'&dhcp=' + (ov('wired_dhcp') === 'true' ? 'auto' : 'manual') +
-		'&ipaddr=' + ov('wired_ipa') +
-		'&netmask=' + ov('wired_nm') +
-		'&gateway=' + ov('wired_gw') +
-		'&dns=' +  ov('wired_dns') +
-		'&ntp=' + ov('wired_ntp')
-}
-
-function getWirelessSettings() {
-	return 'iface=wlan0' +
-		'&dhcp=' + (ov('wireless_dhcp') === 'true' ? 'auto' : 'manual') +
-		'&ipaddr=' + ov('wireless_ipa') +
-		'&netmask=' + ov('wireless_nm') +
-		'&gateway=' + ov('wireless_gw') +
-		'&dns=' +  ov('wireless_dns') +
-		'&ntp=' + ov('wireless_ntp') +
-		'&ssid=' + ov('wireless_ssid') +
-		'&passkey=' + ov('wireless_passkey')
+// Site settings for one interface — address, mask, gateway, DNS.
+function getNetSettings(label) {
+	return 'iface=' + encodeURIComponent(netIface[label] || '') +
+		'&dhcp=' + (ov(label + '_dhcp') === 'true' ? 'auto' : 'manual') +
+		'&ipaddr=' + ov(label + '_ipa') +
+		'&netmask=' + ov(label + '_nm') +
+		'&gateway=' + ov(label + '_gw') +
+		'&dns=' + ov(label + '_dns');
 }
 
 function getCardReaderSettings() {
@@ -533,16 +527,25 @@ function getCardReaderSettings() {
 
 function saveCommsCfg() {
 
-	const wiredCfg = getWiredSettings();
-	const cardreaderCfg = getCardReaderSettings();
+	// One request per interface section that was actually rendered, then the
+	// time server, then the scanner.
+	const steps = ['wired']
+		.filter((label) => netIface[label])
+		.map((label) => ['setnwk.sh', getNetSettings(label)]);
 
-	// Save all configs in sequence: network -> cardreader
-	setData('setnwk.sh', wiredCfg, (data) => {
+	steps.push(['setntp.sh', 'ntp=' + encodeURIComponent(ov('system_ntp'))]);
+	steps.push(['setcardreader.sh', getCardReaderSettings()]);
 
-		setData('setcardreader.sh', cardreaderCfg, (data) => {
+	// Sequentially, not in parallel: these all reach NetworkManager, and it
+	// serialises its callers anyway.
+	const runNext = (i) => {
+		if (i >= steps.length) {
 			alertInfo('Success: Communications Settings Saved!');
-		});
-	});
+			return;
+		}
+		setData(steps[i][0], steps[i][1], () => runNext(i + 1));
+	};
+	runNext(0);
 
 	return false;
 }

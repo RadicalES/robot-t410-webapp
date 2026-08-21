@@ -29,24 +29,71 @@ IPADDR=$(get_param "ipaddr")
 NETMASK=$(get_param "netmask")
 GATEWAY=$(get_param "gateway")
 DNS=$(get_param "dns")
-NTP=$(get_param "ntp")
 
 # Default to eth0
 if [ -z "$IFACE" ]; then
     IFACE="eth0"
 fi
 
-# Find the NetworkManager connection name for this interface
-CON_NAME=$(nmcli -t -g NAME,DEVICE con show | grep ":${IFACE}$" | head -1 | cut -d':' -f1)
-
-if [ -z "$CON_NAME" ]; then
-    echo "{\"status\":\"ERROR\",\"message\":\"No connection found for $IFACE\"}"
+# The interface has to be one this terminal actually has. Everything below
+# reaches NetworkManager with it, and this arrives from a web request.
+case "$IFACE" in
+    *[!a-zA-Z0-9]*) IFACE="" ;;
+esac
+if [ -z "$IFACE" ] || [ ! -e "/sys/class/net/${IFACE}" ]; then
+    echo '{"status":"ERROR","message":"Unknown interface"}'
     exit 0
 fi
 
+# Find the NetworkManager connection to modify.
+#
+# Matching on the DEVICE column alone only finds connections that are up, so
+# saving with the cable unplugged answered "No connection found for eth0" —
+# which is exactly when someone is likely to be setting a static address so the
+# terminal comes up correctly on the next plug-in. Fall back to the profile's
+# own interface-name binding, and then to type, because Debian's stock "Wired
+# connection 1" is bound to no interface at all.
+CON_NAME=$(timeout 5 nmcli -t -g NAME,DEVICE con show 2>/dev/null \
+           | grep ":${IFACE}$" | head -1 | cut -d':' -f1)
+
+if [ -z "$CON_NAME" ]; then
+    timeout 5 nmcli -t -g NAME con show 2>/dev/null > /tmp/setnwk.cons.$$
+    while IFS= read -r C; do
+        BOUND=$(timeout 5 nmcli -g connection.interface-name con show "$C" 2>/dev/null)
+        if [ "$BOUND" = "$IFACE" ]; then
+            CON_NAME="$C"
+            break
+        fi
+    done < /tmp/setnwk.cons.$$
+    rm -f /tmp/setnwk.cons.$$
+fi
+
+if [ -z "$CON_NAME" ]; then
+    if [ -d "/sys/class/net/${IFACE}/wireless" ] || [ -d "/sys/class/net/${IFACE}/phy80211" ]; then
+        WANT_TYPE=802-11-wireless
+    else
+        WANT_TYPE=802-3-ethernet
+    fi
+    CON_NAME=$(timeout 5 nmcli -t -f NAME,TYPE con show 2>/dev/null \
+               | awk -F: -v t="$WANT_TYPE" '$2==t {print $1; exit}')
+fi
+
+if [ -z "$CON_NAME" ]; then
+    echo "{\"status\":\"ERROR\",\"message\":\"No connection profile found for $IFACE\"}"
+    exit 0
+fi
+
+CUR_METHOD=$(timeout 5 nmcli -g ipv4.method con show "$CON_NAME" 2>/dev/null)
+
 if [ "$DHCP" = "auto" ]; then
-    # Set to DHCP
-    sudo nmcli con mod "$CON_NAME" ipv4.method auto ipv4.addresses "" ipv4.gateway "" ipv4.dns "" >/dev/null 2>&1
+    # Already on DHCP: nothing to write, and no reason to bounce the link.
+    # Saving this page also saves the scanner settings, and an operator
+    # changing a port number should not lose the network while it reconnects.
+    if [ "$CUR_METHOD" = "auto" ]; then
+        echo '{"status":"OK","message":"No network changes"}'
+        exit 0
+    fi
+    OUT=$(sudo nmcli con mod "$CON_NAME" ipv4.method auto ipv4.addresses "" ipv4.gateway "" ipv4.dns "" 2>&1)
     RESULT=$?
 else
     # Set static IP
@@ -76,21 +123,36 @@ else
         *) PREFIX=24 ;;
     esac
 
-    sudo nmcli con mod "$CON_NAME" \
+    # Same idea: if the profile already says exactly this, leave it alone
+    # rather than reconnecting the interface for no change.
+    CUR_ADDR=$(timeout 5 nmcli -g ipv4.addresses con show "$CON_NAME" 2>/dev/null | head -1)
+    CUR_GW=$(timeout 5 nmcli -g ipv4.gateway con show "$CON_NAME" 2>/dev/null)
+    CUR_DNS=$(timeout 5 nmcli -g ipv4.dns con show "$CON_NAME" 2>/dev/null | tr ',' ' ' | awk '{print $1}')
+    if [ "$CUR_METHOD" = "manual" ] && \
+       [ "$CUR_ADDR" = "${IPADDR}/${PREFIX}" ] && \
+       [ "$CUR_GW" = "$GATEWAY" ] && \
+       [ "$CUR_DNS" = "${DNS:-$GATEWAY}" ]; then
+        echo '{"status":"OK","message":"No network changes"}'
+        exit 0
+    fi
+
+    OUT=$(sudo nmcli con mod "$CON_NAME" \
         ipv4.method manual \
         ipv4.addresses "${IPADDR}/${PREFIX}" \
         ipv4.gateway "$GATEWAY" \
-        ipv4.dns "${DNS:-$GATEWAY}" >/dev/null 2>&1
+        ipv4.dns "${DNS:-$GATEWAY}" 2>&1)
     RESULT=$?
 fi
 
 if [ $RESULT -ne 0 ]; then
-    echo '{"status":"ERROR","message":"Failed to update network configuration"}'
+    # What nmcli said, rather than a flat "failed" the operator cannot act on.
+    MSG=$(echo "$OUT" | tr -d '"' | tr '\n' ' ')
+    echo "{\"status\":\"ERROR\",\"message\":\"Failed to update network configuration: ${MSG}\"}"
     exit 0
 fi
 
 # Apply changes
-sudo nmcli con up "$CON_NAME" >/dev/null 2>&1
+OUT=$(sudo nmcli con up "$CON_NAME" 2>&1)
 RESULT=$?
 
 if [ $RESULT -eq 0 ]; then

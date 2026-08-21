@@ -1,0 +1,50 @@
+#!/bin/sh
+#
+# /usr/local/sbin/ntp-config
+#
+# Sets the time server systemd-timesyncd uses. Called from the web UI through
+# a narrow sudoers rule — the CGI runs as www-data and cannot write under /etc
+# or drive systemd.
+#
+# The setting is system-wide, not per interface: there is one clock. The web UI
+# used to show an NTP field beside each interface's IP settings, which implied
+# otherwise, and wrote neither of them anywhere.
+#
+# Usage: ntp-config <server>     server = hostname or IPv4 address
+#        ntp-config ""           clear, fall back to the distribution default
+#
+# (C) 2017-2026, Radical Electronic Systems - www.radicalsystems.co.za
+
+set -e
+
+DROPIN=/etc/systemd/timesyncd.conf.d/10-robot.conf
+SERVER="$1"
+
+die() { echo "$1" >&2; exit 1; }
+
+# This input arrives from a web request, and a phone on the setup hotspot
+# reaches these endpoints without a password. It lands in a config file that
+# systemd parses, so keep it to what a server name can contain and nothing
+# that could open a second directive.
+case "$SERVER" in
+    *[!-A-Za-z0-9._]*) die "server has unexpected characters" ;;
+esac
+[ "${#SERVER}" -le 253 ] || die "server name too long"
+
+# 0.0.0.0 is the placeholder the UI shows for "not set", not an address to
+# point the clock at.
+[ "$SERVER" = "0.0.0.0" ] && SERVER=""
+
+if [ -z "$SERVER" ]; then
+    rm -f "$DROPIN"
+else
+    mkdir -p "$(dirname "$DROPIN")"
+    cat > "$DROPIN" <<CONFEOF
+# Written by the web UI.
+[Time]
+NTP=${SERVER}
+CONFEOF
+    chmod 644 "$DROPIN"
+fi
+
+systemctl restart systemd-timesyncd

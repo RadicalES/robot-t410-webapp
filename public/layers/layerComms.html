@@ -67,70 +67,16 @@
 						<label>DNS Server:</label>
 						<input class="w3-input input-short" id="wired_dns" value="" />
 					</div>
-					<div class="w3-col l6 m6 irow">
-						<label>NTP Server:</label>
-						<input class="w3-input input-short" id="wired_ntp" value="" />
-					</div>
 				</div>
 			</div>
+		</div>
 
-			<div id="layerComms_wireless" style="margin-top: 1.5em;">
-				<h3 id="net_wireless_name"></h3>
-				<div class="w3-row">
-					<div class="w3-col l6 m6 irow">
-						<input class="w3-check small-check" type="checkbox" id="wireless_dhcp" value="1" onclick="setNetState('wireless',this.checked);" />
-						<label>DHCP</label>
-					</div>
-				</div>
-				<div class="w3-row">
-					<div class="w3-col l6 m6 irow">
-						<label>MAC Address:</label>
-						<input class="w3-input input-short" name="wireless_mac" disabled id="wireless_mac" value="" />
-					</div>
-					<div class="w3-col l6 m6 irow">
-						<label>IP Address:</label>
-						<input class="w3-input input-short" id="wireless_ipa" value="" />
-					</div>
-				</div>
-				<div class="w3-row">
-					<div class="w3-col l6 m6 irow">
-						<label>Subnet Mask:</label>
-						<input class="w3-input input-short" id="wireless_nm" value="" />
-					</div>
-					<div class="w3-col l6 m6 irow">
-						<label>Default Gateway:</label>
-						<input class="w3-input input-short" id="wireless_gw" value="" />
-					</div>
-				</div>
-				<div class="w3-row">
-					<div class="w3-col l6 m6 irow">
-						<label>DNS Server:</label>
-						<input class="w3-input input-short" id="wireless_dns" value="" />
-					</div>
-					<div class="w3-col l6 m6 irow">
-						<label>NTP Server:</label>
-						<input class="w3-input input-short" id="wireless_ntp" value="" />
-					</div>
-				</div>
-				<div class="w3-row">
-					<div class="w3-col l6 m6 irow">
-						<label>AP SSID:</label>
-						<input class="w3-input input-short" id="wireless_ssid" value="" />
-					</div>
-					<div class="w3-col l6 m6 irow">
-						<label>Passkey:</label>
-						<input class="w3-input input-short" type="password" id="wireless_passkey" value="" />
-					</div>
-				</div>
-				<div class="w3-row">
-					<div class="w3-col l6 m6 irow">
-						<label>AP MAC:</label>
-						<input class="w3-input input-short" disabled id="wireless_ap_mac" value="" />
-					</div>
-					<div class="w3-col l6 m6 irow">
-						<label>Signal Strength:</label>
-						<input class="w3-input input-short" disabled id="wireless_ap_signal" value="" />
-					</div>
+		<div class="card">
+			<legend>Time</legend>
+			<div class="w3-row">
+				<div class="w3-col l6 m6 irow">
+					<label>NTP Server:</label>
+					<input class="w3-input input-short" id="system_ntp" value="" />
 				</div>
 			</div>
 		</div>
@@ -180,13 +126,16 @@
 			gw.add( Validate.IPAddress );
 			gw.add( Validate.Presence );
 
-			const ntp = new LiveValidation( 'wired_ntp', {onlyOnSubmit: false, validMessage: 'OK' } );
-			ntp.add( Validate.IPAddress );
-			ntp.add( Validate.Presence );
-
+			// wired_dns had never actually been validated: its validator was
+			// created and then the rules were added to wired_ntp twice.
 			const dns = new LiveValidation( 'wired_dns', {onlyOnSubmit: false, validMessage: 'OK' } );
-			ntp.add( Validate.IPAddress );
-			ntp.add( Validate.Presence );
+			dns.add( Validate.IPAddress );
+			dns.add( Validate.Presence );
+
+			// A time server is usually named, not numbered - pool.ntp.org and
+			// the like - so it is not held to an IP address.
+			const ntp = new LiveValidation( 'system_ntp', {onlyOnSubmit: false, validMessage: 'OK' } );
+			ntp.add( Validate.Length, { maximum: 253 } );
 		</script>
 	</form>
 </div>

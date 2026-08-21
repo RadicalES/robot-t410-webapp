@@ -57,6 +57,7 @@ if [ -d "$SCRIPT_DIR/html" ]; then
     FAILSAFE_SVC="$SCRIPT_DIR/network-failsafe.service"
     SUDOERS_FILE="$SCRIPT_DIR/www-nmcli"
     TTYSOCKET_HELPER="$SCRIPT_DIR/ttysocket-config"
+    NTP_HELPER="$SCRIPT_DIR/ntp-config"
     TEST_DIR="$SCRIPT_DIR/test"
 else
     echo "No release build found. Run 'npm run release' first."
@@ -109,6 +110,7 @@ $SCP_CMD "$FAILSAFE_SH" "${DEVICE_USER}@${DEVICE_HOST}:/tmp/network-failsafe.sh"
 $SCP_CMD "$FAILSAFE_SVC" "${DEVICE_USER}@${DEVICE_HOST}:/tmp/network-failsafe.service"
 $SCP_CMD "$SUDOERS_FILE" "${DEVICE_USER}@${DEVICE_HOST}:/tmp/www-nmcli"
 $SCP_CMD "$TTYSOCKET_HELPER" "${DEVICE_USER}@${DEVICE_HOST}:/tmp/ttysocket-config"
+$SCP_CMD "$NTP_HELPER" "${DEVICE_USER}@${DEVICE_HOST}:/tmp/ntp-config"
 $SSH_CMD "${DEVICE_USER}@${DEVICE_HOST}" "\
     sudo cp /tmp/network-failsafe.sh /usr/local/bin/network-failsafe.sh && \
     sudo chmod +x /usr/local/bin/network-failsafe.sh && \
@@ -118,7 +120,9 @@ $SSH_CMD "${DEVICE_USER}@${DEVICE_HOST}" "\
     sudo cp /tmp/www-nmcli /etc/sudoers.d/www-nmcli && \
     sudo chmod 440 /etc/sudoers.d/www-nmcli && \
     sudo cp /tmp/ttysocket-config /usr/local/sbin/ttysocket-config && \
-    sudo chmod 755 /usr/local/sbin/ttysocket-config"
+    sudo chmod 755 /usr/local/sbin/ttysocket-config && \
+    sudo cp /tmp/ntp-config /usr/local/sbin/ntp-config && \
+    sudo chmod 755 /usr/local/sbin/ntp-config"
 
 echo ""
 echo "=== Deployment complete ==="
