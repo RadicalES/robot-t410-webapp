@@ -8,7 +8,7 @@
 
 APP_DESC="
 # Robot-T420 Serial Port Settings\n# (C) 2017-2024, Radical Electronic Systems\n\
-# http://www.radicalsystems.co.za info@radicalsystems.co.za\n\n
+# http://www.radicalsystems.co.za info@radsys.io\n\n
 "
 
 SERIAL_ENABLED_0="TRUE"
