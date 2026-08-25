@@ -13,7 +13,7 @@ CARDREADER_DESC="
 
 # CardReader Websocket Server Settings
 CARDWS_SVR_ENABLED=TRUE
-CARDWS_SVR_SPORT=ttyS0
+CARDWS_SVR_SPORT=""   # empty: keep the port the terminal already has
 CARDWS_SVR_WPORT=8100
 CARDWS_SVR_FOREIGN=FALSE
 CARDWS_CARD_SHORT=TRUE
@@ -59,6 +59,11 @@ parse_params () {
       elif [ $1 = "outputFormat" ]; then
         CARDWS_OUTPUT_FORMAT=$2;
 
+      # Which port the reader is on. The helper checks it against this
+      # device's list before writing anything - see ttysocket-config.
+      elif [ $1 = "serialPort" ]; then
+        CARDWS_SVR_SPORT=$2;
+
       # else
   	  #   echo -en "Unknown tag=$1 value=$2\n" >> /etc/robot/appsetting.txt
       fi
@@ -80,7 +85,7 @@ configure_cardreader () {
 
   if RESULT=$(/usr/bin/sudo -n /usr/local/sbin/ttysocket-config \
         "$CARDWS_SVR_WPORT" "$HOSTMODE" "$CARDWS_OUTPUT_FORMAT" \
-        "$CARDWS_SVR_ENABLED" 2>&1); then
+        "$CARDWS_SVR_ENABLED" "$CARDWS_SVR_SPORT" 2>&1); then
     RESULT="settings applied"
   else
     RESULT="failed: $RESULT"

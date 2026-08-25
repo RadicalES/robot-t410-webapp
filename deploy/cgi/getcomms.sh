@@ -102,7 +102,8 @@ CARDREADER_CFG="\"cardreaderConfig\":{
   \"running\":\"${CARD_RUNNING}\",
   \"foreignConnect\":\"${CARD_FOREIGN}\",
   \"serverPort\":\"${TTYSOCKET_PORT:-8100}\",
-  \"outputFormat\":\"${TTYSOCKET_FORMAT:-%s}\"
+  \"outputFormat\":\"${TTYSOCKET_FORMAT:-%s}\",
+  \"serialPort\":\"${TTYSOCKET_TTY##*/}\"
   }"
 
 NET_CFG="\"networkConfig\":[$LAN_CFG]"
