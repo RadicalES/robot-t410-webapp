@@ -8,7 +8,7 @@
 
 APP_DESC="
 # Robot-T430 Application Settings\n# (C) 2017-2025, Radical Electronic Systems\n
-# http://www.radicalsystems.co.za info@radsys.io\n\n
+# https://www.radsys.io info@radsys.io\n\n
 "
 
 # Default Config Server URL

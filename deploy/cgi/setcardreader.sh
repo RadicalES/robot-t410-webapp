@@ -8,7 +8,7 @@
 
 CARDREADER_DESC="
 # Robot-T430 Card Reader Settings\n# (C) 2025, Radical Electronic Systems\n
-# http://www.radicalsystems.co.za info@radsys.io\n\n
+# https://www.radsys.io info@radsys.io\n\n
 "
 
 # CardReader Websocket Server Settings
