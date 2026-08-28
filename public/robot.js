@@ -477,9 +477,18 @@ function setWsService(label, cfg) {
 	// the state that looks fine until the terminal is power-cycled.
 	const state = docGetElById(label + '_state');
 	if (state) {
+		const configured = String(cfg.configured) !== 'FALSE';
 		const running = String(cfg.running) === 'TRUE' || cfg.running === true;
-		state.textContent = running ? 'running' : 'stopped';
-		state.className = 'svc-state ' + (running ? 'running' : 'stopped');
+		if (!configured) {
+			// Not a fault: this terminal has never been given one. Saying so
+			// is what tells an operator the section is an offer, not a
+			// reading.
+			state.textContent = 'not set up';
+			state.className = 'svc-state';
+		} else {
+			state.textContent = running ? 'running' : 'stopped';
+			state.className = 'svc-state ' + (running ? 'running' : 'stopped');
+		}
 	}
 
 	// Which serial port it is on, filled from the device's own list of where
@@ -621,9 +630,14 @@ function setCommsCfgCB(data) {
 				sv('system_ntp', cfc["timeConfig"].ntp);
 			}
 
-			// Only what the terminal actually has. A service with no config
-			// file is one this terminal was not built with, and showing it
-			// would invite someone to enable a scanner that is not there.
+			// Every service this terminal COULD run, whether or not it has
+			// been set up.
+			//
+			// Hiding the unconfigured ones was circular: a scanner has no
+			// config until somebody configures it, and this page is where that
+			// happens - so a terminal that gained a scanner had no way to add
+			// it. An unconfigured service shows as "not set up" and becomes
+			// real when it is given a port and enabled.
 			const services = {
 				cardreader: "cardreaderConfig",
 				scanner:    "scannerConfig",
@@ -633,10 +647,8 @@ function setCommsCfgCB(data) {
 			Object.keys(services).forEach((label) => {
 				const key = services[label];
 				if (!(key in cfc)) return;
-				const cfg = cfc[key];
-				if (String(cfg.configured) === 'FALSE') return;
 				wsServices.push(label);
-				setWsService(label, cfg);
+				setWsService(label, cfc[key]);
 			});
 
 
