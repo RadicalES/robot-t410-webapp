@@ -38,7 +38,8 @@ done
 SERIAL_PORTS_ALLOW="${SERIAL_PORTS_ALLOW:-ttyACM* ttyUSB*}"
 SERIAL_PORTS_DENY="${SERIAL_PORTS_DENY:-}"
 
-# ?service=cardreader|scale narrows the list to what that service may use,
+# ?service=cardreader|scanner|scale narrows the list to what that service may
+# use,
 # because the two are not interchangeable: a T440's reader is soldered to
 # ttyAMA4 and cannot be anywhere else, while its scale arrives on whichever
 # USB port was free. A service with no list of its own falls back to the
@@ -47,6 +48,7 @@ SERVICE=$(printf '%s' "${QUERY_STRING:-}" | sed -n 's/.*\bservice=\([A-Za-z]*\).
 case "$SERVICE" in
     cardreader) [ -n "$SERIAL_PORTS_CARDREADER" ] && SERIAL_PORTS_ALLOW="$SERIAL_PORTS_CARDREADER" ;;
     scale)      [ -n "$SERIAL_PORTS_SCALE" ]      && SERIAL_PORTS_ALLOW="$SERIAL_PORTS_SCALE" ;;
+    scanner)    [ -n "$SERIAL_PORTS_SCANNER" ]    && SERIAL_PORTS_ALLOW="$SERIAL_PORTS_SCANNER" ;;
     *)          SERVICE="" ;;
 esac
 
@@ -63,23 +65,35 @@ esac
 # Reported so the UI can say "this one is the card reader" rather than
 # letting two services be pointed at the same port, which fails at open
 # with an error nobody sees.
-CARDCFG=/etc/ttysocket/ttysocket.conf
-SCALECFG=/etc/ttyscale/ttyscale.conf
+CARDCFG=/etc/ttysocket/cardreader.conf
+SCANCFG=/etc/ttysocket/scanner.conf
+SCALECFG=/etc/ttysocket/scale.conf
 CLAIM_CARD=""
+CLAIM_SCAN=""
 CLAIM_SCALE=""
-if [ -r "$CARDCFG" ]; then
-    CLAIM_CARD=$(sed -n 's/^[[:space:]]*TTYSOCKET_TTY2\?=["'"'"']\?\([^"'"'"'#[:space:]]*\).*/\1/p' "$CARDCFG" | tr '\n' ' ')
-fi
-if [ -r "$SCALECFG" ]; then
-    CLAIM_SCALE=$(sed -n 's/^[[:space:]]*TTYSCALE_TTY=["'"'"']\?\([^"'"'"'#[:space:]]*\).*/\1/p' "$SCALECFG" | tr '\n' ' ')
-fi
+claims_of() {
+    [ -r "$1" ] || return 0
+    sed -n "s/^[[:space:]]*$2=[\"']\?\([^\"'#[:space:]]*\).*/\1/p" "$1" | tr '\n' ' '
+}
+CLAIM_CARD=$(claims_of "$CARDCFG" 'TTYSOCKET_TTY2\?')
+CLAIM_SCAN=$(claims_of "$SCANCFG" 'TTYSOCKET_TTY2\?')
+CLAIM_SCALE=$(claims_of "$SCALECFG" 'TTYSCALE_TTY')
 
 claimed_by() {
     local dev="/dev/$1" name="$1" c
+    # A claim can be written as the by-id link rather than the node, since that
+    # is what survives a replug - so the link is resolved before comparing,
+    # otherwise a claimed port looks free.
     for c in $CLAIM_CARD; do
+        c=$(readlink -f "$c" 2>/dev/null || echo "$c")
         [ "$c" = "$dev" ] || [ "$c" = "$name" ] && { echo "cardreader"; return; }
     done
+    for c in $CLAIM_SCAN; do
+        c=$(readlink -f "$c" 2>/dev/null || echo "$c")
+        [ "$c" = "$dev" ] || [ "$c" = "$name" ] && { echo "scanner"; return; }
+    done
     for c in $CLAIM_SCALE; do
+        c=$(readlink -f "$c" 2>/dev/null || echo "$c")
         [ "$c" = "$dev" ] || [ "$c" = "$name" ] && { echo "scale"; return; }
     done
     echo ""

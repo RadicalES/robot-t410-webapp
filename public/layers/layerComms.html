@@ -82,7 +82,8 @@
 		</div>
 
 		<div class="card">
-			<legend>Websocket Servers</legend>
+			<legend>Websocket Services</legend>
+
 			<div id="layerComms_cardreader" style="margin-top: 0.5em;">
 				<h3>Card Reader</h3>
 				<div class="w3-row">
@@ -110,6 +111,98 @@
 						<input class="w3-input input-short" id="cardreader_output_format" value="[CARD]:%s" />
 					</div>
 				</div>
+				<div class="w3-row">
+					<div class="w3-col l6 m6 irow">
+						<label>Serial Port:</label>
+						<!-- The reader is soldered to one port on this board, so
+						     this shows what it is rather than offering a choice.
+						     getserialports.sh decides which: a list of one entry
+						     with no glob in it is a fixed port. -->
+						<span id="cardreader_serial_port_fixed" class="port-fixed">&mdash;</span>
+						<select class="w3-input input-short" id="cardreader_serial_port" style="display:none;"></select>
+					</div>
+				</div>
+			</div>
+
+			<div id="layerComms_scanner" style="margin-top: 1em;">
+				<h3>Barcode Scanner</h3>
+				<div class="w3-row">
+					<div class="w3-col l6 m6 irow">
+						<input class="w3-check small-check" type="checkbox" id="scanner_enabled" />
+						<label>Enabled</label>
+						<span id="scanner_state" class="svc-state">&mdash;</span>
+					</div>
+					<div class="w3-col l6 m6 irow">
+						<input class="w3-check small-check" type="checkbox" id="scanner_foreign_connect"/>
+						<label>Allow Foreign Connections</label>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l6 m6 irow">
+						<label>Websocket Port</label>
+						<input class="w3-input input-short" id="scanner_server_port" value="8102" />
+					</div>
+					<div class="w3-col l6 m6 irow">
+						<label>Output Format:</label>
+						<input class="w3-input input-short" id="scanner_output_format" value="[SCAN]:%s" />
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l6 m6 irow">
+						<label>Serial Port:</label>
+						<!-- A scanner goes into whichever USB socket was free, so
+						     this one is a choice. A scanner still in keyboard-wedge
+						     mode does not appear in the list at all. -->
+						<select class="w3-input input-short" id="scanner_serial_port"></select>
+						<span id="scanner_serial_port_fixed" class="port-fixed" style="display:none;">&mdash;</span>
+					</div>
+				</div>
+			</div>
+
+			<div id="layerComms_scale" style="margin-top: 1em;">
+				<h3>Scale</h3>
+				<div class="w3-row">
+					<div class="w3-col l6 m6 irow">
+						<input class="w3-check small-check" type="checkbox" id="scale_enabled" />
+						<label>Enabled</label>
+						<span id="scale_state" class="svc-state">&mdash;</span>
+					</div>
+					<div class="w3-col l6 m6 irow">
+						<input class="w3-check small-check" type="checkbox" id="scale_foreign_connect"/>
+						<label>Allow Foreign Connections</label>
+					</div>
+				</div>
+				<!-- Same shape as the card reader and the scanner: the websocket
+				     port with the service's own setting beside it, then the serial
+				     port on its own row. The scale's second setting is the protocol
+				     where the others have an output format. -->
+				<div class="w3-row">
+					<div class="w3-col l6 m6 irow">
+						<label>Websocket Port</label>
+						<input class="w3-input input-short" id="scale_server_port" value="8101" />
+					</div>
+					<div class="w3-col l6 m6 irow">
+						<label>Protocol:</label>
+						<!-- Which indicator is on the other end of the cable. This is
+						     the terminal's own answer, used when it runs standalone.
+						     While it is enrolled the server's setup names the scale and
+						     that is what runs - the note below says so rather than the
+						     field being hidden, because the standalone answer still has
+						     to be settable before the day it is needed. -->
+						<select class="w3-input input-short" id="scale_model"></select>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l6 m6 irow">
+						<label>Serial Port:</label>
+						<select class="w3-input input-short" id="scale_serial_port"></select>
+						<span id="scale_serial_port_fixed" class="port-fixed" style="display:none;">&mdash;</span>
+					</div>
+				</div>
+				<!-- In what units and between which limits: the server's settings,
+				     not this page's. Without a server there is no site, so there are
+				     no limits to apply. -->
+				<p class="hint" id="scale_hint">Units and weight limits come from the SCADA server.</p>
 			</div>
 		</div>
 

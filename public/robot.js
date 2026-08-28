@@ -457,23 +457,135 @@ function setNetwork(label, cfg) {
 	netIface[label] = cfg.iface || 'eth0';
 }
 
-function setCardReader(cfg) {
-	showLayerByID('layerComms_cardreader')
-	scb('cardreader_enabled', cfg.enabled);
-	scb('cardreader_foreign_connect', cfg.foreignConnect);
-	sv('cardreader_server_port', cfg.serverPort)
-	sv('cardreader_output_format', cfg.outputFormat)
+// The card reader, the scanner and the scale are the same shape: a device on a
+// serial port, bridged onto a websocket, started by systemd. One renderer, so
+// a fix to how a service is shown is a fix to all three.
+//
+// The scale is the exception in two places, and only two: it has no output
+// format (wsScale sends structured readings) and no foreign-connections
+// choice.
+function setWsService(label, cfg) {
+	showLayerByID('layerComms_' + label)
+	scb(label + '_enabled', cfg.enabled);
+	scb(label + '_foreign_connect', cfg.foreignConnect);
+	sv(label + '_server_port', cfg.serverPort)
+	sv(label + '_output_format', cfg.outputFormat)
 
 	// "Enabled" is systemd's is-enabled — whether it starts on boot. Whether
 	// it is running right now is a separate answer, and worth showing: a
 	// reader that is enabled but stopped, or running but disabled, is exactly
 	// the state that looks fine until the terminal is power-cycled.
-	const state = docGetElById('cardreader_state');
+	const state = docGetElById(label + '_state');
 	if (state) {
 		const running = String(cfg.running) === 'TRUE' || cfg.running === true;
 		state.textContent = running ? 'running' : 'stopped';
 		state.className = 'svc-state ' + (running ? 'running' : 'stopped');
 	}
+
+	// Which serial port it is on, filled from the device's own list of where
+	// that service's hardware may be.
+	loadSerialPorts(label, cfg.serialPort);
+
+	if (label === 'scale') setScaleModel(cfg);
+}
+
+// Which indicator the scale is.
+//
+// Always settable, even while a SCADA server is naming one. Two reasons: a
+// terminal is set up before it is enrolled, and one that has been enrolled can
+// be taken away and run standalone — and on that day the protocol it falls
+// back to is whatever was chosen here. Hiding the choice while a server is
+// present would mean the fallback could only ever be set from a shell.
+//
+// Precedence is stated rather than enforced by hiding: wsScale reads the
+// server's setup after the local file, so the server's value is what runs
+// while there is one.
+function setScaleModel(cfg) {
+	const sel = docGetElById('scale_model');
+	const hint = docGetElById('scale_hint');
+	if (!sel) return;
+
+	sel.innerHTML = '';
+	// An empty first entry, because "no scale chosen" is a real state on a
+	// terminal that has not been told which one is on the bench.
+	const none = document.createElement('option');
+	none.value = '';
+	none.textContent = '— none —';
+	sel.appendChild(none);
+	(cfg.protocols || []).forEach((name) => {
+		const o = document.createElement('option');
+		o.value = name;
+		o.textContent = name;
+		if (name === cfg.localModel) o.selected = true;
+		sel.appendChild(o);
+	});
+
+	if (!hint) return;
+	if (cfg.serverModel) {
+		hint.textContent = 'The SCADA server specifies ' + cfg.serverModel +
+			', which is what runs while this terminal is enrolled. The protocol above' +
+			' is used when it runs standalone. Units and weight limits come from the server.';
+	} else {
+		hint.textContent = 'No SCADA server: the protocol above is what runs, and' +
+			' weight limits do not apply.';
+	}
+}
+
+// The port list for one service. Rendered as a dropdown, or as text when the
+// terminal reports the port as fixed — the card reader is soldered to ttyS0,
+// and a dropdown with one item in it reads as though there were others to
+// find.
+function loadSerialPorts(label, current) {
+	const sel = docGetElById(label + '_serial_port');
+	const fixed = docGetElById(label + '_serial_port_fixed');
+	if (!sel && !fixed) return;
+
+	getData('getserialports.sh?service=' + label, (data) => {
+		const ports = (data && data.serialPorts) || [];
+		const isFixed = String(data && data.fixed) === 'true';
+
+		// The terminal's answer, not a count: one port today does not make a
+		// port fixed — a scanner is the only USB device plugged in until
+		// somebody plugs in a second one.
+		if (isFixed) {
+			const only = ports.length ? ports[0] : null;
+			let text = current || '—';
+			if (only) {
+				text = only.device + (only.present === false ? '  — not present' : '');
+			}
+			if (fixed) { fixed.textContent = text; fixed.style.display = ''; }
+			if (sel) sel.style.display = 'none';
+			return;
+		}
+
+		if (fixed) fixed.style.display = 'none';
+		if (!sel) return;
+		sel.style.display = '';
+		sel.innerHTML = '';
+		ports.forEach((p) => {
+			const o = document.createElement('option');
+			o.value = p.device;
+			// A port another service already holds is shown and disabled
+			// rather than hidden: "ttyUSB0 — scale" says why it cannot be
+			// picked, where a missing entry just looks like absent hardware.
+			const claim = p.claimedBy && p.claimedBy !== label ? '  — ' + p.claimedBy : '';
+			o.textContent = p.device + (p.label ? '  (' + p.label + ')' : '') + claim;
+			o.disabled = !!claim;
+			if (p.device === current) o.selected = true;
+			sel.appendChild(o);
+		});
+
+		// The port it is on now, even if the list no longer offers it — a
+		// scanner unplugged since the save must not silently become another
+		// device on the next save.
+		if (current && !ports.some((p) => p.device === current)) {
+			const o = document.createElement('option');
+			o.value = current;
+			o.textContent = current + '  — not present';
+			o.selected = true;
+			sel.appendChild(o);
+		}
+	});
 }
 
 
@@ -494,6 +606,8 @@ function setCommsCfgCB(data) {
 	showMenuLayer('layerComms');
 	hideLayerByID('layerComms_wired')
 	hideLayerByID('layerComms_cardreader')
+	hideLayerByID('layerComms_scanner')
+	hideLayerByID('layerComms_scale')
 	netIface = {};
 	if(data.status=="OK") {
 		if("commsConfig" in data) {
@@ -507,10 +621,23 @@ function setCommsCfgCB(data) {
 				sv('system_ntp', cfc["timeConfig"].ntp);
 			}
 
-			if("cardreaderConfig" in cfc) {
-				const crc = cfc["cardreaderConfig"]; // this is an array	
-				setCardReader(crc);				
-			}
+			// Only what the terminal actually has. A service with no config
+			// file is one this terminal was not built with, and showing it
+			// would invite someone to enable a scanner that is not there.
+			const services = {
+				cardreader: "cardreaderConfig",
+				scanner:    "scannerConfig",
+				scale:      "scaleConfig",
+			};
+			wsServices = [];
+			Object.keys(services).forEach((label) => {
+				const key = services[label];
+				if (!(key in cfc)) return;
+				const cfg = cfc[key];
+				if (String(cfg.configured) === 'FALSE') return;
+				wsServices.push(label);
+				setWsService(label, cfg);
+			});
 
 
 		}
@@ -531,23 +658,45 @@ function getNetSettings(label) {
 		'&dns=' + ov(label + '_dns');
 }
 
-function getCardReaderSettings() {
-	return 'enabled=' + ov('cardreader_enabled') +
-	'&foreignConnect=' + ov('cardreader_foreign_connect') +
-	'&serverPort=' + ov('cardreader_server_port') +
-	'&outputFormat=' + ov('cardreader_output_format');
+// Which services this terminal has, filled in from getcomms.sh. It doubles as
+// the record of which blocks were rendered — a save must not post settings for
+// a service nobody saw.
+let wsServices = [];
+
+function getWsServiceSettings(label) {
+	const sel = docGetElById(label + '_serial_port');
+	// The fixed case sends nothing: an empty serial port tells the helper to
+	// keep the one the terminal already has, which is the right answer for a
+	// reader soldered to the board.
+	const port = sel && sel.style.display !== 'none' ? (sel.value || '') : '';
+
+	return 'service=' + label +
+	'&enabled=' + ov(label + '_enabled') +
+	'&foreignConnect=' + ov(label + '_foreign_connect') +
+	'&serverPort=' + ov(label + '_server_port') +
+	'&outputFormat=' + encodeURIComponent(ov(label + '_output_format') || '') +
+	'&serialPort=' + encodeURIComponent(port) +
+	// Only the scale has one, and only when this terminal is the one deciding.
+	(label === 'scale' ? '&scaleModel=' + encodeURIComponent(scaleModelChoice()) : '');
+}
+
+function scaleModelChoice() {
+	const sel = docGetElById('scale_model');
+	return sel ? (sel.value || '') : '';
 }
 
 function saveCommsCfg() {
 
 	// One request per interface section that was actually rendered, then the
-	// time server, then the scanner.
+	// time server, then each websocket service the terminal has.
 	const steps = ['wired']
 		.filter((label) => netIface[label])
 		.map((label) => ['setnwk.sh', getNetSettings(label)]);
 
 	steps.push(['setntp.sh', 'ntp=' + encodeURIComponent(ov('system_ntp'))]);
-	steps.push(['setcardreader.sh', getCardReaderSettings()]);
+	wsServices.forEach((label) => {
+		steps.push(['setttysocket.sh', getWsServiceSettings(label)]);
+	});
 
 	// Sequentially, not in parallel: these all reach NetworkManager, and it
 	// serialises its callers anyway.

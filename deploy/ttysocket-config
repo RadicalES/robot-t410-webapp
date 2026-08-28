@@ -2,36 +2,52 @@
 #
 # /usr/local/sbin/ttysocket-config
 #
-# Applies the Card Reader page's settings to /etc/ttysocket/ttysocket.conf and
-# restarts the bridge. Called from the web UI through a narrow sudoers rule —
-# the CGI runs as www-data and cannot write under /etc or drive systemd.
+# Applies the Comms page's settings to one of the terminal's bridges and
+# restarts it. Called from the web UI through a narrow sudoers rule — the CGI
+# runs as www-data and cannot write under /etc or drive systemd.
 #
-# Only the four settings the page owns are accepted. Everything else in the
-# file — the tty, the baud rate, the read mode, the card-reader options — is
-# deployment-level, set when the terminal is built, and is preserved verbatim.
-# A web request must not be able to repoint the bridge at another port or
-# switch a scanner into card-decoding mode.
+# A terminal has up to three, one config each, named after what is attached:
 #
-# Usage: ttysocket-config <port> <local|foreign> <format> <TRUE|FALSE>
-#                         [tty]
+#   cardreader  /etc/ttysocket/cardreader.conf   wsrobot@cardreader   8100
+#   scanner     /etc/ttysocket/scanner.conf      wsrobot@scanner      8102
+#   scale       /etc/ttysocket/scale.conf        wsscale              8101
 #
-# The tty argument is optional; empty keeps what the terminal has.
+# Only the settings the page owns are accepted. The rest of each file — read
+# mode, card-reader options, the scale's baud — is deployment-level, set when
+# the terminal is built, and is preserved verbatim. A web request must not be
+# able to switch a scanner into card-decoding mode.
+#
+# Usage: ttysocket-config <service> <port> <local|foreign> <format> <TRUE|FALSE>
+#                         [tty] [scale model]
+#
+# For the scale, <format> is ignored: wsScale sends structured readings, not a
+# formatted line. The tty argument is optional; empty keeps what the terminal
+# has. The scale model is only meaningful for the scale, and only on a terminal
+# with no server - when the SCADA server's setup names a scale, that wins.
 #
 # (C) 2017-2026, Radical Electronic Systems - www.radicalsystems.co.za
 
 set -e
 
-CONF=/etc/ttysocket/ttysocket.conf
-PORT="$1"
-HOST="$2"
-FORMAT="$3"
-ENABLED="$4"
-TTY_NEW="$5"
+SERVICE="$1"
+PORT="$2"
+HOST="$3"
+FORMAT="$4"
+ENABLED="$5"
+TTY_NEW="$6"
+MODEL="$7"
 
 die() { echo "$1" >&2; exit 1; }
 
 # Validate before writing: this input arrives from a web request, and a phone
 # on the setup hotspot reaches these endpoints without a password.
+case "$SERVICE" in
+    cardreader) CONF=/etc/ttysocket/cardreader.conf; UNIT=wsrobot@cardreader ;;
+    scanner)    CONF=/etc/ttysocket/scanner.conf;    UNIT=wsrobot@scanner ;;
+    scale)      CONF=/etc/ttysocket/scale.conf;      UNIT=wsscale ;;
+    *) die "unknown service: $SERVICE" ;;
+esac
+
 case "$PORT" in
     ''|*[!0-9]*) die "port must be numeric" ;;
 esac
@@ -66,10 +82,40 @@ esac
 # be; the web UI reads it to build the list, and this reads it again to check
 # what came back. The list is the convenience, this is the rule - a phone on
 # the setup hotspot reaches those pages without a password.
+#
+# The list is per service, because they are not interchangeable: the card
+# reader is soldered to ttyS0 and its list says so, while the scanner and the
+# scale arrive on whichever USB socket was free.
 for FILTERFILE in /etc/robot/serialports.conf /etc/formfactor/serialports.conf; do
     [ -r "$FILTERFILE" ] && { . "$FILTERFILE"; break; }
 done
-PORTS_ALLOW="${SERIAL_PORTS_CARDREADER:-${SERIAL_PORTS_ALLOW:-ttyACM* ttyUSB*}}"
+
+case "$SERVICE" in
+    cardreader) PORTS_ALLOW="${SERIAL_PORTS_CARDREADER:-}" ;;
+    scanner)    PORTS_ALLOW="${SERIAL_PORTS_SCANNER:-}" ;;
+    scale)      PORTS_ALLOW="${SERIAL_PORTS_SCALE:-}" ;;
+esac
+[ -n "$PORTS_ALLOW" ] || PORTS_ALLOW="${SERIAL_PORTS_ALLOW:-ttyACM* ttyUSB*}"
+
+# The name to write down for a port. /dev/ttyACM0 is not a name: the number is
+# handed out in the order devices appear, so a scanner unplugged and plugged
+# back in comes back as ttyACM1 and the bridge opens a port that is no longer
+# there. /dev/serial/by-id carries the device's own serial number and follows
+# it, so it is preferred whenever the kernel offers one.
+#
+# The page speaks node names, because that is what someone reading the terminal
+# sees. This is where that turns into something durable.
+stable_name() {
+    s_name="$1"
+    for s_link in /dev/serial/by-id/*; do
+        [ -e "$s_link" ] || continue
+        if [ "$(readlink -f "$s_link" 2>/dev/null)" = "/dev/$s_name" ]; then
+            echo "$s_link"
+            return
+        fi
+    done
+    echo "/dev/$s_name"
+}
 
 validate_tty() {
     v_name=${1#/dev/}
@@ -90,32 +136,81 @@ validate_tty() {
 
     for v_pattern in $PORTS_ALLOW; do
         case "$v_name" in
-            $v_pattern) echo "/dev/$v_name"; return ;;
+            $v_pattern) stable_name "$v_name"; return ;;
         esac
     done
 
-    die "$v_name is not a port this terminal offers for a card reader"
+    die "$v_name is not a port this terminal offers for the $SERVICE"
 }
 
 # Keep the deployment-level settings. The values written below are quoted,
 # because /usr/local/lib/ttysocket/launch.sh sources this file under `set -e`:
 # an unquoted "-c SHORT" makes the shell run SHORT as a command, and the bridge
 # exits 127 without ever opening the port.
-TTYSOCKET_TTY=/dev/ttyS0
-TTYSOCKET_BAUD=9600
-TTYSOCKET_MODE=rdm6300
-TTYSOCKET_OPTS="-c SHORT"
-TTYSOCKET_REPEAT=0
-[ -r "$CONF" ] && . "$CONF"
-
-# Sent values win over what was there; empty keeps it.
-if [ -n "$TTY_NEW" ]; then
-    TTYSOCKET_TTY=$(validate_tty "$TTY_NEW")
-fi
-
 mkdir -p /etc/ttysocket
-cat > "$CONF" <<CONFEOF
-# Written by the web UI. See /usr/share/doc/wsrobot/ttysocket.conf for every
+
+if [ "$SERVICE" = "scale" ]; then
+    TTYSCALE_TTY=/dev/ttyUSB0
+    TTYSCALE_BAUD=9600
+    TTYSCALE_SETUP=""
+    TTYSCALE_MODEL=""
+    [ -r "$CONF" ] && . "$CONF"
+    [ -n "$TTY_NEW" ] && TTYSCALE_TTY=$(validate_tty "$TTY_NEW")
+
+    # The model is checked against what this build can actually decode, not
+    # taken on trust: an unknown protocol makes wsScale exit at startup, so an
+    # unchecked value here is a scale that stops working at the next restart
+    # with the reason only in the journal.
+    if [ -n "$MODEL" ]; then
+        if /usr/local/bin/wsScale -l 2>/dev/null | grep -qx -- "$MODEL"; then
+            TTYSCALE_MODEL="$MODEL"
+        else
+            die "unknown scale protocol: $MODEL"
+        fi
+    fi
+
+    {
+        echo "# Written by the web UI. See /usr/share/doc/wsscale/scale.conf for"
+        echo "# every key and its default."
+        echo "TTYSCALE_PORT=${PORT}"
+        echo "TTYSCALE_TTY=${TTYSCALE_TTY}"
+        echo "TTYSCALE_BAUD=${TTYSCALE_BAUD}"
+        echo "TTYSCALE_HOST=${HOST}"
+        # Which scale this is, for a terminal with no server to ask. When the
+        # server's setup names one, wsScale reads it after this file and the
+        # server wins - so this is a fallback, not an override.
+        [ -n "$TTYSCALE_MODEL" ] && echo "TTYSCALE_MODEL=${TTYSCALE_MODEL}"
+        # Which file carries the scale's model, units and limits. Not a page
+        # setting - the server owns those - but it has to survive a save, or
+        # wsScale comes back with "No scale configured".
+        [ -n "$TTYSCALE_SETUP" ] && echo "TTYSCALE_SETUP=${TTYSCALE_SETUP}"
+    } > "$CONF"
+else
+    # A scanner streams whatever it reads; a card reader decodes RDM6300
+    # packets and repeats while the card is held. These are the defaults for a
+    # file that does not exist yet - an existing one keeps its own.
+    if [ "$SERVICE" = "scanner" ]; then
+        TTYSOCKET_TTY=""
+        TTYSOCKET_MODE=raw
+        TTYSOCKET_OPTS=""
+        TTYSOCKET_REPEAT=0
+    else
+        TTYSOCKET_TTY=/dev/ttyS0
+        TTYSOCKET_MODE=rdm6300
+        TTYSOCKET_OPTS="-c SHORT"
+        TTYSOCKET_REPEAT=0
+    fi
+    TTYSOCKET_BAUD=9600
+    [ -r "$CONF" ] && . "$CONF"
+
+    # Sent values win over what was there; empty keeps it.
+    if [ -n "$TTY_NEW" ]; then
+        TTYSOCKET_TTY=$(validate_tty "$TTY_NEW")
+    fi
+    [ -n "$TTYSOCKET_TTY" ] || die "no serial port set for the $SERVICE"
+
+    cat > "$CONF" <<CONFEOF
+# Written by the web UI. See /usr/share/doc/wsrobot/${SERVICE}.conf for every
 # key and its default.
 TTYSOCKET_PORT=${PORT}
 TTYSOCKET_TTY=${TTYSOCKET_TTY}
@@ -126,6 +221,7 @@ TTYSOCKET_MODE=${TTYSOCKET_MODE}
 TTYSOCKET_OPTS="${TTYSOCKET_OPTS}"
 TTYSOCKET_REPEAT=${TTYSOCKET_REPEAT}
 CONFEOF
+fi
 chmod 644 "$CONF"
 
 # systemd owns whether this starts on boot, and the page reads it back from
@@ -136,8 +232,8 @@ chmod 644 "$CONF"
 # --now pairs the boot setting with the running state in one step, so the two
 # cannot be left disagreeing.
 if [ "$ENABLED" = "TRUE" ]; then
-    systemctl enable wsrobot
-    systemctl restart wsrobot
+    systemctl enable "$UNIT"
+    systemctl restart "$UNIT"
 else
-    systemctl disable --now wsrobot
+    systemctl disable --now "$UNIT"
 fi

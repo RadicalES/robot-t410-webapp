@@ -7,13 +7,15 @@
 # Written by Jan Zwiegers, jan@radicalsystems.co.za
 
 
-CARDCFGFILE=/etc/ttysocket/ttysocket.conf
+# One config per service, named after what is attached to it. Sourced in
+# subshells below rather than here: all three use the same TTYSOCKET_* names,
+# so sourcing them into one shell would leave the last one read standing for
+# all of them.
+CARDCFGFILE=/etc/ttysocket/cardreader.conf
+SCANCFGFILE=/etc/ttysocket/scanner.conf
+SCALECFGFILE=/etc/ttysocket/scale.conf
 SERVER_CONFIG_URL="http://www.radicalsystems.co.za"
 TAG_NAME="NOT SET"
-
-if [ -e $CARDCFGFILE ]; then
-  . $CARDCFGFILE
-fi
 
 
 CONNECTIONS=$(nmcli -g NAME,TYPE,ACTIVE,STATE,UUID,DEVICE con show)
@@ -87,24 +89,116 @@ BAUDRATES="1200,2400,4800,9600,19200,38400,57600,115200"
 # disabled. The checkbox means "start this on boot", so is-enabled is what
 # answers it, and whether it is running goes alongside rather than standing in
 # for it.
-CARD_ENABLED=FALSE
-case "$(systemctl is-enabled wsrobot 2>/dev/null)" in
-    enabled|enabled-runtime) CARD_ENABLED=TRUE ;;
-esac
-CARD_RUNNING=FALSE
-systemctl is-active --quiet wsrobot 2>/dev/null && CARD_RUNNING=TRUE
-CARD_FOREIGN=FALSE
-[ "${TTYSOCKET_HOST:-foreign}" = "foreign" ] && CARD_FOREIGN=TRUE
+# Each bridge is one unit and one config. Enabled is not a key in the file —
+# it is systemd's own answer, and for an instance the unit is named after the
+# service: wsrobot@cardreader, wsrobot@scanner. The scale is wsscale.
+#
+# It used to be read from is-active, which is a different question: a service
+# that is running right now but disabled comes back as enabled here and then
+# does not survive a reboot, and one that is enabled but has crashed reads as
+# disabled. The checkbox means "start this on boot", so is-enabled is what
+# answers it, and whether it is running goes alongside rather than standing in
+# for it.
+svc_enabled() {
+    case "$(systemctl is-enabled "$1" 2>/dev/null)" in
+        enabled|enabled-runtime) echo TRUE ;;
+        *) echo FALSE ;;
+    esac
+}
 
-CARDREADER_CFG="\"cardreaderConfig\":{
+svc_running() {
+    if systemctl is-active --quiet "$1" 2>/dev/null; then echo TRUE; else echo FALSE; fi
+}
+
+# The node the config points at. A config may name a port through its
+# /dev/serial/by-id link - which is what survives a replug, and what the helper
+# writes - so it is resolved here: the page matches this against a list of node
+# names, and an unresolved link matches nothing and reads as "not present".
+node_of() {
+    [ -n "$1" ] || return 0
+    n_dev=$(readlink -f "$1" 2>/dev/null)
+    [ -n "$n_dev" ] || n_dev="$1"
+    echo "${n_dev##*/}"
+}
+
+# A wsRobot bridge — the card reader or the scanner. Read in a subshell so one
+# service's TTYSOCKET_* values cannot leak into the next.
+wsrobot_json() {
+    r_key="$1" r_unit="$2" r_conf="$3" r_port="$4" r_format="$5"
+    (
+        TTYSOCKET_PORT="$r_port"
+        TTYSOCKET_FORMAT="$r_format"
+        TTYSOCKET_TTY=""
+        TTYSOCKET_HOST=foreign
+        [ -e "$r_conf" ] && . "$r_conf"
+        r_foreign=FALSE
+        [ "${TTYSOCKET_HOST:-foreign}" = "foreign" ] && r_foreign=TRUE
+        echo "\"${r_key}\":{
   \"index\":\"0\",
-  \"enabled\":\"${CARD_ENABLED}\",
-  \"running\":\"${CARD_RUNNING}\",
-  \"foreignConnect\":\"${CARD_FOREIGN}\",
-  \"serverPort\":\"${TTYSOCKET_PORT:-8100}\",
-  \"outputFormat\":\"${TTYSOCKET_FORMAT:-%s}\",
-  \"serialPort\":\"${TTYSOCKET_TTY##*/}\"
+  \"configured\":\"$([ -e "$r_conf" ] && echo TRUE || echo FALSE)\",
+  \"enabled\":\"$(svc_enabled "$r_unit")\",
+  \"running\":\"$(svc_running "$r_unit")\",
+  \"foreignConnect\":\"${r_foreign}\",
+  \"serverPort\":\"${TTYSOCKET_PORT}\",
+  \"outputFormat\":\"${TTYSOCKET_FORMAT}\",
+  \"serialPort\":\"$(node_of "${TTYSOCKET_TTY}")\"
   }"
+    )
+}
+
+CARDREADER_CFG=$(wsrobot_json cardreaderConfig wsrobot@cardreader "$CARDCFGFILE" 8100 '[CARD]:%s')
+SCANNER_CFG=$(wsrobot_json scannerConfig wsrobot@scanner "$SCANCFGFILE" 8102 '[SCAN]:%s')
+
+# The scale keeps its own key names and has no output format: wsScale sends
+# structured readings, and its model, units and limits come from the server
+# rather than from this page.
+SCALE_CFG=$(
+    TTYSCALE_PORT=8101
+    TTYSCALE_TTY=""
+    TTYSCALE_HOST=foreign
+    TTYSCALE_MODEL=""
+    TTYSCALE_SETUP=/run/robot/setup.json
+    [ -e "$SCALECFGFILE" ] && . "$SCALECFGFILE"
+
+    s_foreign=FALSE
+    [ "${TTYSCALE_HOST:-foreign}" = "foreign" ] && s_foreign=TRUE
+
+    # Who decides which scale this is. When the server's setup names one,
+    # wsScale reads it after the local file and the server wins - so the page
+    # shows it and does not offer a choice that would not take effect. With no
+    # server the terminal names its own, and the site's units and limits do not
+    # apply because there is no site.
+    s_from_server=""
+    if [ -r "$TTYSCALE_SETUP" ]; then
+        s_from_server=$(sed -n 's/.*"scale"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' \
+                        "$TTYSCALE_SETUP" | head -1)
+    fi
+    # The effective one, and both halves separately: the page lets the local
+    # protocol be set even while a server is naming one, so that a terminal can
+    # be prepared for the day it runs standalone.
+    s_model="${s_from_server:-$TTYSCALE_MODEL}"
+    s_source=local
+    [ -n "$s_from_server" ] && s_source=server
+
+    # What this build can decode, for the page to offer.
+    s_protocols=$(/usr/local/bin/wsScale -l 2>/dev/null \
+                  | sed -n 's/^\([A-Z0-9-]\{3,\}\)$/"\1"/p' | paste -sd, -)
+
+    echo "\"scaleConfig\":{
+  \"index\":\"0\",
+  \"configured\":\"$([ -e "$SCALECFGFILE" ] && echo TRUE || echo FALSE)\",
+  \"enabled\":\"$(svc_enabled wsscale)\",
+  \"running\":\"$(svc_running wsscale)\",
+  \"foreignConnect\":\"${s_foreign}\",
+  \"serverPort\":\"${TTYSCALE_PORT}\",
+  \"serialPort\":\"$(node_of "${TTYSCALE_TTY}")\",
+  \"model\":\"${s_model}\",
+  \"localModel\":\"${TTYSCALE_MODEL}\",
+  \"serverModel\":\"${s_from_server}\",
+  \"modelSource\":\"${s_source}\",
+  \"protocols\":[${s_protocols}]
+  }"
+)
 
 NET_CFG="\"networkConfig\":[$LAN_CFG]"
 
@@ -116,7 +210,7 @@ NTP_SERVER=$(grep -hs '^NTP=' /etc/systemd/timesyncd.conf.d/*.conf /etc/systemd/
              2>/dev/null | head -1 | cut -d= -f2 | awk '{print $1}')
 TIME_CFG="\"timeConfig\":{\"ntp\":\"${NTP_SERVER}\"}"
 
-COMMS_CFG="{$CARDREADER_CFG,$NET_CFG,$TIME_CFG}"
+COMMS_CFG="{$CARDREADER_CFG,$SCANNER_CFG,$SCALE_CFG,$NET_CFG,$TIME_CFG}"
 JSON="\"status\":\"OK\",\"commsConfig\":$COMMS_CFG";
 
 echo -e "Access-Control-Allow-Origin: *\r\nContent-Type: application/json\r\n\r\n"

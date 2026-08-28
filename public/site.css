@@ -647,3 +647,11 @@ a.contact-card:hover {
 .svc-state { margin-left: .6em; font-size: .85em; color: #5b616b; }
 .svc-state.running { color: #2e7d32; }
 .svc-state.stopped { color: #c62828; }
+
+/* A port the terminal decided when it was built. Shown as text, in the same
+   monospace a port name deserves, so it does not read as an empty dropdown. */
+.port-fixed { display: inline-block; padding: .35em 0; font-family: monospace; }
+
+/* What this page does not own — said once, quietly, rather than left for
+   someone to discover by editing a field that has no effect. */
+.hint { margin: .4em 0 0; font-size: .85em; color: #5b616b; }
