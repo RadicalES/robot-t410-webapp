@@ -58,6 +58,8 @@ if [ -d "$SCRIPT_DIR/html" ]; then
     SUDOERS_FILE="$SCRIPT_DIR/www-nmcli"
     TTYSOCKET_HELPER="$SCRIPT_DIR/ttysocket-config"
     NTP_HELPER="$SCRIPT_DIR/ntp-config"
+    WEBAPP_HELPER="$SCRIPT_DIR/webapp-config"
+    SCADA_HELPER="$SCRIPT_DIR/scada-config"
     TEST_DIR="$SCRIPT_DIR/test"
 else
     echo "No release build found. Run 'npm run release' first."
@@ -111,6 +113,8 @@ $SCP_CMD "$FAILSAFE_SVC" "${DEVICE_USER}@${DEVICE_HOST}:/tmp/network-failsafe.se
 $SCP_CMD "$SUDOERS_FILE" "${DEVICE_USER}@${DEVICE_HOST}:/tmp/www-nmcli"
 $SCP_CMD "$TTYSOCKET_HELPER" "${DEVICE_USER}@${DEVICE_HOST}:/tmp/ttysocket-config"
 $SCP_CMD "$NTP_HELPER" "${DEVICE_USER}@${DEVICE_HOST}:/tmp/ntp-config"
+$SCP_CMD "$WEBAPP_HELPER" "${DEVICE_USER}@${DEVICE_HOST}:/tmp/webapp-config"
+$SCP_CMD "$SCADA_HELPER" "${DEVICE_USER}@${DEVICE_HOST}:/tmp/scada-config"
 $SSH_CMD "${DEVICE_USER}@${DEVICE_HOST}" "\
     sudo cp /tmp/network-failsafe.sh /usr/local/bin/network-failsafe.sh && \
     sudo chmod +x /usr/local/bin/network-failsafe.sh && \
@@ -122,7 +126,11 @@ $SSH_CMD "${DEVICE_USER}@${DEVICE_HOST}" "\
     sudo cp /tmp/ttysocket-config /usr/local/sbin/ttysocket-config && \
     sudo chmod 755 /usr/local/sbin/ttysocket-config && \
     sudo cp /tmp/ntp-config /usr/local/sbin/ntp-config && \
-    sudo chmod 755 /usr/local/sbin/ntp-config"
+    sudo chmod 755 /usr/local/sbin/ntp-config && \
+    sudo cp /tmp/webapp-config /usr/local/sbin/webapp-config && \
+    sudo chmod 755 /usr/local/sbin/webapp-config && \
+    sudo cp /tmp/scada-config /usr/local/sbin/scada-config && \
+    sudo chmod 755 /usr/local/sbin/scada-config"
 
 echo ""
 echo "=== Deployment complete ==="

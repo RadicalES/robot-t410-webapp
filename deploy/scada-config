@@ -1,0 +1,57 @@
+#!/bin/bash
+#
+# scada-config - connect a terminal to its SCADA server, or take it off.
+#
+#   scada-config disconnect   stop and disable the client, forget server.conf
+#   scada-config connect      enable and start it again
+#   scada-config status
+#
+# Two halves, because doing one without the other leaves a terminal in a state
+# nobody meant:
+#
+#   The client running will re-provision within a ping, so removing server.conf
+#   on its own changes nothing for longer than a minute.
+#
+#   server.conf left behind is the last thing a server said, and the launchers
+#   read it - so a terminal with the client disabled went on obeying a server it
+#   no longer talks to, outranking settings typed on its own web UI a minute
+#   before.
+#
+# Disconnecting is not destructive to the terminal's own configuration:
+# app.conf, the installed web app and the network settings are untouched. It is
+# server.conf and the client that go.
+#
+# (C) 2017-2026 Radical Electronic Systems - www.radsys.io
+set -euo pipefail
+
+SERVER_CONF=/etc/robot/server.conf
+UNIT=robot-scada-client
+
+case "${1:-}" in
+    disconnect)
+        systemctl disable --now "$UNIT" >/dev/null 2>&1 || true
+        # Kept, not deleted: a terminal reconnected next week should not have
+        # lost the station it was, and the client rewrites this file the moment
+        # a server answers anyway.
+        [ -f "$SERVER_CONF" ] && mv -f "$SERVER_CONF" "$SERVER_CONF.disconnected"
+        echo '{"status":"OK","connected":false}'
+        ;;
+    connect)
+        # The saved copy is not restored: whatever the server says now is
+        # newer than whatever it said before this terminal was taken off it.
+        systemctl enable --now "$UNIT" >/dev/null 2>&1 || true
+        echo '{"status":"OK","connected":true}'
+        ;;
+    status)
+        enabled=false; running=false
+        systemctl is-enabled --quiet "$UNIT" 2>/dev/null && enabled=true
+        systemctl is-active --quiet "$UNIT" 2>/dev/null && running=true
+        conf=false; [ -f "$SERVER_CONF" ] && conf=true
+        printf '{"status":"OK","enabled":%s,"running":%s,"serverConf":%s}\n' \
+            "$enabled" "$running" "$conf"
+        ;;
+    *)
+        echo "usage: scada-config disconnect | connect | status" >&2
+        exit 2
+        ;;
+esac

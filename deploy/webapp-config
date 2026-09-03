@@ -1,0 +1,129 @@
+#!/bin/bash
+#
+# webapp-config - install or activate a device web app, for the web UI.
+#
+# The page runs as www-data and this runs as root, for the same reason the
+# other helpers do: a web request must not be able to write into /var/www/apps
+# or repoint what the kiosk serves except through a command that checks what it
+# was given.
+#
+#   webapp-config install  <bundle.tar.gz>
+#   webapp-config activate <slug> <version>
+#   webapp-config release  <slug>          hand the app back to the server
+#   webapp-config config   <name> <type> <protocol> <setupURL> <transactionURL> <scale>
+#   webapp-config list
+#
+# The work belongs to robot-scada-client's own module, which is what installs
+# an app the SCADA server sends. Uploading one at the terminal unpacks it,
+# makes it current and prunes the old ones by exactly the same code - so "it
+# worked when I uploaded it" and "it worked when the server pushed it" cannot
+# come apart.
+#
+# (C) 2017-2026 Radical Electronic Systems - www.radsys.io
+set -euo pipefail
+
+CLIENT_DIR=/opt/robot-scada-client
+[ -d "$CLIENT_DIR" ] || { echo "ERROR: $CLIENT_DIR is not installed" >&2; exit 2; }
+
+ACTION="${1:-}"
+
+case "$ACTION" in
+    install)
+        BUNDLE="${2:-}"
+        [ -f "$BUNDLE" ] || { echo "ERROR: no such bundle: $BUNDLE" >&2; exit 2; }
+        ;;
+    release)
+        SLUG="${2:-}"
+        [ -n "$SLUG" ] || { echo "ERROR: release needs a slug" >&2; exit 2; }
+        case "$SLUG" in *[!A-Za-z0-9._-]*) echo "ERROR: not a slug" >&2; exit 2 ;; esac
+        ;;
+    activate)
+        SLUG="${2:-}"; VERSION="${3:-}"
+        [ -n "$SLUG" ] && [ -n "$VERSION" ] || { echo "ERROR: activate needs a slug and a version" >&2; exit 2; }
+        # A slug and a version become directory names. Nothing else may be in
+        # them: this runs as root and joins them onto a path.
+        case "$SLUG$VERSION" in
+            *[!A-Za-z0-9._-]*) echo "ERROR: not a slug and version" >&2; exit 2 ;;
+        esac
+        ;;
+    config)
+        NAME="${2:-}"; TYPE="${3:-}"; PROTOCOL="${4:-}"
+        SETUP_URL="${5:-}"; TRANSACTION_URL="${6:-}"; SCALE="${7:-}"
+        ;;
+    list) ;;
+    *) echo "usage: webapp-config install <bundle> | activate <slug> <version> | release <slug> | config ... | list" >&2; exit 2 ;;
+esac
+
+cd "$CLIENT_DIR"
+ACTION="$ACTION" BUNDLE="${BUNDLE:-}" SLUG="${SLUG:-}" VERSION="${VERSION:-}" \
+NAME="${NAME:-}" TYPE="${TYPE:-}" PROTOCOL="${PROTOCOL:-}" SCALE="${SCALE:-}" \
+SETUP_URL="${SETUP_URL:-}" TRANSACTION_URL="${TRANSACTION_URL:-}" \
+python3 - <<'PY'
+import json, os, sys
+sys.path.insert(0, "/opt/robot-scada-client")
+import robot_device_webapp as webapp
+
+action = os.environ["ACTION"]
+
+if action == "list":
+    print(json.dumps({"status": "OK", "apps": webapp.installed()}))
+    sys.exit(0)
+
+if action == "config":
+    # Through the client's own writer, so the file a standalone terminal makes
+    # is the file a provisioned one gets: same fields, same shape, same path.
+    # The app cannot tell which of them configured it, which is the point.
+    setup = {
+        "name": os.environ.get("NAME", ""),
+        "type": os.environ.get("TYPE", ""),
+        "protocol": os.environ.get("PROTOCOL", ""),
+        "serverURL": os.environ.get("SETUP_URL", ""),
+        "transactionURL": os.environ.get("TRANSACTION_URL", ""),
+        "scale": os.environ.get("SCALE", ""),
+    }
+    for slug in [a["slug"] for a in webapp.installed()]:
+        setup["deviceWebAppVersion"] = webapp.current_version(slug) or ""
+        break
+    changed = webapp.write_app_config(setup)
+    print(json.dumps({"status": "OK", "changed": bool(changed)}))
+    sys.exit(0)
+
+if action == "release":
+    ok = webapp.set_managed_here(os.environ["SLUG"], False)
+    print(json.dumps({"status": "OK" if ok else "FAILED",
+                      "message": "" if ok else "could not hand it back"}))
+    sys.exit(0 if ok else 1)
+
+if action == "activate":
+    ok = webapp.activate(os.environ["SLUG"], os.environ["VERSION"])
+    print(json.dumps({"status": "OK" if ok else "FAILED",
+                      "message": "" if ok else "that version is not on this device"}))
+    sys.exit(0 if ok else 1)
+
+# install: the bundle says what it is, so nobody has to be believed about it.
+bundle = os.environ["BUNDLE"]
+doc = webapp.read_bundle_manifest(bundle)
+if not doc:
+    print(json.dumps({"status": "FAILED",
+                      "message": "this bundle carries no manifest.json, so it "
+                                 "cannot say which app or which version it is"}))
+    sys.exit(1)
+
+slug, version = doc.get("slug"), doc.get("version")
+if not slug or not version:
+    print(json.dumps({"status": "FAILED",
+                      "message": "the bundle's manifest names no slug or version"}))
+    sys.exit(1)
+
+if webapp.install_bundle(slug, version, bundle) is None:
+    print(json.dumps({"status": "FAILED", "message": f"could not install {slug} {version}"}))
+    sys.exit(1)
+
+# Installed here, so this terminal owns it: the server's next offer would
+# otherwise put its own app back within the minute.
+webapp.set_managed_here(slug, True)
+
+print(json.dumps({"status": "OK", "slug": slug, "version": version,
+                  "name": doc.get("name") or slug,
+                  "supports": doc.get("supports") or []}))
+PY

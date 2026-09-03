@@ -116,6 +116,14 @@ fs.copyFileSync('deploy/ttysocket-config', path.join(distDir, 'ttysocket-config'
 fs.chmodSync(path.join(distDir, 'ttysocket-config'), 0o755);
 fs.copyFileSync('deploy/ntp-config', path.join(distDir, 'ntp-config'));
 fs.chmodSync(path.join(distDir, 'ntp-config'), 0o755);
+// webapp-config installs an app uploaded at the terminal, through
+// robot-scada-client's own module; scada-config takes the terminal off its
+// SCADA server and puts it back. Both are named in the sudoers file above, so
+// leaving either out gives a page that reports success and changes nothing.
+fs.copyFileSync('deploy/webapp-config', path.join(distDir, 'webapp-config'));
+fs.chmodSync(path.join(distDir, 'webapp-config'), 0o755);
+fs.copyFileSync('deploy/scada-config', path.join(distDir, 'scada-config'));
+fs.chmodSync(path.join(distDir, 'scada-config'), 0o755);
 fs.copyFileSync('deploy/batch-deploy.sh', path.join(distDir, 'batch-deploy.sh'));
 fs.chmodSync(path.join(distDir, 'batch-deploy.sh'), 0o755);
 fs.copyFileSync('deploy/INSTALL.md', path.join(distDir, 'README.md'));
