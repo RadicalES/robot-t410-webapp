@@ -15,6 +15,17 @@
 			<h3>Application Engine</h3>
 			<div class="w3-row">
 				<div class="w3-col l6 m6 irow">
+					<label class="s-label">Function</label>
+					<select class="w3-select w3-border select-short" id="app_engine"></select>
+					<p class="field-hint">
+						What this terminal is. The list is what the installed
+						web app implements, so a terminal cannot be set to a
+						function its app has never had a screen for.
+					</p>
+				</div>
+			</div>
+			<div class="w3-row">
+				<div class="w3-col l6 m6 irow">
 					<label class="s-label">Tag Name</label>
 					<input class="w3-input in-rest" id="app_tag"/>
 				</div>
@@ -23,6 +34,22 @@
 				<div class="w3-col irow">
 					<label class="s-label">Setup URL:</label>
 					<input class="w3-input input-long" id="app_url" />
+					<p class="field-hint">
+						Where this terminal is configured from.
+					</p>
+				</div>
+			</div>
+			<div class="w3-row">
+				<div class="w3-col irow">
+					<label class="s-label">Transaction URL:</label>
+					<input class="w3-input input-long" id="app_transaction_url" />
+					<p class="field-hint">
+						Where the web app posts its work &mdash; the business
+						system, which is usually not this terminal and not the
+						setup URL. Both are handed to the app, so a terminal
+						with no SCADA server still knows where to send what it
+						captures.
+					</p>
 				</div>
 			</div>
 		</div>

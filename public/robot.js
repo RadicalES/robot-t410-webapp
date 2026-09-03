@@ -1013,6 +1013,7 @@ function setFormAppCB(data) {
 		}
 		
 		sv('app_url', cfg.serverURL);
+		sv('app_transaction_url', cfg.transactionURL);
 		sv('app_engine', cfg.engine);
 		sv('app_scale', cfg.scale);
 		sv('app_proto', cfg.protocol);
@@ -1025,13 +1026,17 @@ function setFormAppCB(data) {
 
 function saveAppCfg() {
 
-	const payload = 
-	'serverUrl=' + ov('app_url') +
-	'&engine=' + ov('app_engine') +
-	'&scale=' + ov('app_scale') +
-	'&protocol=' + ov('app_proto') +
-	'&startApp=' + ov('app_start') +
-	'&tagName=' + ov('app_tag');
+	// Encoded, because a URL carries the characters that would otherwise end
+	// one field and start another - a transaction URL with a query string used
+	// to arrive as several settings, none of them right.
+	const payload =
+	'serverUrl=' + encodeURIComponent(ov('app_url')) +
+	'&transactionUrl=' + encodeURIComponent(ov('app_transaction_url')) +
+	'&engine=' + encodeURIComponent(ov('app_engine')) +
+	'&scale=' + encodeURIComponent(ov('app_scale')) +
+	'&protocol=' + encodeURIComponent(ov('app_proto')) +
+	'&startApp=' + encodeURIComponent(ov('app_start')) +
+	'&tagName=' + encodeURIComponent(ov('app_tag'));
 
 	setData('setapp.sh', payload, (data) => {
 		if (data.status === 'OK') {
