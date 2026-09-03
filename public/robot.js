@@ -400,6 +400,36 @@ function loadComms(evt) {
 	});
 }
 
+var scadaConnected = true;
+
+// Take the terminal off its server, or put it back.
+//
+// Both halves together: stopping the client without setting server.conf aside
+// leaves the terminal obeying what the server last said, and setting the file
+// aside without stopping the client just means it is written again within a
+// ping.
+function toggleScada() {
+	const action = scadaConnected ? 'disconnect' : 'connect';
+	const asking = scadaConnected
+		? 'Disconnect this terminal from its SCADA server?\n\n'
+		  + 'It will run on its own settings. The application, the installed '
+		  + 'web app and the network are untouched.'
+		: 'Reconnect this terminal to its SCADA server?\n\n'
+		  + 'The server decides again what this terminal runs.';
+	if (!confirm(asking)) return;
+
+	setData('setscada.sh', 'action=' + action, (data) => {
+		if (data.status === 'OK') {
+			alertInfo(action === 'disconnect'
+				? 'Disconnected. This terminal now runs on its own settings.'
+				: 'Reconnected. The server decides what this terminal runs.');
+			refreshScada();
+		} else {
+			alertError(data.message || 'Could not change the connection.');
+		}
+	});
+}
+
 function refreshScada() {
 	getData('getscada.sh', setScadaCB);
 }
@@ -424,6 +454,22 @@ function setScadaCB(data) {
 	if (su) su.textContent = s.serverURL || '—';
 	const stn = docGetElById('scada_station');
 	if (stn) stn.innerHTML = s.station || '&mdash;';
+	// Which way the button goes. "Enabled" is systemd's answer for the client,
+	// which is what decides whether this terminal listens to a server at all -
+	// not whether it can reach one this second.
+	const toggle = docGetElById('scada_toggle');
+	const toggleState = docGetElById('scada_toggle_state');
+	if (toggle) {
+		const enabled = String(s.enabled) !== 'false' && s.enabled !== false;
+		scadaConnected = enabled;
+		toggle.textContent = enabled ? 'Disconnect from server' : 'Reconnect to server';
+		toggle.className = enabled ? 'btn btn-danger' : 'btn btn-primary';
+		if (toggleState) {
+			toggleState.textContent = enabled ? '' : 'running on its own';
+			toggleState.className = 'svc-state' + (enabled ? '' : ' unset');
+		}
+	}
+
 	const lc = docGetElById('scada_last');
 	if (lc) lc.innerHTML = (s.lastContact >= 0) ? (s.lastContact + 's ago') : 'never';
 }
