@@ -1,3 +1,5 @@
 www-data ALL=(ALL) NOPASSWD: /usr/bin/nmcli
 www-data ALL=(root) NOPASSWD: /usr/local/sbin/ttysocket-config
 www-data ALL=(root) NOPASSWD: /usr/local/sbin/ntp-config
+www-data ALL=(root) NOPASSWD: /usr/local/sbin/webapp-config
+www-data ALL=(root) NOPASSWD: /usr/local/sbin/scada-config
