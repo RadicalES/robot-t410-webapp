@@ -27,6 +27,50 @@
 			</div>
 		</div>
 
+		<div class="card" id="layerApp_webapp">
+			<h2>Device Web App</h2>
+
+			<p class="field-hint">
+				The application this terminal serves to itself. A terminal with
+				one runs on its own: it does not need a SCADA server to be
+				given an app, and the one it is given here is the one it keeps.
+			</p>
+
+			<div class="w3-row irow">
+				<label class="s-label">Installed</label>
+				<span id="webapp_installed" class="port-fixed">&mdash;</span>
+			</div>
+
+			<div class="w3-row">
+				<div class="w3-col l6 m6 irow">
+					<label class="s-label">Serving version</label>
+					<select class="w3-select w3-border select-short" id="webapp_version"></select>
+					<p class="field-hint">
+						Every version still on this terminal. Going back to the
+						one before does not need the network that broke.
+					</p>
+				</div>
+			</div>
+
+			<div class="w3-row">
+				<div class="w3-col l6 m6 irow">
+					<label class="s-label">Upload a bundle</label>
+					<input class="w3-input in-rest" type="file" id="webapp_file" accept=".gz,.tgz,application/gzip" />
+					<p class="field-hint">
+						A <code>.tar.gz</code> of a built app, carrying
+						<code>manifest.json</code> &mdash; the bundle says which
+						app and which version it is, so nothing here has to be
+						told. Installed exactly as one sent by the server is.
+					</p>
+				</div>
+			</div>
+
+			<div style="display:flex; gap:0.8em; flex-wrap:wrap; margin-top:0.6em;">
+				<button class="btn btn-secondary" type="button" onclick="uploadWebApp()">Upload and install</button>
+				<span id="webapp_progress" class="svc-state"></span>
+			</div>
+		</div>
+
 		<div style="display:flex; gap:0.8em; flex-wrap:wrap;">
 			<button class="btn btn-danger" type="button" onclick="resetAppCfg()">Reset Settings</button>
 			<button class="btn btn-primary" type="submit">Save Settings</button>

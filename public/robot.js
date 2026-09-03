@@ -797,6 +797,137 @@ function loadApp(evt) {
 	loadLoading();
 	loadLayerHTML('layerApp', () => {
 		getData('getapp.sh', setFormAppCB);
+		refreshWebApp();
+	});
+}
+
+// What this terminal is serving to itself, and what it could be set up as.
+//
+// The app declares both. A terminal running one that only prints labels should
+// not be offered the scale, and nobody should have to remember which build is
+// on which terminal - so the page asks the terminal rather than the person.
+var webAppSupports = [];
+
+function refreshWebApp() {
+	getData('getwebapp.sh', (data) => {
+		const apps = (data && data.apps) || [];
+		const app = apps.length ? apps[0] : null;
+		const installed = docGetElById('webapp_installed');
+		const versions = docGetElById('webapp_version');
+
+		webAppSupports = (app && app.supports) || [];
+
+		if (installed) {
+			installed.textContent = app
+				? app.name + '  ' + app.version
+				  + (app.vendor ? '  \u2014 ' + app.vendor : '')
+				: 'none installed';
+		}
+
+		if (versions) {
+			versions.innerHTML = '';
+			((app && app.versions) || []).forEach((v) => {
+				const o = document.createElement('option');
+				o.value = v;
+				o.textContent = v + (v === app.version ? '  (serving)' : '');
+				if (v === app.version) o.selected = true;
+				versions.appendChild(o);
+			});
+			versions.disabled = !app;
+			versions.onchange = () => activateWebApp(app.slug, versions.value);
+		}
+
+		// The Application list is what the installed app can actually be, so it
+		// is filled after the app has been asked - not from a list written here
+		// that goes stale the day an app gains a function.
+		applyWebAppSupports();
+	});
+}
+
+// The functions the terminal may be set up as, from the app that would have to
+// implement them.
+//
+// The list used to be written into getapp.sh, where it went stale the day an
+// app gained a function and lied the day a terminal was given an app that had
+// fewer. Asking the app is the only answer that stays true - and on a terminal
+// with no app installed the configured list stands, because there is nothing
+// better to say.
+function applyWebAppSupports() {
+	const sel = docGetElById('app_engine');
+	if (!sel || !webAppSupports.length) return;
+
+	const chosen = sel.value;
+	sel.innerHTML = '';
+	webAppSupports.forEach((name) => {
+		const o = document.createElement('option');
+		o.value = name;
+		o.textContent = FUNCTION_LABELS[name] || name;
+		if (name === chosen) o.selected = true;
+		sel.appendChild(o);
+	});
+
+	// What it was set to, kept even when the new app cannot do it: silently
+	// moving a terminal to another function because its app changed is how a
+	// scale becomes a label printer overnight. It shows, and stays wrong until
+	// somebody chooses.
+	if (chosen && webAppSupports.indexOf(chosen) === -1) {
+		const o = document.createElement('option');
+		o.value = chosen;
+		o.textContent = (FUNCTION_LABELS[chosen] || chosen) + '  \u2014 not in this app';
+		o.selected = true;
+		sel.appendChild(o);
+	}
+}
+
+// The server's function names, in the words an operator would use.
+const FUNCTION_LABELS = {
+	SCALE:      'Scale',
+	SCANNER:    'Barcode Scanner',
+	TERMINAL:   'Terminal Point',
+	FORKLIFT:   'Stock Movement',
+	BINTIP:     'Bin Tip Point',
+	DUALSCAN:   'Dual Scanning',
+	LABELPRINT: 'Label Printing',
+};
+
+// Serve a version already on the terminal. Not a download: going back to the
+// one before should not need the network.
+function activateWebApp(slug, version) {
+	if (!slug || !version) return;
+	setData('setwebapp.sh?action=activate',
+	        'slug=' + encodeURIComponent(slug) + '&version=' + encodeURIComponent(version),
+	        () => { alertInfo('Now serving ' + slug + ' ' + version); refreshWebApp(); });
+}
+
+// Send the bundle as the body rather than as a form: the page has the file
+// already, and a shell CGI parsing multipart is a way to lose a tarball
+// halfway through.
+function uploadWebApp() {
+	const input = docGetElById('webapp_file');
+	const note = docGetElById('webapp_progress');
+	const file = input && input.files && input.files[0];
+	if (!file) { alertError('Choose a bundle first.'); return; }
+
+	if (note) { note.textContent = 'uploading ' + file.name + '\u2026'; note.className = 'svc-state'; }
+
+	fetch('/cgi/setwebapp.sh?action=install', {
+		method: 'POST',
+		cache: 'no-cache',
+		headers: { 'Content-Type': 'application/octet-stream' },
+		body: file,
+	}).then((r) => r.json()).then((d) => {
+		if (d.status === 'OK') {
+			if (note) { note.textContent = 'installed'; note.className = 'svc-state running'; }
+			alertInfo('Installed ' + (d.name || d.slug) + ' ' + d.version);
+			if (input) input.value = '';
+			refreshWebApp();
+		} else {
+			if (note) { note.textContent = 'not installed'; note.className = 'svc-state stopped'; }
+			alertError(d.message || 'The bundle was not installed.');
+		}
+	}).catch((e) => {
+		if (note) { note.textContent = 'not installed'; note.className = 'svc-state stopped'; }
+		alertError('Upload failed: ' + e.message);
 	});
 }
 
@@ -823,12 +954,15 @@ function setFormAppCB(data) {
 				apst.remove(0);
 			}
 			
+			// KEY:Label, so the list can say "Device Web App" while the
+			// terminal is configured with DEVICE_WEBAPP. A bare KEY still
+			// works and is its own label, which is what this was before.
 			const staps = cfg.startapps.split(',');
 			for(var i=0; i<staps.length; i++) {
 				const aeo = docCreateEl("option");
-				const ae = staps[i];
-				aeo.text = ae;
-				aeo.value = ae;
+				const parts = staps[i].split(':');
+				aeo.value = parts[0].trim();
+				aeo.text = (parts[1] || parts[0]).trim();
 				apst.add(aeo);
 			}
 		}
@@ -884,6 +1018,7 @@ function setFormAppCB(data) {
 		sv('app_proto', cfg.protocol);
 		sv('app_tag', cfg.tagName);
 		sv('app_start', cfg.startapp);
+		applyWebAppSupports();
 		
 	}
 }
