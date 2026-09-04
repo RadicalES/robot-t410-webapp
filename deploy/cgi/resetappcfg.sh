@@ -17,6 +17,7 @@ cat > "$CFGFILE" <<'EOF'
 # (C) 2017-2026, Radical Electronic Systems
 
 SERVER_CONFIG_URL=http://www.radicalsystems.co.za
+TRANSACTION_URL=
 API_PROTOCOL=ROBOT-API
 APP_ENGINE=TERMINAL
 SCALE_TYPE=RICHTER

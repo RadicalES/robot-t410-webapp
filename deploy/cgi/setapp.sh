@@ -13,6 +13,7 @@ APP_DESC="
 
 # Default Config Server URL
 SERVER_CONFIG_URL="http://127.0.0.1"
+TRANSACTION_URL=""
 API_PROTOCOL='ROBOT-API'
 APP_ENGINE='TERMINAL'
 SCALE_TYPE='RICHTER'
@@ -24,6 +25,16 @@ generate_tagname () {
     read MAC </sys/class/net/eth0/address
     POSTFIX=$(echo $MAC | sed s/://g | awk '{print toupper(substr($0,7))}')
     TAG_NAME="T430-$POSTFIX"
+}
+
+# The page sends every value percent-encoded, because a URL carries the
+# characters that would otherwise end one field and start another: a
+# transaction URL with a query string used to arrive as several settings, none
+# of them right. Decoded here, once, after the split - so a value may contain
+# = and & and still be one value.
+urldecode () {
+  local s="${1//+/ }"
+  printf '%b' "${s//%/\\x}"
 }
 
 parse_params () {
@@ -39,30 +50,31 @@ parse_params () {
       # process "$i"
       IFS='=';
       set -- $i;
+      KEY="$1"
+      # An empty field is a field, not a missing one: a terminal with no
+      # transaction URL sends "transactionUrl=" and means it.
+      VALUE="$(urldecode "${2:-}")"
 
-      if [ $2 = "1" ]; then
-        VAL="yes";
-      else
-        VAL="no";
-      fi
+      if [ "$KEY" = "serverUrl" ]; then
+        SERVER_CONFIG_URL="$VALUE";
 
-      if [ $1 = "serverUrl" ]; then
-        SERVER_CONFIG_URL=$2;
+      elif [ "$KEY" = "transactionUrl" ]; then
+        TRANSACTION_URL="$VALUE";
 
-      elif [ $1 = "protocol" ]; then
-        API_PROTOCOL=$2;
+      elif [ "$KEY" = "protocol" ]; then
+        API_PROTOCOL="$VALUE";
 
-      elif [ $1 = "tagName" ]; then
-        TAG_NAME=$2;
+      elif [ "$KEY" = "tagName" ]; then
+        TAG_NAME="$VALUE";
 
-      elif [ $1 = "scale" ]; then
-        SCALE_TYPE=$2;
+      elif [ "$KEY" = "scale" ]; then
+        SCALE_TYPE="$VALUE";
 
-      elif [ $1 = "engine" ]; then
-        APP_ENGINE=$2;
+      elif [ "$KEY" = "engine" ]; then
+        APP_ENGINE="$VALUE";
 
-      elif [ $1 = "startApp" ]; then
-        START_APP=$2;
+      elif [ "$KEY" = "startApp" ]; then
+        START_APP="$VALUE";
 
       # else
   	  #   echo -en "Unknown tag=$1 value=$2\n" >> /etc/robot/appsetting.txt
@@ -76,6 +88,7 @@ configure_app () {
 
 APP_CFG="# Application Settings\n\n
 SERVER_CONFIG_URL=$SERVER_CONFIG_URL\n
+TRANSACTION_URL=$TRANSACTION_URL\n
 API_PROTOCOL=$API_PROTOCOL\n
 APP_ENGINE=$APP_ENGINE\n
 SCALE_TYPE=$SCALE_TYPE\n
@@ -83,6 +96,22 @@ TAG_NAME=$TAG_NAME\n
 START_APP=$START_APP\n"
   echo -e "$APP_DESC" > /etc/robot/app.conf
   echo -e $APP_CFG >> /etc/robot/app.conf
+}
+
+# Hand the settings to the web app this terminal serves.
+#
+# Written through robot-scada-client's own writer, so the config a standalone
+# terminal makes is the file a provisioned one gets - same fields, same shape,
+# same path. The app cannot tell which of them configured it, which is the
+# point: an app written against a SCADA server runs here unchanged.
+#
+# A terminal with no app installed has nothing to configure, and says so
+# quietly: this is the ordinary case on a terminal that runs the browser.
+configure_webapp () {
+  [ -x /usr/local/sbin/webapp-config ] || return 0
+  sudo /usr/local/sbin/webapp-config config \
+      "$TAG_NAME" "$APP_ENGINE" "$API_PROTOCOL" \
+      "$SERVER_CONFIG_URL" "$TRANSACTION_URL" "$SCALE_TYPE" >/dev/null 2>&1 || true
 }
 
 configure_hostname () {
@@ -111,6 +140,7 @@ if [ $REQUEST_METHOD = "POST" ]; then
       generate_tagname
       parse_params $POST_DATA
       configure_app
+      configure_webapp
       configure_hostname
       configure_ligthdm
       echo "{\"status\":\"OK\", \"data\":\"$RESULT\"}"

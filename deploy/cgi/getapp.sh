@@ -10,6 +10,7 @@
 CFGFILE=/etc/robot/app.conf
 
 SERVER_CONFIG_URL="http://www.radicalsystems.co.za"
+TRANSACTION_URL=""
 API_PROTOCOL='ROBOT-API'
 APP_ENGINE='TERMINAL'
 SCALE_TYPE='RICHTER'
@@ -23,13 +24,14 @@ fi
 APP_CFG="{
   \"tagName\":\"$HOSTNAME\",
   \"serverURL\":\"$SERVER_CONFIG_URL\",
+  \"transactionURL\":\"$TRANSACTION_URL\",
   \"engines\":\"TERMINAL,FORKLIFT\",
   \"engine\":\"$APP_ENGINE\",
-  \"protocols\":\"ROBOT-API,FARSOFT-API\",
+  \"protocols\":\"ROBOT-API,TRANSACT-API,FARSOFT-API\",
   \"protocol\":\"$API_PROTOCOL\",
-  \"scales\":\"RICHTER\",
+  \"scales\":\"RICHTER,MASSAMATIC,RINSTRUM\",
   \"scale\":\"$SCALE_TYPE\",
-  \"startapps\":\"DESKTOP,BROWSER,CHROME,ROBOT-APP\",
+  \"startapps\":\"DESKTOP:Desktop,BROWSER:Robot Browser,CHROME:Chrome Kiosk,ROBOT-APP:Robot App,DEVICE_WEBAPP:Device Web App\",
   \"startapp\":\"$START_APP\"
   }"
 
